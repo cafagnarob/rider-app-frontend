@@ -1,8 +1,8 @@
 import { useState } from "react"
-import { Button, Card } from "react-bootstrap"
+import { Button, Card, Form } from "react-bootstrap"
 import { FaEye, FaEyeSlash } from "react-icons/fa"
 import { IoCloseCircle } from "react-icons/io5"
-import { Form, Link } from "react-router-dom"
+import { Link } from "react-router-dom"
 import { useRegisterMutation } from "../features/auth/authApi"
 
 function RegisterPage() {
