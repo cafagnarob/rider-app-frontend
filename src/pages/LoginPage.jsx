@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useLoginMutation } from "../features/auth/authApi"
 import { useDispatch } from "react-redux"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import { setCredentials } from "../features/auth/authSlice"
 import { Button, Card, Form } from "react-bootstrap"
 import { IoCloseCircle } from "react-icons/io5"
@@ -16,6 +16,9 @@ function LoginPage() {
   const dispach = useDispatch()
   const navigate = useNavigate()
 
+  const location = useLocation()
+  const from = location.state?.from?.pathname || "/"
+
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
@@ -28,7 +31,7 @@ function LoginPage() {
       dispach(
         setCredentials({ token: result.accessToken, remember: rememberMe }),
       )
-      navigate("/")
+      navigate(from, { replace: true })
     } catch (err) {
       console.error("login fallito", err)
     }
