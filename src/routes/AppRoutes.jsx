@@ -8,6 +8,8 @@ import ResetPasswordPage from "../pages/ResetPasswordPage"
 import VerifyEmailPage from "../pages/VerifyEmailPage"
 import RegisterPage from "../pages/RegisterPage"
 import ProtectedRoute from "./ProtectedRoute"
+import BrandsPage from "../pages/BrandsPage"
+import ModelsPage from "../pages/ModelPage"
 
 function AppRoutes() {
   return (
@@ -16,6 +18,8 @@ function AppRoutes() {
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/events" element={<EventsPage />} />
+          <Route path="/catalog" element={<BrandsPage />} />
+          <Route path="/catalog/:brandId" element={<ModelsPage />} />
         </Route>
       </Route>
       <Route path="/login" element={<LoginPage />} />
