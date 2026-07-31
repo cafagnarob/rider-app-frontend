@@ -114,7 +114,7 @@ function LoginPage() {
               </div>
             )}
 
-            <div className="d-flex justify-content-center">
+            <div className="d-flex justify-content-center flex-column align-items-center">
               <Button
                 type="submit"
                 disabled={isLoading}
@@ -123,6 +123,13 @@ function LoginPage() {
               >
                 {isLoading ? "Accesso in corso..." : "Accedi"}
               </Button>
+              <Link
+                to="/register"
+                className="text-decoration-none"
+                style={{ color: "#FFBE5D" }}
+              >
+                Registrati
+              </Link>
             </div>
           </Form>
         </div>
