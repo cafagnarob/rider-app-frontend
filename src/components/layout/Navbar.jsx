@@ -45,6 +45,9 @@ function Navbar() {
                   <Dropdown.Item as={Link} to="/garage">
                     Garage
                   </Dropdown.Item>
+                  <Nav.Link as={Link} to="/catalog">
+                    Catalogo
+                  </Nav.Link>
                   <Dropdown.Divider />
                   <Dropdown.Item onClick={handleLogout}>Esci</Dropdown.Item>
                 </Dropdown.Menu>
