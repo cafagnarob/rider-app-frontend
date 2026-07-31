@@ -14,7 +14,7 @@ export const authApi = apiSlice.injectEndpoints({
         url: "/auth/register",
         method: "POST",
         body: newUser,
-        responseHandler: "text",
+        responseHandler: textOrJsonHandler,
       }),
     }),
     forgotPassword: builder.mutation({
@@ -22,6 +22,7 @@ export const authApi = apiSlice.injectEndpoints({
         url: "/auth/forgot-password",
         method: "POST",
         body: { email },
+        responseHandler: textOrJsonHandler,
       }),
     }),
     resetPassword: builder.mutation({
@@ -29,12 +30,13 @@ export const authApi = apiSlice.injectEndpoints({
         url: "/auth/reset-password",
         method: "POST",
         body: { token, newPassword },
+        responseHandler: textOrJsonHandler,
       }),
     }),
     verifyEmail: builder.query({
       query: (token) => ({
         url: `/auth/verify-email?token=${encodeURIComponent(token)}`,
-        responseHandler: "text",
+        responseHandler: textOrJsonHandler,
       }),
     }),
     resendVerification: builder.mutation({
@@ -42,10 +44,21 @@ export const authApi = apiSlice.injectEndpoints({
         url: "/auth/resend-verification",
         method: "POST",
         body: { email },
+        responseHandler: textOrJsonHandler,
       }),
     }),
   }),
 })
+
+const textOrJsonHandler = async (response) => {
+  const text = await response.text()
+  if (response.ok) return text
+  try {
+    return JSON.parse(text)
+  } catch {
+    return { message: text }
+  }
+}
 
 export const {
   useLoginMutation,
