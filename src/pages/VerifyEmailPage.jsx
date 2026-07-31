@@ -6,8 +6,8 @@ function VerifyEmailPage() {
   const [searchParams] = useSearchParams()
   const token = searchParams.get("token")
 
-  const { data, isLoading, isError } = useVerifyEmailQuery(token, {
-    skip: token,
+  const { data, isLoading, isError, isSuccess } = useVerifyEmailQuery(token, {
+    skip: !token,
   })
 
   return (
@@ -36,13 +36,13 @@ function VerifyEmailPage() {
           </div>
         )}
 
-        {data && (
+        {isSuccess && (
           <div className="alert alert-success">
             Email verificata con successo! Ora puoi accedere al tuo account.
           </div>
         )}
 
-        {(data || isError) && (
+        {(isSuccess || isError) && (
           <Link to="/login">
             <Button
               className="rounded-pill px-5 fw-bold mt-3 border-0"
