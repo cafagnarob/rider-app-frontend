@@ -2,6 +2,7 @@ import { useState } from "react"
 import { Nav, Spinner, Button } from "react-bootstrap"
 import { useGetFeedQuery } from "../features/social/postsApi"
 import PostCard from "../features/social/components/PostCard"
+import CreatePostModal from "../features/social/components/CreatePostModal"
 
 function FeedPage() {
   const [type, setType] = useState("FOLLOWING")
@@ -20,8 +21,20 @@ function FeedPage() {
     setPage(0)
   }
 
+  const [showCreate, setShowCreate] = useState(false)
+
   return (
     <>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h2 className="mb-0">Feed</h2>
+        <Button
+          className="rounded-pill px-3 fw-bold border-0"
+          style={{ backgroundColor: "#FFBE5D", color: "#000" }}
+          onClick={() => setShowCreate(true)}
+        >
+          + Nuovo post
+        </Button>
+      </div>
       <Nav variant="tabs" activeKey={type} className="mb-4">
         <Nav.Item>
           <Nav.Link
@@ -69,7 +82,7 @@ function FeedPage() {
           }}
         >
           {feed.content.map((post) => (
-            <PostCard key={post.id} post={post} feedArgs={feedArgs} />
+            <PostCard key={post.id} post={post} />
           ))}
         </div>
       )}
@@ -97,6 +110,8 @@ function FeedPage() {
           </Button>
         </div>
       )}
+
+      <CreatePostModal show={showCreate} onClose={() => setShowCreate(false)} />
     </>
   )
 }
