@@ -108,6 +108,11 @@ export const postsApi = apiSlice.injectEndpoints({
       },
       invalidatesTags: ["Post"],
     }),
+    getUserPosts: builder.query({
+      query: ({ userId, page = 0, size = 20 }) =>
+        `/posts/user/${userId}?page=${page}&size=${size}`,
+      providesTags: ["Post"],
+    }),
   }),
 })
 
@@ -120,4 +125,5 @@ export const {
   useAddCommentMutation,
   useDeleteCommentMutation,
   useCreatePostMutation,
+  useGetUserPostsQuery,
 } = postsApi
