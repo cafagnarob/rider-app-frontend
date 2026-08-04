@@ -6,6 +6,7 @@ import {
 import { Badge, Button, Card, Spinner } from "react-bootstrap"
 import { Link } from "react-router-dom"
 import ProfileEditModal from "../features/users/components/ProfileEditModal"
+import ProfileLinksSection from "../features/users/components/ProfileLinksSection"
 
 function ProfilePage() {
   const { data: profile, isLoading, isError } = useGetCurrentUserQuery()
@@ -143,6 +144,7 @@ function ProfilePage() {
           </Button>
         </Card.Body>
       </Card>
+      <ProfileLinksSection links={profile.links || []} />
 
       <ProfileEditModal
         key={showEdit ? "open" : "closed"}
