@@ -17,3 +17,11 @@ export const CC_RANGES = [
   { value: "701-1000", label: "700 – 1000 cc" },
   { value: "1001-", label: "Oltre 1000 cc" },
 ]
+
+export const PLATFORM_LABELS = {
+  INSTAGRAM: "Instagram",
+  FACEBOOK: "Facebook",
+  YOUTUBE: "YouTube",
+  TIKTOK: "TikTok",
+  WEBSITE: "Sito web",
+}
