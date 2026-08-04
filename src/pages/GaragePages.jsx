@@ -1,19 +1,42 @@
 import { Badge, Button, Card, Modal, Spinner } from "react-bootstrap"
 import { Link } from "react-router-dom"
 import { CATEGORY_LABELS } from "../utils/constants"
-import VehicleEditModal from "../features/vehicles/component/VehicleEditModal"
+import VehicleEditModal from "../features/vehicles/components/VehicleEditModal"
 import {
   useDeleteVehicleMutation,
   useGetMyVehiclesQuery,
 } from "../features/vehicles/vehiclesApi"
 import { useState } from "react"
+import {
+  useClearVehicleMutation,
+  useGetCurrentUserQuery,
+  useSelectVehicleMutation,
+} from "../features/users/usersApi"
 
 function GaragePage() {
+  const { data: profile } = useGetCurrentUserQuery()
+  const [selectVehicle, { isLoading: isSelecting }] = useSelectVehicleMutation()
+  const [clearVehicle, { isLoading: isClearing }] = useClearVehicleMutation()
+
+  const activeVehicleId = profile?.currentVehicle?.id
+
   const { data: vehicles, isLoading, isError } = useGetMyVehiclesQuery()
   const [deleteVehicle, { isLoading: isDeleting }] = useDeleteVehicleMutation()
 
   const [editing, setEditing] = useState(null)
   const [confirmDelete, setConfirmDelete] = useState(null)
+
+  const handleToggleActive = async (vehicleId) => {
+    try {
+      if (activeVehicleId === vehicleId) {
+        await clearVehicle().unwrap()
+      } else {
+        await selectVehicle(vehicleId).unwrap()
+      }
+    } catch (err) {
+      console.error("Cambio moto attiva fallito:", err)
+    }
+  }
 
   const handleDelete = async () => {
     try {
@@ -69,71 +92,95 @@ function GaragePage() {
       </div>
 
       <div className="row g-3">
-        {vehicles.map((vehicle) => (
-          <div className="col-12 col-md-6" key={vehicle.id}>
-            <Card className="bg-dark text-light h-100 border-secondary">
-              {(vehicle.photoUrl || vehicle.model.imageUrl) && (
-                <div className="ratio ratio-16x9">
-                  <img
-                    src={vehicle.photoUrl || vehicle.model.imageUrl}
-                    alt={vehicle.model.name}
-                    style={{ objectFit: "cover" }}
-                  />
-                </div>
-              )}
+        {vehicles.map((vehicle) => {
+          const isActive = vehicle.id === activeVehicleId
 
-              <Card.Body>
-                <div className="d-flex justify-content-between align-items-start">
-                  <div>
-                    <Card.Title className="fs-6 mb-1">
-                      {vehicle.nickname ||
-                        `${vehicle.model.brand.name} ${vehicle.model.name}`}
-                    </Card.Title>
-                    {vehicle.nickname && (
-                      <p className="text-secondary small mb-2">
-                        {vehicle.model.brand.name} {vehicle.model.name}
-                      </p>
-                    )}
+          return (
+            <div className="col-12 col-md-6" key={vehicle.id}>
+              <Card
+                className="bg-dark text-light h-100"
+                style={{
+                  borderColor: isActive ? "#FFBE5D" : "#6c757d",
+                  borderWidth: isActive ? "2px" : "1px",
+                }}
+              >
+                {(vehicle.photoUrl || vehicle.model.imageUrl) && (
+                  <div className="ratio ratio-16x9">
+                    <img
+                      src={vehicle.photoUrl || vehicle.model.imageUrl}
+                      alt={vehicle.model.name}
+                      style={{ objectFit: "cover" }}
+                    />
                   </div>
-                  {vehicle.licensePlate && (
-                    <Badge bg="light" text="dark" className="font-monospace">
-                      {vehicle.licensePlate}
+                )}
+
+                <Card.Body>
+                  {isActive && (
+                    <Badge bg="warning" text="dark" className="mb-2">
+                      Moto attiva
                     </Badge>
                   )}
-                </div>
 
-                <div className="d-flex gap-2 flex-wrap mb-3">
-                  <Badge bg="secondary">{vehicle.year}</Badge>
-                  <Badge bg="secondary">{vehicle.model.engineCc} cc</Badge>
-                  <Badge bg="secondary">
-                    {CATEGORY_LABELS[vehicle.model.category] ||
-                      vehicle.model.category}
-                  </Badge>
-                  <Badge bg="secondary">
-                    {vehicle.currentMileage.toLocaleString("it-IT")} km
-                  </Badge>
-                </div>
+                  <div className="d-flex justify-content-between align-items-start">
+                    <div>
+                      <Card.Title className="fs-6 mb-1">
+                        {vehicle.nickname ||
+                          `${vehicle.model.brand.name} ${vehicle.model.name}`}
+                      </Card.Title>
+                      {vehicle.nickname && (
+                        <p className="text-secondary small mb-2">
+                          {vehicle.model.brand.name} {vehicle.model.name}
+                        </p>
+                      )}
+                    </div>
+                    {vehicle.licensePlate && (
+                      <Badge bg="light" text="dark" className="font-monospace">
+                        {vehicle.licensePlate}
+                      </Badge>
+                    )}
+                  </div>
 
-                <div className="d-flex gap-2">
-                  <Button
-                    variant="outline-light"
-                    size="sm"
-                    onClick={() => setEditing(vehicle)}
-                  >
-                    Modifica
-                  </Button>
-                  <Button
-                    variant="outline-danger"
-                    size="sm"
-                    onClick={() => setConfirmDelete(vehicle)}
-                  >
-                    Elimina
-                  </Button>
-                </div>
-              </Card.Body>
-            </Card>
-          </div>
-        ))}
+                  <div className="d-flex gap-2 flex-wrap mb-3">
+                    <Badge bg="secondary">{vehicle.year}</Badge>
+                    <Badge bg="secondary">{vehicle.model.engineCc} cc</Badge>
+                    <Badge bg="secondary">
+                      {CATEGORY_LABELS[vehicle.model.category] ||
+                        vehicle.model.category}
+                    </Badge>
+                    <Badge bg="secondary">
+                      {vehicle.currentMileage.toLocaleString("it-IT")} km
+                    </Badge>
+                  </div>
+
+                  <div className="d-flex gap-2 flex-wrap">
+                    <Button
+                      variant={isActive ? "warning" : "outline-warning"}
+                      size="sm"
+                      disabled={isSelecting || isClearing}
+                      onClick={() => handleToggleActive(vehicle.id)}
+                    >
+                      {isActive ? "Disattiva" : "Rendi attiva"}
+                    </Button>
+                    <Button
+                      variant="outline-light"
+                      size="sm"
+                      onClick={() => setEditing(vehicle)}
+                    >
+                      Modifica
+                    </Button>
+                    <Button
+                      variant="outline-danger"
+                      size="sm"
+                      onClick={() => setConfirmDelete(vehicle)}
+                    >
+                      Elimina
+                    </Button>
+                  </div>
+                </Card.Body>
+              </Card>
+            </div>
+          )
+        })}
       </div>
 
       <VehicleEditModal
