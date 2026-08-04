@@ -41,6 +41,30 @@ export const usersApi = apiSlice.injectEndpoints({
       },
       invalidatesTags: ["User"],
     }),
+
+    addProfileLink: builder.mutation({
+      query: (body) => ({
+        url: "/users/me/links",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["User"],
+    }),
+    updateProfileLink: builder.mutation({
+      query: ({ linkId, ...body }) => ({
+        url: `/users/me/links/${linkId}`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["User"],
+    }),
+    deleteProfileLink: builder.mutation({
+      query: (linkId) => ({
+        url: `/users/me/links/${linkId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["User"],
+    }),
   }),
 })
 export const {
@@ -49,4 +73,7 @@ export const {
   useClearVehicleMutation,
   useUpdateProfileMutation,
   useUpdateProfilePictureMutation,
+  useAddProfileLinkMutation,
+  useUpdateProfileLinkMutation,
+  useDeleteProfileLinkMutation,
 } = usersApi
