@@ -11,6 +11,7 @@ import ProtectedRoute from "./ProtectedRoute"
 import BrandsPage from "../pages/BrandsPage"
 import ModelsPage from "../pages/ModelsPage"
 import GaragePage from "../pages/GaragePages"
+import ProfilePage from "../pages/ProfilePage"
 
 function AppRoutes() {
   return (
@@ -22,6 +23,7 @@ function AppRoutes() {
           <Route path="/catalog" element={<BrandsPage />} />
           <Route path="/catalog/:brandId" element={<ModelsPage />} />
           <Route path="/garage" element={<GaragePage />} />
+          <Route path="/profile" element={<ProfilePage />} />
         </Route>
       </Route>
       <Route path="/login" element={<LoginPage />} />
