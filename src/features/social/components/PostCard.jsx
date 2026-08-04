@@ -4,11 +4,11 @@ import { Link } from "react-router-dom"
 import { useToggleLikeMutation } from "../postsApi"
 import { formatRelativeTime } from "../../../utils/dateFormat"
 
-function PostCard({ post, feedArgs }) {
+function PostCard({ post }) {
   const [toggleLike] = useToggleLikeMutation()
 
   const handleLike = () => {
-    toggleLike({ postId: post.id, liked: post.likedByCurrentUser, feedArgs })
+    toggleLike({ postId: post.id, liked: post.likedByCurrentUser })
   }
 
   const cover = post.media?.[0]
