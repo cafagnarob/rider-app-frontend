@@ -8,6 +8,15 @@ import ResetPasswordPage from "../pages/ResetPasswordPage"
 import VerifyEmailPage from "../pages/VerifyEmailPage"
 import RegisterPage from "../pages/RegisterPage"
 import ProtectedRoute from "./ProtectedRoute"
+import BrandsPage from "../pages/BrandsPage"
+import ModelsPage from "../pages/ModelsPage"
+import GaragePage from "../pages/GaragePages"
+import ProfilePage from "../pages/ProfilePage"
+import FeedPage from "../pages/FeedPage"
+import PostDetailPage from "../pages/PostDetailPage"
+import NotificationsPage from "../pages/NotificationsPage"
+import PublicProfilePage from "../pages/PublicProfilePage"
+import FollowListPage from "../pages/FollowListPage"
 
 function AppRoutes() {
   return (
@@ -16,6 +25,22 @@ function AppRoutes() {
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/events" element={<EventsPage />} />
+          <Route path="/catalog" element={<BrandsPage />} />
+          <Route path="/catalog/:brandId" element={<ModelsPage />} />
+          <Route path="/garage" element={<GaragePage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/profile/:username" element={<PublicProfilePage />} />
+          <Route path="/feed" element={<FeedPage />} />
+          <Route path="/posts/:postId" element={<PostDetailPage />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
+          <Route
+            path="/users/:username/followers"
+            element={<FollowListPage type="followers" />}
+          />
+          <Route
+            path="/users/:username/following"
+            element={<FollowListPage type="following" />}
+          />
         </Route>
       </Route>
       <Route path="/login" element={<LoginPage />} />

@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom"
 import { useGetCurrentUserQuery } from "../../features/users/usersApi"
 import { logout } from "../../features/auth/authSlice"
 import { Container, Dropdown, Nav, Navbar as BsNavbar } from "react-bootstrap"
+import NotificationBell from "../../features/notification/components/NotificationBell"
 
 function Navbar() {
   const token = useSelector((state) => state.auth.token)
@@ -34,21 +35,36 @@ function Navbar() {
 
           <Nav>
             {token ? (
-              <Dropdown align="end">
-                <Dropdown.Toggle variant="dark" id="user-menu">
-                  {currentUser?.username || "Account"}
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                  <Dropdown.Item as={Link} to="/profile">
-                    Profilo
-                  </Dropdown.Item>
-                  <Dropdown.Item as={Link} to="/garage">
-                    Garage
-                  </Dropdown.Item>
-                  <Dropdown.Divider />
-                  <Dropdown.Item onClick={handleLogout}>Esci</Dropdown.Item>
-                </Dropdown.Menu>
-              </Dropdown>
+              <>
+                <NotificationBell />
+                <Dropdown align="end">
+                  <Dropdown.Toggle variant="dark" id="user-menu">
+                    {currentUser?.username || "Account"}
+                  </Dropdown.Toggle>
+                  <Dropdown.Menu>
+                    <Dropdown.Item as={Link} to="/profile">
+                      Profilo
+                    </Dropdown.Item>
+                    <Dropdown.Item as={Link} to="/garage">
+                      Garage
+                    </Dropdown.Item>
+                    <Nav.Link as={Link} to="/catalog">
+                      Catalogo
+                    </Nav.Link>
+                    <Dropdown.Divider />
+                    {currentUser?.currentVehicle && (
+                      <>
+                        <Dropdown.ItemText className="small text-secondary">
+                          {currentUser.currentVehicle.nickname ||
+                            `${currentUser.currentVehicle.brandName} ${currentUser.currentVehicle.modelName}`}
+                        </Dropdown.ItemText>
+                        <Dropdown.Divider />
+                      </>
+                    )}
+                    <Dropdown.Item onClick={handleLogout}>Esci</Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
+              </>
             ) : (
               <>
                 <Nav.Link as={Link} to="/login">
