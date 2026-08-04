@@ -49,6 +49,15 @@ function Navbar() {
                     Catalogo
                   </Nav.Link>
                   <Dropdown.Divider />
+                  {currentUser?.currentVehicle && (
+                    <>
+                      <Dropdown.ItemText className="small text-secondary">
+                        {currentUser.currentVehicle.nickname ||
+                          `${currentUser.currentVehicle.brandName} ${currentUser.currentVehicle.modelName}`}
+                      </Dropdown.ItemText>
+                      <Dropdown.Divider />
+                    </>
+                  )}
                   <Dropdown.Item onClick={handleLogout}>Esci</Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>
