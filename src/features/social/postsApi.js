@@ -24,24 +24,89 @@ export const postsApi = apiSlice.injectEndpoints({
         method: liked ? "DELETE" : "POST",
       }),
       async onQueryStarted(
-        { postId, liked, feedArgs },
-        { dispatch, queryFulfilled },
+        { postId, liked },
+        { dispatch, queryFulfilled, getState },
       ) {
-        const patch = dispatch(
-          postsApi.util.updateQueryData("getFeed", feedArgs, (draft) => {
-            const post = draft.content.find((p) => p.id === postId)
-            if (post) {
-              post.likedByCurrentUser = !liked
-              post.likeCount += liked ? -1 : 1
-            }
-          }),
+        const patches = []
+
+        const applyChange = (draftPost) => {
+          draftPost.likedByCurrentUser = !liked
+          draftPost.likeCount += liked ? -1 : 1
+        }
+        const cachedFeedArgs = postsApi.util.selectCachedArgsForQuery(
+          getState(),
+          "getFeed",
         )
+        cachedFeedArgs.forEach((args) => {
+          patches.push(
+            dispatch(
+              postsApi.util.updateQueryData("getFeed", args, (draft) => {
+                const p = draft.content.find((x) => x.id === postId)
+                if (p) applyChange(p)
+              }),
+            ),
+          )
+        })
+
+        patches.push(
+          dispatch(
+            postsApi.util.updateQueryData("getPostById", postId, applyChange),
+          ),
+        )
+
         try {
           await queryFulfilled
         } catch {
-          patch.undo()
+          patches.forEach((p) => p.undo())
         }
       },
+    }),
+
+    getComments: builder.query({
+      query: ({ postId, page = 0, size = 20 }) =>
+        `/posts/${postId}/comments?page=${page}&size=${size}`,
+      providesTags: (result, error, { postId }) => [
+        { type: "Comment", id: postId },
+      ],
+    }),
+    addComment: builder.mutation({
+      query: ({ postId, text }) => ({
+        url: `/posts/${postId}/comments`,
+        method: "POST",
+        body: { text },
+      }),
+      invalidatesTags: (result, error, { postId }) => [
+        { type: "Comment", id: postId },
+        { type: "Post", id: postId },
+      ],
+    }),
+    deleteComment: builder.mutation({
+      query: ({ postId, commentId }) => ({
+        url: `/posts/${postId}/comments/${commentId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, { postId }) => [
+        { type: "Comment", id: postId },
+        { type: "Post", id: postId },
+      ],
+    }),
+
+    createPost: builder.mutation({
+      query: ({ data, files }) => {
+        const formData = new FormData()
+        formData.append(
+          "data",
+          new Blob([JSON.stringify(data)], { type: "application/json" }),
+        )
+        files.forEach((file) => formData.append("media", file))
+
+        return {
+          url: "/posts",
+          method: "POST",
+          body: formData,
+        }
+      },
+      invalidatesTags: ["Post"],
     }),
   }),
 })
@@ -51,4 +116,8 @@ export const {
   useGetPostByIdQuery,
   useDeletePostMutation,
   useToggleLikeMutation,
+  useGetCommentsQuery,
+  useAddCommentMutation,
+  useDeleteCommentMutation,
+  useCreatePostMutation,
 } = postsApi
