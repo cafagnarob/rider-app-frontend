@@ -16,6 +16,7 @@ import FeedPage from "../pages/FeedPage"
 import PostDetailPage from "../pages/PostDetailPage"
 import NotificationsPage from "../pages/NotificationsPage"
 import PublicProfilePage from "../pages/PublicProfilePage"
+import FollowListPage from "../pages/FollowListPage"
 
 function AppRoutes() {
   return (
@@ -32,6 +33,14 @@ function AppRoutes() {
           <Route path="/feed" element={<FeedPage />} />
           <Route path="/posts/:postId" element={<PostDetailPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
+          <Route
+            path="/users/:username/followers"
+            element={<FollowListPage type="followers" />}
+          />
+          <Route
+            path="/users/:username/following"
+            element={<FollowListPage type="following" />}
+          />
         </Route>
       </Route>
       <Route path="/login" element={<LoginPage />} />
