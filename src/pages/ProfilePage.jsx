@@ -7,6 +7,7 @@ import { Badge, Button, Card, Spinner } from "react-bootstrap"
 import { Link } from "react-router-dom"
 import ProfileEditModal from "../features/users/components/ProfileEditModal"
 import ProfileLinksSection from "../features/users/components/ProfileLinksSection"
+import SecuritySection from "../features/users/components/SecuritySection"
 
 function ProfilePage() {
   const { data: profile, isLoading, isError } = useGetCurrentUserQuery()
@@ -145,6 +146,7 @@ function ProfilePage() {
         </Card.Body>
       </Card>
       <ProfileLinksSection links={profile.links || []} />
+      <SecuritySection profile={profile} />
 
       <ProfileEditModal
         key={showEdit ? "open" : "closed"}
