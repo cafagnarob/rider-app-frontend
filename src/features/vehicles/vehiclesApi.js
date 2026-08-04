@@ -28,7 +28,7 @@ export const vehiclesApi = apiSlice.injectEndpoints({
         url: `/vehicles/${vehicleId}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Vehicle"],
+      invalidatesTags: ["Vehicle", "User"],
     }),
     updateVehicle: builder.mutation({
       query: ({ vehicleId, ...body }) => ({
