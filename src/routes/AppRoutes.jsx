@@ -9,7 +9,8 @@ import VerifyEmailPage from "../pages/VerifyEmailPage"
 import RegisterPage from "../pages/RegisterPage"
 import ProtectedRoute from "./ProtectedRoute"
 import BrandsPage from "../pages/BrandsPage"
-import ModelsPage from "../pages/ModelPage"
+import ModelsPage from "../pages/ModelsPage"
+import GaragePage from "../pages/GaragePages"
 
 function AppRoutes() {
   return (
@@ -20,6 +21,7 @@ function AppRoutes() {
           <Route path="/events" element={<EventsPage />} />
           <Route path="/catalog" element={<BrandsPage />} />
           <Route path="/catalog/:brandId" element={<ModelsPage />} />
+          <Route path="/garage" element={<GaragePage />} />
         </Route>
       </Route>
       <Route path="/login" element={<LoginPage />} />
