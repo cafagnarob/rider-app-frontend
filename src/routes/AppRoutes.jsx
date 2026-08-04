@@ -13,6 +13,7 @@ import ModelsPage from "../pages/ModelsPage"
 import GaragePage from "../pages/GaragePages"
 import ProfilePage from "../pages/ProfilePage"
 import FeedPage from "../pages/FeedPage"
+import PostDetailPage from "../pages/PostDetailPage"
 
 function AppRoutes() {
   return (
@@ -26,6 +27,7 @@ function AppRoutes() {
           <Route path="/garage" element={<GaragePage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/feed" element={<FeedPage />} />
+          <Route path="/posts/:postId" element={<PostDetailPage />} />
         </Route>
       </Route>
       <Route path="/login" element={<LoginPage />} />
