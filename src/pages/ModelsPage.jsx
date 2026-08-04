@@ -47,10 +47,6 @@ function ModelsPage() {
     orderBy,
   })
 
-  const lastDataRef = useRef(null)
-  if (pageData) lastDataRef.current = pageData
-  const displayData = pageData ?? lastDataRef.current
-
   const { data: brands } = useGetBrandsQuery()
 
   const brand = brands?.find((b) => b.id === brandId)
@@ -76,7 +72,7 @@ function ModelsPage() {
     setPage(0)
   }
 
-  if (!displayData && isLoading) {
+  if (isLoading) {
     return (
       <div className="text-center py-5">
         <Spinner animation="border" variant="light" />
