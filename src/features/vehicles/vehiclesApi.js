@@ -30,6 +30,34 @@ export const vehiclesApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Vehicle"],
     }),
+    updateVehicle: builder.mutation({
+      query: ({ vehicleId, ...body }) => ({
+        url: `/vehicles/${vehicleId}`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["Vehicle"],
+    }),
+
+    updateVehiclePhoto: builder.mutation({
+      query: ({ vehicleId, photo }) => {
+        const formData = new FormData()
+        formData.append("photo", photo)
+        return {
+          url: `/vehicles/${vehicleId}/photo`,
+          method: "PATCH",
+          body: formData,
+        }
+      },
+      invalidatesTags: ["Vehicle"],
+    }),
+    deleteVehiclePhoto: builder.mutation({
+      query: (vehicleId) => ({
+        url: `/vehicles/${vehicleId}/photo`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Vehicle"],
+    }),
   }),
 })
 
@@ -37,4 +65,7 @@ export const {
   useGetMyVehiclesQuery,
   useAddVehicleMutation,
   useDeleteVehicleMutation,
+  useUpdateVehicleMutation,
+  useUpdateVehiclePhotoMutation,
+  useDeleteVehiclePhotoMutation,
 } = vehiclesApi
