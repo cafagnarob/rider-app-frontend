@@ -25,3 +25,11 @@ export const PLATFORM_LABELS = {
   TIKTOK: "TikTok",
   WEBSITE: "Sito web",
 }
+
+export const RIDE_TYPE_LABELS = {
+  TOUR: "Tour",
+  COMMUTE: "Spostamento",
+  ADVENTURE: "Avventura",
+  EVENT: "Evento",
+  TRAINING: "Allenamento",
+}
