@@ -94,6 +94,12 @@ export const usersApi = apiSlice.injectEndpoints({
         method: "PATCH",
       }),
     }),
+    getPublicProfile: builder.query({
+      query: (username) => `/users/${username}`,
+      providesTags: (result, error, username) => [
+        { type: "User", id: username },
+      ],
+    }),
   }),
 })
 export const {
@@ -109,4 +115,5 @@ export const {
   useUpdateUsernameMutation,
   useUpdateEmailMutation,
   useDeactivateAccountMutation,
+  useGetPublicProfileQuery,
 } = usersApi
