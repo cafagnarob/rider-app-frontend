@@ -65,6 +65,35 @@ export const usersApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["User"],
     }),
+    changePassword: builder.mutation({
+      query: (body) => ({
+        url: "/users/me/password",
+        method: "PATCH",
+        body,
+      }),
+    }),
+    updateUsername: builder.mutation({
+      query: (body) => ({
+        url: "/users/me/username",
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["User"],
+    }),
+    updateEmail: builder.mutation({
+      query: (body) => ({
+        url: "/users/me/email",
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["User"],
+    }),
+    deactivateAccount: builder.mutation({
+      query: () => ({
+        url: "/users/me/deactivate",
+        method: "PATCH",
+      }),
+    }),
   }),
 })
 export const {
@@ -76,4 +105,8 @@ export const {
   useAddProfileLinkMutation,
   useUpdateProfileLinkMutation,
   useDeleteProfileLinkMutation,
+  useChangePasswordMutation,
+  useUpdateUsernameMutation,
+  useUpdateEmailMutation,
+  useDeactivateAccountMutation,
 } = usersApi
