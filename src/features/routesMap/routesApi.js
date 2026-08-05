@@ -42,6 +42,13 @@ export const routesApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Route"],
     }),
+    previewRoute: builder.mutation({
+      query: (body) => ({
+        url: "/routes/preview",
+        method: "POST",
+        body,
+      }),
+    }),
   }),
 })
 
@@ -52,4 +59,5 @@ export const {
   useDeleteRouteMutation,
   useSetImportableMutation,
   useImportRouteMutation,
+  usePreviewRouteMutation,
 } = routesApi
