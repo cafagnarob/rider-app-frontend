@@ -17,6 +17,10 @@ import PostDetailPage from "../pages/PostDetailPage"
 import NotificationsPage from "../pages/NotificationsPage"
 import PublicProfilePage from "../pages/PublicProfilePage"
 import FollowListPage from "../pages/FollowListPage"
+import RidesHistoryPage from "../pages/RidesHistoryPage"
+import RideTrackerPage from "../pages/RideTrackerPage"
+import RideDetailPage from "../pages/RideDetailPage"
+import RouteEditorPage from "../pages/RouteEditorPage"
 
 function AppRoutes() {
   return (
@@ -41,6 +45,10 @@ function AppRoutes() {
             path="/users/:username/following"
             element={<FollowListPage type="following" />}
           />
+          <Route path="/rides" element={<RidesHistoryPage />} />
+          <Route path="/rides/new" element={<RideTrackerPage />} />
+          <Route path="/rides/:rideId" element={<RideDetailPage />} />
+          <Route path="/routes/new" element={<RouteEditorPage />} />
         </Route>
       </Route>
       <Route path="/login" element={<LoginPage />} />
