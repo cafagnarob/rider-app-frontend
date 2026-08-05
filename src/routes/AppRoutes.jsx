@@ -21,6 +21,8 @@ import RidesHistoryPage from "../pages/RidesHistoryPage"
 import RideTrackerPage from "../pages/RideTrackerPage"
 import RideDetailPage from "../pages/RideDetailPage"
 import RouteEditorPage from "../pages/RouteEditorPage"
+import RoutesListPage from "../pages/RoutesListPage"
+import RouteDetailPage from "../pages/RouteDetailPage"
 
 function AppRoutes() {
   return (
@@ -48,7 +50,9 @@ function AppRoutes() {
           <Route path="/rides" element={<RidesHistoryPage />} />
           <Route path="/rides/new" element={<RideTrackerPage />} />
           <Route path="/rides/:rideId" element={<RideDetailPage />} />
+          <Route path="/routes" element={<RoutesListPage />} />
           <Route path="/routes/new" element={<RouteEditorPage />} />
+          <Route path="/routes/:routeId" element={<RouteDetailPage />} />
         </Route>
       </Route>
       <Route path="/login" element={<LoginPage />} />
