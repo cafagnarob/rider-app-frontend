@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from "react"
-import { useCreateRouteMutation } from "../features/routesMap/routesApi"
+import {
+  useCreateRouteMutation,
+  usePreviewRouteMutation,
+} from "../features/routesMap/routesApi"
 import { useNavigate } from "react-router-dom"
 import { Map, Marker, NavigationControl } from "maplibre-gl"
 import { decodePolyline } from "../utils/polyline"
@@ -14,6 +17,14 @@ function RouteEditorPage() {
   const mapRef = useRef(null)
   const markersRef = useRef([])
   const timerRef = useRef(null)
+
+  const [mapReady, setMapReady] = useState(false)
+
+  const [savedRoute, setSavedRoute] = useState(null)
+
+  const [previewRoute] = usePreviewRouteMutation()
+  const [routeInfo, setRouteInfo] = useState(null)
+  const previewTimerRef = useRef(null)
 
   const [waypoints, setWaypoints] = useState([])
   const [name, setName] = useState("")
@@ -30,6 +41,43 @@ function RouteEditorPage() {
 
   const [createRoute, { isLoading }] = useCreateRouteMutation()
   const navigate = useNavigate()
+
+  const waypointsRef = useRef([])
+  waypointsRef.current = waypoints
+
+  useEffect(() => {
+    clearTimeout(previewTimerRef.current)
+
+    if (waypoints.length < 2) {
+      setPreview(null)
+      setRouteInfo(null)
+      return
+    }
+
+    previewTimerRef.current = setTimeout(async () => {
+      setPreview(null)
+      try {
+        const result = await previewRoute({
+          points: waypoints.map((w) => ({
+            latitude: w.latitude,
+            longitude: w.longitude,
+            label: w.label || null,
+          })),
+          ...options,
+        }).unwrap()
+
+        setPreview(result.encodedPolyline)
+        setRouteInfo({
+          distanceKm: result.distanceMeters / 1000,
+          durationMin: result.durationSeconds / 60,
+        })
+      } catch (err) {
+        setErrorMsg(err.data?.message || "Impossibile calcolare l'anteprima.")
+      }
+    }, 800)
+
+    return () => clearTimeout(previewTimerRef.current)
+  }, [waypoints, options])
 
   // --- creazione mappa (una sola volta) ---
   useEffect(() => {
@@ -58,11 +106,133 @@ function RouteEditorPage() {
       ])
     })
 
+    const initLayers = () => {
+      const empty = { type: "FeatureCollection", features: [] }
+
+      map.addSource("draft", { type: "geojson", data: empty })
+      map.addSource("ghost", { type: "geojson", data: empty })
+      map.addSource("route", { type: "geojson", data: empty })
+
+      map.addLayer({
+        id: "draft-line",
+        type: "line",
+        source: "draft",
+        layout: { "line-join": "round", "line-cap": "round" },
+        paint: {
+          "line-color": "#adb5bd",
+          "line-width": 3,
+          "line-dasharray": [2, 2],
+          "line-opacity": 0.7,
+        },
+      })
+
+      map.addLayer({
+        id: "ghost-line",
+        type: "line",
+        source: "ghost",
+        layout: { "line-join": "round", "line-cap": "round" },
+        paint: {
+          "line-color": "#FFBE5D",
+          "line-width": 2,
+          "line-dasharray": [1, 2],
+          "line-opacity": 0.6,
+        },
+      })
+
+      map.addLayer({
+        id: "route-line",
+        type: "line",
+        source: "route",
+        layout: { "line-join": "round", "line-cap": "round" },
+        paint: {
+          "line-color": "#0d6efd",
+          "line-width": 5,
+          "line-opacity": 0.85,
+        },
+      })
+
+      setMapReady(true)
+    }
+
+    let initialized = false
+    const tryInit = () => {
+      if (initialized || !map.isStyleLoaded()) return
+      initialized = true
+      initLayers()
+    }
+    map.on("styledata", tryInit)
+    map.on("load", tryInit)
+    tryInit()
+
+    map.on("mousemove", (e) => {
+      const list = waypointsRef.current
+      const source = map.getSource("ghost")
+      if (!source) return
+
+      if (list.length === 0) {
+        source.setData({ type: "FeatureCollection", features: [] })
+        return
+      }
+
+      const last = list[list.length - 1]
+      source.setData({
+        type: "Feature",
+        geometry: {
+          type: "LineString",
+          coordinates: [
+            [last.longitude, last.latitude],
+            [e.lngLat.lng, e.lngLat.lat],
+          ],
+        },
+      })
+    })
+
+    map.on("mouseout", () => {
+      map
+        .getSource("ghost")
+        ?.setData({ type: "FeatureCollection", features: [] })
+    })
+
     return () => {
       map.remove()
       mapRef.current = null
     }
   }, [])
+
+  useEffect(() => {
+    if (!mapReady) return
+    const source = mapRef.current?.getSource("draft")
+    if (!source) return
+
+    if (waypoints.length < 2) {
+      source.setData({ type: "FeatureCollection", features: [] })
+      return
+    }
+
+    source.setData({
+      type: "Feature",
+      geometry: {
+        type: "LineString",
+        coordinates: waypoints.map((w) => [w.longitude, w.latitude]),
+      },
+    })
+  }, [waypoints, mapReady])
+
+  useEffect(() => {
+    if (!mapReady) return
+    const source = mapRef.current?.getSource("route")
+    if (!source) return
+
+    if (!preview) {
+      source.setData({ type: "FeatureCollection", features: [] })
+      return
+    }
+
+    source.setData({
+      type: "Feature",
+      geometry: { type: "LineString", coordinates: decodePolyline(preview) },
+    })
+  }, [preview, mapReady])
 
   // --- sincronizzazione marcatori ---
   useEffect(() => {
@@ -99,32 +269,6 @@ function RouteEditorPage() {
       markersRef.current.push(marker)
     })
   }, [waypoints])
-
-  // --- anteprima percorso calcolato ---
-  useEffect(() => {
-    const map = mapRef.current
-    if (!map || !map.isStyleLoaded()) return
-
-    if (map.getLayer("preview-line")) map.removeLayer("preview-line")
-    if (map.getSource("preview")) map.removeSource("preview")
-
-    if (!preview) return
-
-    const coordinates = decodePolyline(preview)
-    if (coordinates.length === 0) return
-
-    map.addSource("preview", {
-      type: "geojson",
-      data: { type: "Feature", geometry: { type: "LineString", coordinates } },
-    })
-    map.addLayer({
-      id: "preview-line",
-      type: "line",
-      source: "preview",
-      layout: { "line-join": "round", "line-cap": "round" },
-      paint: { "line-color": "#0d6efd", "line-width": 5, "line-opacity": 0.8 },
-    })
-  }, [preview])
 
   // --- ricerca indirizzo ---
   const handleSearchChange = (e) => {
@@ -196,7 +340,7 @@ function RouteEditorPage() {
         ...options,
       }).unwrap()
 
-      setPreview(created.encodedPolyline)
+      setSavedRoute(created)
     } catch (err) {
       setErrorMsg(err.data?.message || "Impossibile calcolare il percorso.")
     }
@@ -355,9 +499,26 @@ function RouteEditorPage() {
             <div className="alert alert-danger py-2">{errorMsg}</div>
           )}
 
-          {preview && (
+          {routeInfo && (
+            <div className="d-flex gap-3 mb-3 text-secondary small">
+              <span>
+                <strong className="text-light">
+                  {routeInfo.distanceKm.toFixed(1)}
+                </strong>{" "}
+                km
+              </span>
+              <span>
+                <strong className="text-light">
+                  {Math.round(routeInfo.durationMin)}
+                </strong>{" "}
+                min
+              </span>
+            </div>
+          )}
+
+          {savedRoute && (
             <div className="alert alert-success py-2">
-              Percorso calcolato e salvato.{" "}
+              Percorso "{savedRoute.name}" salvato.{" "}
               <Button
                 variant="link"
                 size="sm"
