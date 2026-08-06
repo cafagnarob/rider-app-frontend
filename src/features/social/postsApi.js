@@ -78,6 +78,7 @@ export const postsApi = apiSlice.injectEndpoints({
       invalidatesTags: (result, error, { postId }) => [
         { type: "Comment", id: postId },
         { type: "Post", id: postId },
+        "Post",
       ],
     }),
     deleteComment: builder.mutation({
@@ -88,6 +89,7 @@ export const postsApi = apiSlice.injectEndpoints({
       invalidatesTags: (result, error, { postId }) => [
         { type: "Comment", id: postId },
         { type: "Post", id: postId },
+        "Post",
       ],
     }),
 
