@@ -70,6 +70,22 @@ export const eventsApi = apiSlice.injectEndpoints({
         "Event",
       ],
     }),
+    getAccessCode: builder.query({
+      query: (eventId) => `/events/${eventId}/access-code`,
+      providesTags: (result, error, eventId) => [
+        { type: "Event", id: eventId },
+      ],
+    }),
+    regenerateAccessCode: builder.mutation({
+      query: ({ eventId, currentPassword, newAccessCode }) => ({
+        url: `/events/${eventId}/access-code`,
+        method: "PATCH",
+        body: { currentPassword, newAccessCode },
+      }),
+      invalidatesTags: (result, error, { eventId }) => [
+        { type: "Event", id: eventId },
+      ],
+    }),
   }),
 })
 
@@ -81,4 +97,6 @@ export const {
   useCreateEventMutation,
   useUpdateEventMutation,
   useChangeEventStatusMutation,
+  useGetAccessCodeQuery,
+  useRegenerateAccessCodeMutation,
 } = eventsApi
