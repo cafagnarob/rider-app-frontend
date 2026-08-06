@@ -118,6 +118,16 @@ function RouteDetailPage() {
             </Badge>
             <Badge bg="secondary">{route.waypoints.length} tappe</Badge>
           </div>
+          {route.googleMapsUrl && (
+            <a
+              href={route.googleMapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-outline-primary btn-sm mb-3"
+            >
+              Apri in Google Maps
+            </a>
+          )}
           <ol className="ps-3 mb-0">
             {route.waypoints.map((wp) => (
               <li key={wp.sequence} className="small">
