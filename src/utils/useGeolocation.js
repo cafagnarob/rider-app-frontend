@@ -2,11 +2,12 @@ import { useState, useEffect } from "react"
 
 export function useGeolocation() {
   const [position, setPosition] = useState(null)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState(() =>
+    "geolocation" in navigator ? null : "Geolocalizzazione non supportata.",
+  )
 
   useEffect(() => {
     if (!("geolocation" in navigator)) {
-      setError("Geolocalizzazione non supportata.")
       return
     }
     navigator.geolocation.getCurrentPosition(
