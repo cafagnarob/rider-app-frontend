@@ -37,6 +37,7 @@ function NotificationBell() {
     const link = buildNotificationLink(
       notification.referenceType,
       notification.referenceId,
+      notification.type,
     )
     if (link) navigate(link)
   }
