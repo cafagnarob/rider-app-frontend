@@ -2,7 +2,6 @@ import { Route, Routes } from "react-router-dom"
 import Layout from "../components/layout/Layout"
 import HomePage from "../pages/HomePage"
 import LoginPage from "../pages/LoginPage"
-import EventsPage from "../pages/EventsPage"
 import ForgotPasswordPage from "../pages/ForgotPasswordPage"
 import ResetPasswordPage from "../pages/ResetPasswordPage"
 import VerifyEmailPage from "../pages/VerifyEmailPage"
@@ -23,6 +22,10 @@ import RideDetailPage from "../pages/RideDetailPage"
 import RouteEditorPage from "../pages/RouteEditorPage"
 import RoutesListPage from "../pages/RoutesListPage"
 import RouteDetailPage from "../pages/RouteDetailPage"
+import EventsListPage from "../pages/EventsListPage"
+import EventCreatePage from "../pages/EventCreatePage"
+import EventDetailPage from "../pages/EventDetailPage"
+import MyInvitesPage from "../pages/MyInvitesPage"
 
 function AppRoutes() {
   return (
@@ -30,7 +33,6 @@ function AppRoutes() {
       <Route element={<Layout />}>
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<HomePage />} />
-          <Route path="/events" element={<EventsPage />} />
           <Route path="/catalog" element={<BrandsPage />} />
           <Route path="/catalog/:brandId" element={<ModelsPage />} />
           <Route path="/garage" element={<GaragePage />} />
@@ -53,6 +55,10 @@ function AppRoutes() {
           <Route path="/routes" element={<RoutesListPage />} />
           <Route path="/routes/new" element={<RouteEditorPage />} />
           <Route path="/routes/:routeId" element={<RouteDetailPage />} />
+          <Route path="/events" element={<EventsListPage />} />
+          <Route path="/events/new" element={<EventCreatePage />} />
+          <Route path="/events/:eventId" element={<EventDetailPage />} />
+          <Route path="/invites" element={<MyInvitesPage />} />
         </Route>
       </Route>
       <Route path="/login" element={<LoginPage />} />
