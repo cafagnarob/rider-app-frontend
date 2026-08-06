@@ -41,3 +41,18 @@ body {
     transform: scale(1);
   }
 }
+
+.qj-popup .maplibregl-popup-content {
+  background: #13141a;
+  color: #f4f2f0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  padding: 8px 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.qj-popup .maplibregl-popup-tip {
+  border-top-color: #13141a;
+}
