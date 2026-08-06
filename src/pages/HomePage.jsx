@@ -108,7 +108,6 @@ function HomePage() {
           background: ${COLORS.accent};
           border: 2px solid ${COLORS.bg};
           cursor: pointer;
-          position: relative;
         `
         if (isNext) {
           const pulse = document.createElement("span")
