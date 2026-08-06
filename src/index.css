@@ -22,3 +22,22 @@ body {
     transform: scale(2.4);
   }
 }
+
+.carousel-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes heartPop {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.35);
+  }
+  60% {
+    transform: scale(0.92);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
