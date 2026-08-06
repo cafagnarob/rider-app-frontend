@@ -3,7 +3,7 @@ import {
   useCreateRouteMutation,
   usePreviewRouteMutation,
 } from "../features/routesMap/routesApi"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { Map, Marker, NavigationControl } from "maplibre-gl"
 import { decodePolyline } from "../utils/polyline"
 import { searchPlaces } from "../utils/geocoding"
@@ -17,6 +17,8 @@ function RouteEditorPage() {
   const mapRef = useRef(null)
   const markersRef = useRef([])
   const timerRef = useRef(null)
+
+  const location = useLocation()
 
   const [mapReady, setMapReady] = useState(false)
 
@@ -43,17 +45,14 @@ function RouteEditorPage() {
   const navigate = useNavigate()
 
   const waypointsRef = useRef([])
-  waypointsRef.current = waypoints
+  useEffect(() => {
+    waypointsRef.current = waypoints
+  }, [waypoints])
 
   useEffect(() => {
+    if (waypoints.length < 2) return
+
     clearTimeout(previewTimerRef.current)
-
-    if (waypoints.length < 2) {
-      setPreview(null)
-      setRouteInfo(null)
-      return
-    }
-
     previewTimerRef.current = setTimeout(async () => {
       setPreview(null)
       try {
@@ -223,7 +222,7 @@ function RouteEditorPage() {
     const source = mapRef.current?.getSource("route")
     if (!source) return
 
-    if (!preview) {
+    if (!preview || waypoints.length < 2) {
       source.setData({ type: "FeatureCollection", features: [] })
       return
     }
@@ -232,7 +231,7 @@ function RouteEditorPage() {
       type: "Feature",
       geometry: { type: "LineString", coordinates: decodePolyline(preview) },
     })
-  }, [preview, mapReady])
+  }, [preview, mapReady, waypoints.length])
 
   // --- sincronizzazione marcatori ---
   useEffect(() => {
@@ -499,7 +498,7 @@ function RouteEditorPage() {
             <div className="alert alert-danger py-2">{errorMsg}</div>
           )}
 
-          {routeInfo && (
+          {routeInfo && waypoints.length >= 2 && (
             <div className="d-flex gap-3 mb-3 text-secondary small">
               <span>
                 <strong className="text-light">
@@ -519,14 +518,29 @@ function RouteEditorPage() {
           {savedRoute && (
             <div className="alert alert-success py-2">
               Percorso "{savedRoute.name}" salvato.{" "}
-              <Button
-                variant="link"
-                size="sm"
-                className="p-0"
-                onClick={() => navigate("/routes")}
-              >
-                Vai ai miei percorsi
-              </Button>
+              {location.state?.returnTo ? (
+                <Button
+                  variant="link"
+                  size="sm"
+                  className="p-0"
+                  onClick={() =>
+                    navigate(location.state.returnTo, {
+                      state: { newRouteId: savedRoute.id, resumeDraft: true },
+                    })
+                  }
+                >
+                  Torna alla creazione dell'evento
+                </Button>
+              ) : (
+                <Button
+                  variant="link"
+                  size="sm"
+                  className="p-0"
+                  onClick={() => navigate("/routes")}
+                >
+                  Vai ai miei percorsi
+                </Button>
+              )}
             </div>
           )}
 
