@@ -48,6 +48,9 @@ function Navbar() {
                     <Dropdown.Item as={Link} to="/garage">
                       Garage
                     </Dropdown.Item>
+                    <Dropdown.Item as={Link} to="/invites">
+                      Inviti
+                    </Dropdown.Item>
                     <Nav.Link as={Link} to="/catalog">
                       Catalogo
                     </Nav.Link>
