@@ -114,6 +114,17 @@ function RoutesListPage() {
                   >
                     Elimina
                   </Button>
+                  {route.googleMapsUrl && (
+                    <Button
+                      variant="outline-primary"
+                      size="sm"
+                      href={route.googleMapsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Apri in Google Maps
+                    </Button>
+                  )}
                   <Form.Check
                     type="switch"
                     id={`importable-${route.id}`}
