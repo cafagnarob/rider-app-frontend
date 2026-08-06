@@ -22,6 +22,14 @@ export function toLocalDateTimeString(date = new Date()) {
   )
 }
 
+export function addSecondsToLocalDateTime(localDateTimeStr, seconds) {
+  if (!localDateTimeStr) return ""
+  const date = new Date(localDateTimeStr)
+  date.setSeconds(date.getSeconds() + seconds)
+  const pad = (n) => String(n).padStart(2, "0")
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`
+}
+
 export function formatDuration(seconds) {
   const h = Math.floor(seconds / 3600)
   const m = Math.floor((seconds % 3600) / 60)
