@@ -8,11 +8,14 @@ import { Link } from "react-router-dom"
 import ProfileEditModal from "../features/users/components/ProfileEditModal"
 import ProfileLinksSection from "../features/users/components/ProfileLinksSection"
 import SecuritySection from "../features/users/components/SecuritySection"
+import { useGetMyInvitesQuery } from "../features/events/invitesApi"
 
 function ProfilePage() {
   const { data: profile, isLoading, isError } = useGetCurrentUserQuery()
   const [updatePicture, { isLoading: isUploading }] =
     useUpdateProfilePictureMutation()
+
+  const { data: myInvites } = useGetMyInvitesQuery()
 
   const [showEdit, setShowEdit] = useState(false)
   const [errorMsg, setErrorMsg] = useState("")
