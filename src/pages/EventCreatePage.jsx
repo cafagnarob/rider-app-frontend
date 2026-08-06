@@ -1,9 +1,13 @@
 import { useState } from "react"
-import { Button, Form, Spinner } from "react-bootstrap"
+import { Spinner } from "react-bootstrap"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { useGetMyRoutesQuery } from "../features/routesMap/routesApi"
 import { useCreateEventMutation } from "../features/events/eventsApi"
-import { toLocalDateTimeString } from "../utils/geo"
+import { toLocalDateTimeString, addSecondsToLocalDateTime } from "../utils/geo"
+import { generateAccessCode } from "../utils/codeGenerator"
+import { COLORS, FONTS, styles } from "../styles/theme"
+import { useInviteUserMutation } from "../features/events/invitesApi"
+import InviteSelector from "../features/events/components/InviteSelector"
 
 const DRAFT_KEY = "eventDraft"
 
@@ -16,8 +20,15 @@ const loadDraft = () => {
   }
 }
 
-const generateCode = () =>
-  Math.random().toString(36).substring(2, 8).toUpperCase()
+const VISIBILITY_OPTIONS = [
+  { value: "PUBLIC", label: "PUBBLICO", hint: "Visibile a tutti" },
+  {
+    value: "PRIVATE_CODE",
+    label: "CON CODICE",
+    hint: "Visibile a chi ha il codice",
+  },
+  { value: "INVITE_ONLY", label: "SU INVITO", hint: "Solo persone invitate" },
+]
 
 function EventCreatePage() {
   const navigate = useNavigate()
@@ -30,6 +41,26 @@ function EventCreatePage() {
 
   const draft = loadDraft()
 
+  const [inviteUsernames, setInviteUsernames] = useState(
+    draft?.inviteUsernames || [],
+  )
+  const [inviteUser] = useInviteUserMutation()
+
+  const updateInvitees = (list) => {
+    setInviteUsernames(list)
+    try {
+      localStorage.setItem(
+        DRAFT_KEY,
+        JSON.stringify({ ...form, inviteUsernames: list }),
+      )
+    } catch {
+      // localStorage non disponibile
+    }
+  }
+
+  const [inviteSummary, setInviteSummary] = useState(null)
+  const [createdEventId, setCreatedEventId] = useState(null)
+
   const [form, setForm] = useState({
     title: draft?.title || "",
     description: draft?.description || "",
@@ -39,13 +70,16 @@ function EventCreatePage() {
     maxParticipants: draft?.maxParticipants ?? 10,
     visibility: draft?.visibility || "PUBLIC",
     autoApprove: draft?.autoApprove || false,
-    accessCode: draft?.accessCode || generateCode(),
+    accessCode: draft?.accessCode || generateAccessCode(),
   })
   const [errorMsg, setErrorMsg] = useState("")
 
   const saveDraft = () => {
     try {
-      localStorage.setItem(DRAFT_KEY, JSON.stringify(form))
+      localStorage.setItem(
+        DRAFT_KEY,
+        JSON.stringify({ ...form, inviteUsernames }),
+      )
     } catch {
       // localStorage non disponibile
     }
@@ -55,7 +89,7 @@ function EventCreatePage() {
     setForm((prev) => {
       const next = {
         ...prev,
-        accessCode: generateCode(),
+        accessCode: generateAccessCode(),
       }
       try {
         localStorage.setItem(DRAFT_KEY, JSON.stringify(next))
@@ -82,6 +116,15 @@ function EventCreatePage() {
 
   const nowLocal = toLocalDateTimeString(new Date()).slice(0, 16)
 
+  const selectedRoute = routesPage?.content?.find((r) => r.id === form.routeId)
+  const minEndDateTime =
+    selectedRoute && form.startDateTime
+      ? addSecondsToLocalDateTime(
+          form.startDateTime,
+          selectedRoute.durationSeconds,
+        )
+      : form.startDateTime || nowLocal
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setErrorMsg("")
@@ -90,7 +133,21 @@ function EventCreatePage() {
       setErrorMsg("Seleziona un percorso.")
       return
     }
-    if (new Date(form.endDateTime) <= new Date(form.startDateTime)) {
+    if (selectedRoute && form.startDateTime) {
+      const minEnd = new Date(
+        addSecondsToLocalDateTime(
+          form.startDateTime,
+          selectedRoute.durationSeconds,
+        ),
+      )
+      if (new Date(form.endDateTime) < minEnd) {
+        const minutes = Math.ceil(selectedRoute.durationSeconds / 60)
+        setErrorMsg(
+          `La fine deve essere almeno ${minutes} minuti dopo l'inizio, la durata stimata del percorso.`,
+        )
+        return
+      }
+    } else if (new Date(form.endDateTime) <= new Date(form.startDateTime)) {
       setErrorMsg("La data di fine deve essere successiva a quella di inizio.")
       return
     }
@@ -106,58 +163,182 @@ function EventCreatePage() {
         routeId: form.routeId,
         startDateTime: form.startDateTime + ":00",
         endDateTime: form.endDateTime + ":00",
-        maxParticipants: Number(form.maxParticipants),
+        maxParticipants:
+          form.visibility === "INVITE_ONLY"
+            ? 999
+            : Number(form.maxParticipants),
         visibility: form.visibility,
         autoApprove: form.visibility === "PUBLIC" ? form.autoApprove : false,
         accessCode: form.visibility === "PRIVATE_CODE" ? form.accessCode : null,
       }).unwrap()
+
       localStorage.removeItem(DRAFT_KEY)
+
+      if (form.visibility === "INVITE_ONLY" && inviteUsernames.length > 0) {
+        const results = await Promise.allSettled(
+          inviteUsernames.map((username) =>
+            inviteUser({ eventId: created.id, username }).unwrap(),
+          ),
+        )
+        const failed = inviteUsernames.filter(
+          (_, i) => results[i].status === "rejected",
+        )
+
+        setCreatedEventId(created.id)
+        setInviteSummary({
+          total: inviteUsernames.length,
+          success: inviteUsernames.length - failed.length,
+          failed,
+        })
+        return
+      }
       navigate(`/events/${created.id}`)
     } catch (err) {
       setErrorMsg(err.data?.message || "Impossibile creare l'evento.")
     }
   }
 
-  return (
-    <div style={{ maxWidth: "540px", margin: "0 auto" }}>
-      <h2 className="mb-4">Crea un evento</h2>
+  if (inviteSummary) {
+    return (
+      <div
+        style={{
+          ...styles.pageBg,
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 24,
+          textAlign: "center",
+          gap: 16,
+        }}
+      >
+        <div
+          style={{ fontFamily: FONTS.heading, fontWeight: 700, fontSize: 28 }}
+        >
+          EVENTO CREATO
+        </div>
 
-      <Form onSubmit={handleSubmit}>
-        <Form.Group className="mb-3">
-          <Form.Label>Titolo</Form.Label>
-          <Form.Control
+        <div
+          style={{ ...styles.card, padding: 18, maxWidth: 360, width: "100%" }}
+        >
+          <div
+            style={{
+              fontFamily: FONTS.mono,
+              fontSize: 11,
+              color: COLORS.textSecondary,
+              marginBottom: 10,
+            }}
+          >
+            INVITI INVIATI
+          </div>
+          <div
+            style={{
+              fontFamily: FONTS.heading,
+              fontWeight: 700,
+              fontSize: 32,
+              color: COLORS.accent,
+            }}
+          >
+            {inviteSummary.success}/{inviteSummary.total}
+          </div>
+
+          {inviteSummary.failed.length > 0 && (
+            <div
+              style={{
+                fontFamily: FONTS.body,
+                fontSize: 12,
+                color: COLORS.textFaint,
+                marginTop: 10,
+                lineHeight: 1.5,
+              }}
+            >
+              Non è stato possibile invitare: {inviteSummary.failed.join(", ")}.
+              Potrai riprovare dalla pagina dell'evento.
+            </div>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => navigate(`/events/${createdEventId}`)}
+          style={{ ...styles.primaryButton, maxWidth: 300, width: "100%" }}
+        >
+          VAI ALL'EVENTO
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ ...styles.pageBg, paddingTop: 20, paddingBottom: 40 }}>
+      <div style={{ padding: "0 20px 20px" }}>
+        <div style={{ ...styles.pageTitle, fontSize: 28 }}>CREA UN EVENTO</div>
+      </div>
+
+      <form
+        onSubmit={handleSubmit}
+        style={{
+          padding: "0 20px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 18,
+        }}
+      >
+        <div>
+          <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>TITOLO</div>
+          <input
             type="text"
-            className="bg-transparent text-light"
             placeholder="Giro dei trulli"
             value={form.title}
             onChange={set("title")}
             required
+            style={styles.input}
           />
-        </Form.Group>
+        </div>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Descrizione</Form.Label>
-          <Form.Control
-            as="textarea"
-            rows={3}
-            className="bg-transparent text-light"
+        <div>
+          <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+            DESCRIZIONE
+          </div>
+          <textarea
             value={form.description}
             onChange={set("description")}
             required
+            rows={3}
+            style={{
+              width: "100%",
+              borderRadius: 14,
+              background: COLORS.card,
+              border: `1px solid ${COLORS.borderStrong}`,
+              color: COLORS.text,
+              fontFamily: FONTS.body,
+              fontSize: 15,
+              lineHeight: 1.5,
+              padding: 14,
+              outline: "none",
+              resize: "none",
+              boxSizing: "border-box",
+            }}
           />
-        </Form.Group>
+        </div>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Percorso</Form.Label>
+        <div>
+          <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>PERCORSO</div>
           {isLoadingRoutes ? (
-            <Spinner size="sm" animation="border" variant="light" />
+            <Spinner
+              size="sm"
+              animation="border"
+              style={{ color: COLORS.accent }}
+            />
           ) : routesPage?.content?.length === 0 ? (
-            <div className="alert alert-warning py-2 small mb-0">
+            <div style={{ ...styles.emptyState, fontSize: 13 }}>
               Non hai ancora nessun percorso.{" "}
               <Link
                 to="/routes/new"
                 state={{ returnTo: "/events/new", resumeDraft: true }}
                 onClick={saveDraft}
+                style={{ color: COLORS.accent }}
               >
                 Creane uno
               </Link>{" "}
@@ -165,148 +346,249 @@ function EventCreatePage() {
             </div>
           ) : (
             <>
-              <Form.Select
-                className="bg-transparent text-light"
+              <select
                 value={form.routeId}
                 onChange={set("routeId")}
                 required
+                style={styles.input}
               >
                 <option value="">Seleziona un percorso</option>
                 {routesPage?.content?.map((r) => (
                   <option key={r.id} value={r.id}>
-                    {r.name} ({(r.distanceMeters / 1000).toFixed(1)} km)
+                    {r.name} (
+                    {(r.distanceMeters / 1000).toFixed(1).replace(".", ",")} km)
                   </option>
                 ))}
-              </Form.Select>
-              <Form.Text className="text-secondary">
+              </select>
+              <div
+                style={{
+                  fontFamily: FONTS.body,
+                  fontSize: 12,
+                  color: COLORS.textFaint,
+                  marginTop: 8,
+                }}
+              >
                 Non trovi quello che cerchi?{" "}
                 <Link
                   to="/routes/new"
-                  state={{
-                    returnTo: "/events/new",
-                    resumeDraft: true,
-                  }}
+                  state={{ returnTo: "/events/new", resumeDraft: true }}
                   onClick={saveDraft}
+                  style={{ color: COLORS.accent }}
                 >
                   Crea un nuovo percorso
                 </Link>
-              </Form.Text>
+              </div>
             </>
           )}
-        </Form.Group>
+        </div>
 
-        <div className="row">
-          <div className="col-6">
-            <Form.Group className="mb-3">
-              <Form.Label>Inizio</Form.Label>
-              <Form.Control
-                type="datetime-local"
-                className="bg-transparent text-light"
-                min={nowLocal}
-                value={form.startDateTime}
-                onChange={set("startDateTime")}
-                required
-              />
-            </Form.Group>
+        <div style={{ display: "flex", gap: 12 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>INIZIO</div>
+            <input
+              type="datetime-local"
+              min={nowLocal}
+              value={form.startDateTime}
+              onChange={set("startDateTime")}
+              required
+              style={styles.input}
+            />
           </div>
-          <div className="col-6">
-            <Form.Group className="mb-3">
-              <Form.Label>Fine</Form.Label>
-              <Form.Control
-                type="datetime-local"
-                className="bg-transparent text-light"
-                min={form.startDateTime || nowLocal}
-                value={form.endDateTime}
-                onChange={set("endDateTime")}
-                required
-              />
-            </Form.Group>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>FINE</div>
+            <input
+              type="datetime-local"
+              min={minEndDateTime}
+              value={form.endDateTime}
+              onChange={set("endDateTime")}
+              required
+              style={styles.input}
+            />
+            {selectedRoute && (
+              <div
+                style={{
+                  fontFamily: FONTS.mono,
+                  fontSize: 10,
+                  color: COLORS.textFaint,
+                  marginTop: 6,
+                }}
+              >
+                Durata stimata: {Math.ceil(selectedRoute.durationSeconds / 60)}{" "}
+                min
+              </div>
+            )}
           </div>
         </div>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Numero massimo di partecipanti</Form.Label>
-          <Form.Control
-            type="number"
-            min={1}
-            className="bg-transparent text-light"
-            value={form.maxParticipants}
-            onChange={set("maxParticipants")}
-            required
-          />
-        </Form.Group>
+        {form.visibility !== "INVITE_ONLY" && (
+          <div>
+            <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+              NUMERO MASSIMO DI PARTECIPANTI
+            </div>
+            <input
+              type="number"
+              min={1}
+              value={form.maxParticipants}
+              onChange={set("maxParticipants")}
+              required
+              style={styles.input}
+            />
+          </div>
+        )}
 
-        <Form.Group className="mb-3">
-          <Form.Label>Visibilità</Form.Label>
-          <Form.Select
-            className="bg-transparent text-light"
-            value={form.visibility}
-            onChange={(e) => {
-              const value = e.target.value
-
-              setForm((prev) => ({
-                ...prev,
-                visibility: value,
-                accessCode:
-                  value === "PRIVATE_CODE" && !prev.accessCode
-                    ? generateCode()
-                    : prev.accessCode,
-              }))
-            }}
-          >
-            <option value="PUBLIC">Pubblico — visibile a tutti</option>
-            <option value="PRIVATE_CODE">
-              Con codice — visibile a chi ha il codice
-            </option>
-            <option value="INVITE_ONLY">Solo su invito</option>
-          </Form.Select>
-        </Form.Group>
+        <div>
+          <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+            VISIBILITÀ
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {VISIBILITY_OPTIONS.map((opt) => {
+              const active = form.visibility === opt.value
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => {
+                    setForm((prev) => {
+                      const next = {
+                        ...prev,
+                        visibility: opt.value,
+                        accessCode:
+                          opt.value === "PRIVATE_CODE" && !prev.accessCode
+                            ? generateAccessCode()
+                            : prev.accessCode,
+                      }
+                      try {
+                        localStorage.setItem(DRAFT_KEY, JSON.stringify(next))
+                      } catch {
+                        // localStorage non disponibile
+                      }
+                      return next
+                    })
+                  }}
+                  style={{
+                    textAlign: "left",
+                    padding: "13px 15px",
+                    borderRadius: 13,
+                    background: active ? COLORS.accentSoftBg : COLORS.card,
+                    border: `1px solid ${active ? COLORS.accentSoftBorder : COLORS.borderStrong}`,
+                    cursor: "pointer",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontFamily: FONTS.heading,
+                      fontWeight: 700,
+                      fontSize: 15,
+                      color: active ? COLORS.accent : COLORS.text,
+                    }}
+                  >
+                    {opt.label}
+                  </div>
+                  <div
+                    style={{
+                      fontFamily: FONTS.body,
+                      fontSize: 12,
+                      color: COLORS.textMuted,
+                      marginTop: 2,
+                    }}
+                  >
+                    {opt.hint}
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </div>
 
         {form.visibility === "PUBLIC" && (
-          <Form.Check
-            type="switch"
-            id="auto-approve"
-            label="Accetta automaticamente le richieste di partecipazione"
-            className="mb-3"
-            checked={form.autoApprove}
-            onChange={set("autoApprove")}
-          />
+          <label
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              fontFamily: FONTS.body,
+              fontSize: 13,
+              color: COLORS.textSecondary,
+              cursor: "pointer",
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={form.autoApprove}
+              onChange={set("autoApprove")}
+            />
+            Accetta automaticamente le richieste di partecipazione
+          </label>
         )}
 
         {form.visibility === "PRIVATE_CODE" && (
-          <Form.Group className="mb-3">
-            <Form.Label>Codice di accesso</Form.Label>
-            <Form.Control
-              type="text"
-              className="bg-transparent text-light"
-              value={form.accessCode}
-              readOnly
-            />
-            <Button type="button" onClick={regenerateCode}>
-              Rigenera codice
-            </Button>
-          </Form.Group>
-        )}
-
-        {form.visibility === "INVITE_ONLY" && (
-          <div className="alert alert-info small py-2">
-            Potrai invitare persone specifiche dopo aver creato l'evento.
+          <div>
+            <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+              CODICE DI ACCESSO
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <div
+                style={{
+                  flex: 1,
+                  padding: "12px 14px",
+                  borderRadius: 12,
+                  background: COLORS.cardAlt,
+                  border: `1px solid ${COLORS.borderSoft}`,
+                  fontFamily: FONTS.mono,
+                  fontSize: 17,
+                  letterSpacing: ".12em",
+                  color: COLORS.accent,
+                }}
+              >
+                {form.accessCode}
+              </div>
+              <button
+                type="button"
+                onClick={regenerateCode}
+                style={{
+                  ...styles.secondaryButton,
+                  height: "auto",
+                  padding: "0 16px",
+                }}
+              >
+                RIGENERA
+              </button>
+            </div>
           </div>
         )}
 
-        {errorMsg && <div className="alert alert-danger py-2">{errorMsg}</div>}
+        {form.visibility === "INVITE_ONLY" && (
+          <div>
+            <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+              INVITA DAI TUOI CONTATTI
+            </div>
+            <InviteSelector
+              selected={inviteUsernames}
+              onChange={updateInvitees}
+            />
+          </div>
+        )}
 
-        <div className="d-grid">
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="rounded-pill fw-bold border-0"
-            style={{ backgroundColor: "#FFBE5D", color: "#000" }}
+        {errorMsg && (
+          <div
+            style={{
+              fontFamily: FONTS.body,
+              fontSize: 13,
+              color: COLORS.danger,
+            }}
           >
-            {isLoading ? "Creazione..." : "Crea evento"}
-          </Button>
-        </div>
-      </Form>
+            {errorMsg}
+          </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={isLoading}
+          style={{ ...styles.primaryButton, opacity: isLoading ? 0.6 : 1 }}
+        >
+          {isLoading ? "..." : "CREA EVENTO"}
+        </button>
+      </form>
     </div>
   )
 }
