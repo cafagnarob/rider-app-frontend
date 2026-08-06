@@ -91,26 +91,50 @@ function PostCard({ post }) {
         </div>
       </div>
 
-      {post.event && (
-        <button
-          type="button"
-          onClick={goToDetail}
-          style={{
-            display: "inline-block",
-            marginTop: 12,
-            padding: "6px 11px",
-            borderRadius: 10,
-            background: COLORS.accentSoftBg,
-            border: `1px solid ${COLORS.accentSoftBorder}`,
-            fontFamily: FONTS.mono,
-            fontSize: 11,
-            color: COLORS.accent,
-            cursor: "pointer",
-          }}
-        >
-          {post.event.title}
-        </button>
-      )}
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }}>
+        {post.event && (
+          <button
+            type="button"
+            onClick={goToDetail}
+            style={{
+              display: "inline-block",
+              marginTop: 12,
+              padding: "6px 11px",
+              borderRadius: 10,
+              background: COLORS.accentSoftBg,
+              border: `1px solid ${COLORS.accentSoftBorder}`,
+              fontFamily: FONTS.mono,
+              fontSize: 11,
+              color: COLORS.accent,
+              cursor: "pointer",
+            }}
+          >
+            {post.event.title}
+          </button>
+        )}
+
+        {post.ride && (
+          <button
+            type="button"
+            onClick={goToDetail}
+            style={{
+              display: "inline-block",
+              marginTop: 12,
+              marginLeft: post.event ? 8 : 0,
+              padding: "6px 11px",
+              borderRadius: 10,
+              background: COLORS.card,
+              border: `1px solid ${COLORS.border}`,
+              fontFamily: FONTS.mono,
+              fontSize: 11,
+              color: COLORS.textSecondary,
+              cursor: "pointer",
+            }}
+          >
+            {post.ride.title || "GIRO"} · {post.ride.distanceKm?.toFixed(1)} KM
+          </button>
+        )}
+      </div>
 
       {post.media?.length > 0 && (
         <div
