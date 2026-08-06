@@ -428,7 +428,13 @@ function RouteEditorPage() {
                     <Form.Control
                       size="sm"
                       className="bg-transparent text-light border-0"
-                      placeholder={`Punto ${index + 1}`}
+                      placeholder={
+                        index === 0
+                          ? "Es. Ritrovo"
+                          : index === waypoints.length - 1
+                            ? "Es. Arrivo"
+                            : "Es. Sosta caffè"
+                      }
                       value={wp.label}
                       onChange={(e) => setLabel(wp.id, e.target.value)}
                     />
