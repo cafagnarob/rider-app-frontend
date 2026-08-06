@@ -9,6 +9,7 @@ import {
 import RideMap from "../components/map/RideMap"
 import { RIDE_TYPE_LABELS } from "../utils/constants"
 import { formatDuration } from "../utils/geo"
+import RideCharts from "../features/rides/components/RideCharts"
 
 function RideDetailPage() {
   const { rideId } = useParams()
@@ -65,6 +66,12 @@ function RideDetailPage() {
       <div className="mb-4">
         <RideMap points={ride.points} />
       </div>
+
+      <Card className="bg-dark text-light border-secondary mb-4">
+        <Card.Body>
+          <RideCharts points={ride.points} />
+        </Card.Body>
+      </Card>
 
       <Card className="bg-dark text-light border-secondary mb-4">
         <Card.Body>
