@@ -1,12 +1,7 @@
 import { useEffect, useRef, useState } from "react"
-import { Card, Button, Badge, Spinner, Form, Modal } from "react-bootstrap"
+import { Spinner } from "react-bootstrap"
 import { useParams, useNavigate } from "react-router-dom"
-import {
-  Map as MapLibreMap,
-  NavigationControl,
-  Marker,
-  LngLatBounds,
-} from "maplibre-gl"
+import { Map as MapLibreMap, Marker, LngLatBounds, Popup } from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
 import {
   useGetEventByIdQuery,
@@ -15,15 +10,21 @@ import {
 import {
   useJoinEventMutation,
   useCancelMyParticipationMutation,
+  useGetAcceptedParticipantsQuery,
 } from "../features/events/participationApi"
 import OrganizerPanel from "../features/events/components/OrganizerPanel"
 import { decodePolyline } from "../utils/polyline"
 import { VISIBILITY_LABELS } from "../utils/constants"
+import { COLORS, FONTS, styles } from "../styles/theme"
+import { FaArrowLeft } from "react-icons/fa"
+import AccessCodeCard from "../features/events/components/AccessCodeCard"
 
 function EventDetailPage() {
   const { eventId } = useParams()
   const navigate = useNavigate()
   const { data: event, isLoading, isError } = useGetEventByIdQuery(eventId)
+
+  const { data: participants } = useGetAcceptedParticipantsQuery(eventId)
 
   const [joinEvent, { isLoading: isJoining }] = useJoinEventMutation()
   const [cancelParticipation, { isLoading: isCancelling }] =
@@ -32,8 +33,7 @@ function EventDetailPage() {
 
   const [accessCode, setAccessCode] = useState("")
   const [joinError, setJoinError] = useState("")
-  const [showCancelConfirm, setShowCancelConfirm] = useState(false)
-  const [showCancelEventConfirm, setShowCancelEventConfirm] = useState(false)
+  const [confirmType, setConfirmType] = useState(null)
 
   const containerRef = useRef(null)
   const mapRef = useRef(null)
@@ -42,7 +42,17 @@ function EventDetailPage() {
     if (!containerRef.current || !event?.route?.encodedPolyline) return
 
     const coordinates = decodePolyline(event.route.encodedPolyline)
-    if (coordinates.length === 0) return
+
+    const isValidCoordinate = ([lng, lat]) =>
+      Number.isFinite(lng) &&
+      Number.isFinite(lat) &&
+      lng >= -180 &&
+      lng <= 180 &&
+      lat >= -90 &&
+      lat <= 90
+
+    if (coordinates.length === 0 || !coordinates.every(isValidCoordinate))
+      return
 
     const map = new MapLibreMap({
       container: containerRef.current,
@@ -51,9 +61,9 @@ function EventDetailPage() {
       zoom: 11,
     })
     mapRef.current = map
-    map.addControl(new NavigationControl(), "top-right")
 
     const draw = () => {
+      map.resize()
       map.addSource("route", {
         type: "geojson",
         data: {
@@ -66,19 +76,62 @@ function EventDetailPage() {
         type: "line",
         source: "route",
         layout: { "line-join": "round", "line-cap": "round" },
-        paint: { "line-color": "#0d6efd", "line-width": 5 },
+        paint: {
+          "line-color": COLORS.accent,
+          "line-width": 4,
+          "line-opacity": 0.85,
+        },
       })
+      const validWaypoints = (event.route.waypoints || []).filter((wp) =>
+        isValidCoordinate([wp.longitude, wp.latitude]),
+      )
+      const lastIndex = validWaypoints.length - 1
 
-      new Marker({ color: "#198754" }).setLngLat(coordinates[0]).addTo(map)
-      new Marker({ color: "#dc3545" })
-        .setLngLat(coordinates[coordinates.length - 1])
-        .addTo(map)
+      validWaypoints.forEach((wp, index) => {
+        const isStart = index === 0
+        const isEnd = index === lastIndex && lastIndex > 0
+        const isEndpoint = isStart || isEnd
+
+        const el = document.createElement("div")
+        el.style.cssText = `
+       width: ${isEndpoint ? 20 : 11}px;
+      height: ${isEndpoint ? 20 : 11}px;
+      border-radius: 50%;
+      background: ${isStart ? "#4ADE80" : isEnd ? COLORS.danger : COLORS.accent};
+      border: ${isEndpoint ? 3 : 2}px solid ${COLORS.bg};
+
+    `
+        if (isStart) {
+          const pulse = document.createElement("span")
+          pulse.style.cssText = `
+         position: absolute; inset: -8px; border-radius: 50%;
+        background: #4ADE80; animation: qjpulse 2.6s ease-out infinite;
+      `
+          el.appendChild(pulse)
+        }
+        const marker = new Marker({ element: el }).setLngLat([
+          wp.longitude,
+          wp.latitude,
+        ])
+
+        if (wp.label && wp.label.trim()) {
+          marker.setPopup(
+            new Popup({
+              offset: 14,
+              closeButton: false,
+              className: "qj-popup",
+            }).setText(wp.label),
+          )
+        }
+
+        marker.addTo(map)
+      })
 
       const bounds = coordinates.reduce(
         (b, c) => b.extend(c),
         new LngLatBounds(coordinates[0], coordinates[0]),
       )
-      map.fitBounds(bounds, { padding: 40, maxZoom: 15 })
+      map.fitBounds(bounds, { padding: 40, maxZoom: 14 })
     }
 
     let initialized = false
@@ -112,7 +165,7 @@ function EventDetailPage() {
   const handleCancelParticipation = async () => {
     try {
       await cancelParticipation(eventId).unwrap()
-      setShowCancelConfirm(false)
+      setConfirmType(null)
     } catch (err) {
       setJoinError(
         err.data?.message || "Impossibile annullare la partecipazione.",
@@ -123,7 +176,7 @@ function EventDetailPage() {
   const handleCancelEvent = async () => {
     try {
       await changeStatus({ eventId, status: "CANCELLED" }).unwrap()
-      setShowCancelEventConfirm(false)
+      setConfirmType(null)
     } catch (err) {
       console.error(err)
     }
@@ -131,262 +184,498 @@ function EventDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="text-center py-5">
-        <Spinner animation="border" variant="light" />
+      <div style={{ textAlign: "center", padding: "60px 0" }}>
+        <Spinner animation="border" style={{ color: COLORS.accent }} />
       </div>
     )
   }
 
   if (isError)
     return (
-      <div className="alert alert-danger">
+      <div style={{ ...styles.emptyState, margin: 20 }}>
         Evento non trovato o accesso negato.
       </div>
     )
 
   const isFull = event.currentParticipants >= event.maxParticipants
-  const isCancelled = event.status === "CANCELLED"
-  const isFinished = event.status === "FINISHED"
+  const start = new Date(event.startDateTime)
+  const dayLabel = start
+    .toLocaleDateString("it-IT", {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+    })
+    .toUpperCase()
+  const timeLabel = start.toLocaleTimeString("it-IT", {
+    hour: "2-digit",
+    minute: "2-digit",
+  })
+  const distanceKm = event.route
+    ? (event.route.distanceMeters / 1000).toFixed(1).replace(".", ",")
+    : null
 
   return (
-    <div style={{ maxWidth: "640px", margin: "0 auto" }}>
-      <div className="d-flex align-items-center gap-3 mb-3">
-        <Button variant="outline-light" size="sm" onClick={() => navigate(-1)}>
-          ← Indietro
-        </Button>
+    <div style={{ ...styles.pageBg, paddingBottom: 100 }}>
+      <div style={{ position: "relative", height: 250 }}>
+        {event.route?.encodedPolyline ? (
+          <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
+        ) : (
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              background: COLORS.cardAlt,
+            }}
+          />
+        )}
+
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          style={{
+            ...styles.iconButton,
+            position: "absolute",
+            left: 16,
+            top: 16,
+            background: "rgba(10,10,12,.8)",
+          }}
+        >
+          <FaArrowLeft />
+        </button>
+
         {event.organizer && event.status === "ACTIVE" && (
-          <Button
-            variant="outline-danger"
-            size="sm"
-            className="ms-auto"
-            onClick={() => setShowCancelEventConfirm(true)}
+          <button
+            type="button"
+            onClick={() => setConfirmType("cancelEvent")}
+            style={{
+              position: "absolute",
+              right: 16,
+              top: 16,
+              height: 40,
+              padding: "0 14px",
+              borderRadius: 12,
+              background: "rgba(10,10,12,.8)",
+              border: `1px solid ${COLORS.dangerBorder}`,
+              color: COLORS.danger,
+              fontFamily: FONTS.mono,
+              fontSize: 10,
+              cursor: "pointer",
+            }}
           >
-            Annulla evento
-          </Button>
+            ANNULLA EVENTO
+          </button>
         )}
       </div>
-
-      <div className="d-flex justify-content-between align-items-start mb-2">
-        <h3 className="mb-0">{event.title}</h3>
-        {isCancelled && <Badge bg="danger">Annullato</Badge>}
-        {isFinished && <Badge bg="secondary">Concluso</Badge>}
-      </div>
-
-      <p className="text-secondary mb-3">
-        Organizzato da <strong>{event.organizerUsername}</strong> ·{" "}
-        {new Date(event.startDateTime).toLocaleDateString("it-IT", {
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        })}
-      </p>
-
-      <p className="mb-3">{event.description}</p>
-
-      <div className="d-flex gap-2 flex-wrap mb-4">
-        <Badge bg="secondary">{VISIBILITY_LABELS[event.visibility]}</Badge>
-        <Badge bg="secondary">
-          {event.currentParticipants}/{event.maxParticipants} partecipanti
-        </Badge>
-        {event.route && (
-          <Badge bg="secondary">
-            {(event.route.distanceMeters / 1000).toFixed(1)} km
-          </Badge>
-        )}
-
-        <div className="d-flex gap-2 flex-wrap mb-4">
-          <Badge bg="secondary">{VISIBILITY_LABELS[event.visibility]}</Badge>
-          <Badge bg="secondary">
-            {event.currentParticipants}/{event.maxParticipants} partecipanti
-          </Badge>
-          {event.route && (
-            <Badge bg="secondary">
-              {(event.route.distanceMeters / 1000).toFixed(1)} km
-            </Badge>
+      <div style={{ padding: "22px 20px 0" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: 8,
+            alignItems: "center",
+            marginBottom: 10,
+          }}
+        >
+          <span style={{ ...styles.screenLabel, color: COLORS.accent }}>
+            {dayLabel} · {timeLabel}
+          </span>
+          {event.status === "CANCELLED" && (
+            <span style={{ ...styles.screenLabel, color: COLORS.danger }}>
+              ANNULLATO
+            </span>
           )}
-          {event.route?.googleMapsUrl && (
-            <a
-              href={event.route.googleMapsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-outline-primary btn-sm"
-            >
-              Apri in Google Maps
-            </a>
+          {event.status === "FINISHED" && (
+            <span style={{ ...styles.screenLabel, color: COLORS.textMuted }}>
+              CONCLUSO
+            </span>
           )}
         </div>
-      </div>
 
-      {event.route?.encodedPolyline && (
+        <div style={{ ...styles.pageTitle, fontSize: 34, marginBottom: 10 }}>
+          {event.title}
+        </div>
+
         <div
-          ref={containerRef}
           style={{
-            height: "360px",
-            borderRadius: "0.5rem",
-            overflow: "hidden",
+            fontFamily: FONTS.mono,
+            fontSize: 11,
+            color: COLORS.textMuted,
+            marginBottom: 18,
           }}
-          className="mb-4"
-        />
-      )}
+        >
+          {event.meetingPointAddress || "Ritrovo da definire"}
+          {distanceKm && ` · ${distanceKm} KM`}
+          {` · ${event.currentParticipants}/${event.maxParticipants}`}
+        </div>
 
-      {/* --- partecipazione (solo se non sei l'organizzatore) --- */}
-      {!event.organizer && event.status === "ACTIVE" && (
-        <Card className="bg-dark text-light border-secondary mb-4">
-          <Card.Body>
-            {event.myParticipationStatus === "ACCEPTED" && (
-              <div className="d-flex justify-content-between align-items-center">
-                <Badge bg="success">Partecipazione confermata</Badge>
-                <Button
-                  variant="outline-danger"
-                  size="sm"
-                  onClick={() => setShowCancelConfirm(true)}
+        <p
+          style={{
+            fontSize: 14.5,
+            lineHeight: 1.55,
+            color: "rgba(255,255,255,.85)",
+            marginBottom: 22,
+          }}
+        >
+          {event.description}
+        </p>
+
+        <div
+          style={{
+            ...styles.statGrid,
+            gridTemplateColumns: "1fr 1fr",
+            marginBottom: 22,
+          }}
+        >
+          <div style={styles.statCell}>
+            <span style={styles.statLabel}>RITROVO</span>
+            <span
+              style={{
+                fontFamily: FONTS.heading,
+                fontWeight: 600,
+                fontSize: 15,
+                lineHeight: 1.2,
+              }}
+            >
+              {event.meetingPointAddress || "—"}
+            </span>
+          </div>
+          <div style={styles.statCell}>
+            <span style={styles.statLabel}>POSTI</span>
+            <span style={styles.statValue}>
+              {event.currentParticipants}/{event.maxParticipants}
+            </span>
+          </div>
+          <div style={styles.statCell}>
+            <span style={styles.statLabel}>PERCORSO</span>
+            <span style={styles.statValue}>
+              {distanceKm ? `${distanceKm} KM` : "—"}
+            </span>
+          </div>
+          <div style={styles.statCell}>
+            <span style={styles.statLabel}>VISIBILITÀ</span>
+            <span
+              style={{
+                fontFamily: FONTS.heading,
+                fontWeight: 700,
+                fontSize: 21,
+              }}
+            >
+              {VISIBILITY_LABELS[event.visibility]}
+            </span>
+          </div>
+        </div>
+
+        {event.route?.googleMapsUrl && (
+          <a
+            href={event.route.googleMapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              ...styles.secondaryButton,
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "0 18px",
+              textDecoration: "none",
+              marginBottom: 22,
+            }}
+          >
+            APRI IN GOOGLE MAPS
+          </a>
+        )}
+
+        {participants && participants.length > 0 && (
+          <div style={{ marginBottom: 22 }}>
+            <div style={{ ...styles.fieldLabel, marginBottom: 10 }}>
+              PARTECIPANTI
+            </div>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              {participants.slice(0, 3).map((p, i) => (
+                <img
+                  key={p.id}
+                  src={p.profilePicture}
+                  alt={p.username}
+                  title={p.username}
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    background: COLORS.surfaceRaised,
+                    border: `2px solid ${COLORS.bg}`,
+                    marginLeft: i === 0 ? 0 : -12,
+                  }}
+                />
+              ))}
+              {participants.length > 3 && (
+                <div
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: "50%",
+                    marginLeft: -12,
+                    background: COLORS.card,
+                    border: `2px solid ${COLORS.bg}`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontFamily: FONTS.mono,
+                    fontSize: 11,
+                    color: COLORS.textSecondary,
+                  }}
                 >
-                  Annulla partecipazione
-                </Button>
+                  +{participants.length - 3}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {!event.organizer && event.status === "ACTIVE" && (
+          <div style={{ ...styles.card, padding: 18, marginBottom: 20 }}>
+            {event.myParticipationStatus === "ACCEPTED" && (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily: FONTS.mono,
+                    fontSize: 11,
+                    color: "#4ADE80",
+                  }}
+                >
+                  ✓ PARTECIPAZIONE CONFERMATA
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setConfirmType("cancelMe")}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: COLORS.danger,
+                    fontFamily: FONTS.mono,
+                    fontSize: 10,
+                    cursor: "pointer",
+                  }}
+                >
+                  ANNULLA
+                </button>
               </div>
             )}
 
             {event.myParticipationStatus === "PENDING" && (
-              <div className="d-flex justify-content-between align-items-center">
-                <Badge bg="info">Richiesta in attesa di approvazione</Badge>
-                <Button
-                  variant="outline-danger"
-                  size="sm"
-                  onClick={() => setShowCancelConfirm(true)}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily: FONTS.mono,
+                    fontSize: 11,
+                    color: COLORS.accent,
+                  }}
                 >
-                  Annulla richiesta
-                </Button>
+                  RICHIESTA IN ATTESA
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setConfirmType("cancelMe")}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: COLORS.danger,
+                    fontFamily: FONTS.mono,
+                    fontSize: 10,
+                    cursor: "pointer",
+                  }}
+                >
+                  ANNULLA RICHIESTA
+                </button>
               </div>
             )}
 
             {(event.myParticipationStatus === "REJECTED" ||
               event.myParticipationStatus === "CANCELLED") && (
-              <Badge bg="secondary">
+              <span
+                style={{
+                  fontFamily: FONTS.mono,
+                  fontSize: 11,
+                  color: COLORS.textMuted,
+                }}
+              >
                 {event.myParticipationStatus === "REJECTED"
-                  ? "Richiesta rifiutata"
-                  : "Partecipazione annullata"}
-              </Badge>
+                  ? "RICHIESTA RIFIUTATA"
+                  : "PARTECIPAZIONE ANNULLATA"}
+              </span>
             )}
 
             {event.myParticipationStatus === null && (
               <>
                 {event.visibility === "INVITE_ONLY" ? (
-                  <p className="small text-secondary mb-0">
-                    Questo evento richiede un invito da parte
-                    dell'organizzatore.
+                  <p
+                    style={{
+                      fontFamily: FONTS.body,
+                      fontSize: 13,
+                      color: COLORS.textFaint,
+                      margin: 0,
+                    }}
+                  >
+                    Questo evento richiede un invito dall'organizzatore.
                   </p>
                 ) : isFull ? (
-                  <p className="small text-secondary mb-0">
+                  <p
+                    style={{
+                      fontFamily: FONTS.body,
+                      fontSize: 13,
+                      color: COLORS.textFaint,
+                      margin: 0,
+                    }}
+                  >
                     Numero massimo di partecipanti raggiunto.
                   </p>
                 ) : (
                   <>
                     {event.visibility === "PRIVATE_CODE" && (
-                      <Form.Group className="mb-2">
-                        <Form.Label className="small">
-                          Codice di accesso
-                        </Form.Label>
-                        <Form.Control
-                          size="sm"
-                          className="bg-transparent text-light"
-                          value={accessCode}
-                          onChange={(e) => setAccessCode(e.target.value)}
-                        />
-                      </Form.Group>
+                      <input
+                        type="text"
+                        placeholder="Codice di accesso"
+                        value={accessCode}
+                        onChange={(e) => setAccessCode(e.target.value)}
+                        style={{
+                          ...styles.input,
+                          height: 46,
+                          marginBottom: 12,
+                        }}
+                      />
                     )}
                     {joinError && (
-                      <div className="alert alert-danger py-2 small">
+                      <div
+                        style={{
+                          fontFamily: FONTS.body,
+                          fontSize: 13,
+                          color: COLORS.danger,
+                          marginBottom: 10,
+                        }}
+                      >
                         {joinError}
                       </div>
                     )}
-                    <Button
-                      className="rounded-pill px-4 fw-bold border-0"
-                      style={{ backgroundColor: "#FFBE5D", color: "#000" }}
-                      disabled={isJoining}
+                    <button
+                      type="button"
                       onClick={handleJoin}
+                      disabled={isJoining}
+                      style={{
+                        ...styles.primaryButton,
+                        width: "100%",
+                        opacity: isJoining ? 0.6 : 1,
+                      }}
                     >
-                      {isJoining ? "Invio richiesta..." : "Partecipa"}
-                    </Button>
+                      {isJoining ? "..." : "PRENOTA IL TUO POSTO"}
+                    </button>
                   </>
                 )}
               </>
             )}
-          </Card.Body>
-        </Card>
-      )}
+          </div>
+        )}
 
-      {/* --- pannello organizzatore --- */}
-      {event.organizer && (
-        <OrganizerPanel eventId={eventId} visibility={event.visibility} />
-      )}
+        {event.organizer && event.visibility === "PRIVATE_CODE" && (
+          <AccessCodeCard eventId={eventId} />
+        )}
 
-      {/* --- conferma annullamento partecipazione --- */}
-      <Modal
-        show={showCancelConfirm}
-        onHide={() => setShowCancelConfirm(false)}
-        centered
-        data-bs-theme="dark"
-      >
-        <Modal.Header
-          closeButton
-          className="bg-dark text-light border-secondary"
+        {event.organizer && (
+          <OrganizerPanel eventId={eventId} visibility={event.visibility} />
+        )}
+      </div>
+      {confirmType && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(6,6,7,.72)",
+            zIndex: 300,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 24,
+          }}
+          onClick={() => setConfirmType(null)}
         >
-          <Modal.Title className="fs-5">
-            Annullare la partecipazione?
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="bg-dark text-light">
-          Potrai richiedere di partecipare nuovamente solo se l'organizzatore te
-          lo consente.
-        </Modal.Body>
-        <Modal.Footer className="bg-dark border-secondary">
-          <Button
-            variant="outline-light"
-            onClick={() => setShowCancelConfirm(false)}
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              ...styles.card,
+              padding: 22,
+              width: "100%",
+              maxWidth: 340,
+            }}
           >
-            Torna indietro
-          </Button>
-          <Button
-            variant="danger"
-            disabled={isCancelling}
-            onClick={handleCancelParticipation}
-          >
-            Conferma
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      {/* --- conferma annullamento evento --- */}
-      <Modal
-        show={showCancelEventConfirm}
-        onHide={() => setShowCancelEventConfirm(false)}
-        centered
-        data-bs-theme="dark"
-      >
-        <Modal.Header
-          closeButton
-          className="bg-dark text-light border-secondary"
-        >
-          <Modal.Title className="fs-5">Annullare l'evento?</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="bg-dark text-light">
-          Tutti i partecipanti verranno informati. L'operazione non è
-          reversibile.
-        </Modal.Body>
-        <Modal.Footer className="bg-dark border-secondary">
-          <Button
-            variant="outline-light"
-            onClick={() => setShowCancelEventConfirm(false)}
-          >
-            Torna indietro
-          </Button>
-          <Button variant="danger" onClick={handleCancelEvent}>
-            Annulla evento
-          </Button>
-        </Modal.Footer>
-      </Modal>
+            <div
+              style={{
+                fontFamily: FONTS.heading,
+                fontWeight: 700,
+                fontSize: 20,
+                marginBottom: 10,
+              }}
+            >
+              {confirmType === "cancelEvent"
+                ? "ANNULLARE L'EVENTO?"
+                : "ANNULLARE LA PARTECIPAZIONE?"}
+            </div>
+            <p
+              style={{
+                fontFamily: FONTS.body,
+                fontSize: 13,
+                color: COLORS.textSecondary,
+                lineHeight: 1.5,
+                marginBottom: 18,
+              }}
+            >
+              {confirmType === "cancelEvent"
+                ? "Tutti i partecipanti verranno informati. L'operazione non è reversibile."
+                : "Potrai richiedere di partecipare di nuovo solo se l'organizzatore te lo consente."}
+            </p>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                type="button"
+                onClick={() => setConfirmType(null)}
+                style={{ ...styles.secondaryButton, flex: 1 }}
+              >
+                INDIETRO
+              </button>
+              <button
+                type="button"
+                onClick={
+                  confirmType === "cancelEvent"
+                    ? handleCancelEvent
+                    : handleCancelParticipation
+                }
+                disabled={isCancelling}
+                style={{
+                  flex: 1,
+                  height: 48,
+                  borderRadius: 15,
+                  background: COLORS.danger,
+                  border: "none",
+                  color: "#fff",
+                  fontFamily: FONTS.heading,
+                  fontWeight: 700,
+                  fontSize: 15,
+                  cursor: "pointer",
+                }}
+              >
+                CONFERMA
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
