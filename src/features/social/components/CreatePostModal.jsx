@@ -98,8 +98,8 @@ function CreatePostModal({ show, onClose }) {
       await createPost({
         data: {
           text: text.trim() || null,
-          eventId: null,
-          rideId: null,
+          eventId: eventId || null,
+          rideId: rideId || null,
           vehicleId: vehicleId || null,
           includeRoutePhoto: false,
         },
