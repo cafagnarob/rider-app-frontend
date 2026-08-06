@@ -22,7 +22,9 @@ export const NOTIFICATION_ICONS = {
   SYSTEM: { Icon: FaBell, color: "#adb5bd" },
 }
 
-export function buildNotificationLink(referenceType, referenceId) {
+export function buildNotificationLink(referenceType, referenceId, type) {
+  if (type === "EVENT_INVITE") return "/invites"
+
   switch (referenceType) {
     case "POST":
       return `/posts/${referenceId}`
