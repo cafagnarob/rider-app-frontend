@@ -1,14 +1,19 @@
 import { Outlet } from "react-router-dom"
-import Navbar from "./Navbar"
+import { COLORS } from "../../styles/theme"
+import BottomNav from "./BottomNav"
 
 function Layout() {
   return (
-    <>
-      <Navbar />
-      <main className="container mt-4">
-        <Outlet />
-      </main>
-    </>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: COLORS.bg,
+        paddingBottom: "104px",
+      }}
+    >
+      <Outlet />
+      <BottomNav />
+    </div>
   )
 }
 export default Layout
