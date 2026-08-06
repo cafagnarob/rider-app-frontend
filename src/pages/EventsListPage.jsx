@@ -1,5 +1,5 @@
 import { useRef, useState } from "react"
-import { Card, Spinner, Button, Badge, Form, Nav } from "react-bootstrap"
+import { Spinner } from "react-bootstrap"
 import { Link, useNavigate } from "react-router-dom"
 import { FaLock } from "react-icons/fa"
 import {
@@ -8,6 +8,13 @@ import {
   useGetParticipatingEventsQuery,
 } from "../features/events/eventsApi"
 import { VISIBILITY_LABELS } from "../utils/constants"
+import { COLORS, FONTS, styles } from "../styles/theme"
+
+const TABS = [
+  { key: "search", label: "SCOPRI" },
+  { key: "organized", label: "ORGANIZZATI" },
+  { key: "participating", label: "PARTECIPO" },
+]
 
 function EventsListPage() {
   const [tab, setTab] = useState("search")
@@ -55,157 +62,327 @@ function EventsListPage() {
   }
 
   return (
-    <div style={{ maxWidth: "640px", margin: "0 auto" }}>
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h2 className="mb-0">Eventi</h2>
-        <Link to="/events/new">
-          <Button
-            className="rounded-pill px-3 fw-bold border-0"
-            style={{ backgroundColor: "#FFBE5D", color: "#000" }}
-          >
-            + Crea evento
-          </Button>
+    <div style={{ ...styles.pageBg, paddingTop: 20, paddingBottom: 20 }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "0 20px",
+        }}
+      >
+        <div style={{ ...styles.pageTitle, fontSize: 28 }}>EVENTI</div>
+        <Link
+          to="/events/new"
+          style={{
+            height: 40,
+            padding: "0 15px",
+            borderRadius: 12,
+            background: COLORS.accent,
+            border: "none",
+            color: COLORS.onAccent,
+            fontFamily: FONTS.heading,
+            fontWeight: 700,
+            fontSize: 15,
+            letterSpacing: ".04em",
+            display: "inline-flex",
+            alignItems: "center",
+            textDecoration: "none",
+          }}
+        >
+          + CREA
         </Link>
       </div>
 
-      <Nav variant="tabs" activeKey={tab} className="mb-3">
-        <Nav.Item>
-          <Nav.Link eventKey="search" onClick={() => handleTab("search")}>
-            Scopri
-          </Nav.Link>
-        </Nav.Item>
-        <Nav.Item>
-          <Nav.Link eventKey="organized" onClick={() => handleTab("organized")}>
-            Organizzati
-          </Nav.Link>
-        </Nav.Item>
-        <Nav.Item>
-          <Nav.Link
-            eventKey="participating"
-            onClick={() => handleTab("participating")}
-          >
-            A cui partecipo
-          </Nav.Link>
-        </Nav.Item>
-      </Nav>
+      <div style={{ display: "flex", gap: 8, padding: "18px 20px 0" }}>
+        {TABS.map((t) => {
+          const active = tab === t.key
+          return (
+            <button
+              key={t.key}
+              type="button"
+              onClick={() => handleTab(t.key)}
+              style={{
+                height: 36,
+                padding: "0 14px",
+                borderRadius: 11,
+                background: active ? COLORS.accent : COLORS.card,
+                border: `1px solid ${COLORS.border}`,
+                color: active ? COLORS.onAccent : COLORS.textSecondary,
+                fontFamily: FONTS.mono,
+                fontSize: 10.5,
+                letterSpacing: ".06em",
+                cursor: "pointer",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {t.label}
+            </button>
+          )
+        })}
+      </div>
 
       {tab === "search" && (
-        <Form.Control
-          type="search"
-          placeholder="Cerca per titolo..."
-          className="bg-transparent text-light mb-3"
-          value={titleInput}
-          onChange={handleSearchChange}
-        />
+        <div style={{ padding: "16px 20px 0" }}>
+          <input
+            type="search"
+            placeholder="Cerca per titolo..."
+            value={titleInput}
+            onChange={handleSearchChange}
+            style={{ ...styles.input, height: 46 }}
+          />
+        </div>
       )}
 
       {isLoading && (
-        <div className="text-center py-5">
-          <Spinner animation="border" variant="light" />
+        <div style={{ textAlign: "center", padding: "60px 0" }}>
+          <Spinner animation="border" style={{ color: COLORS.accent }} />
         </div>
       )}
 
       {isError && (
-        <div className="alert alert-danger">
+        <div style={{ ...styles.emptyState, margin: "20px" }}>
           Impossibile caricare gli eventi.
         </div>
       )}
 
       {data && data.content.length === 0 && (
-        <p className="text-secondary text-center py-5">
+        <p
+          style={{
+            fontFamily: FONTS.body,
+            fontSize: 13,
+            color: COLORS.textFaint,
+            textAlign: "center",
+            padding: "60px 20px",
+          }}
+        >
           Nessun evento trovato.
         </p>
       )}
 
       {data && data.content.length > 0 && (
         <div
-          className="d-flex flex-column gap-3"
-          style={{ opacity: isFetching ? 0.6 : 1 }}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 12,
+            padding: "18px 20px 0",
+            opacity: isFetching ? 0.6 : 1,
+          }}
         >
-          {data.content.map((event) => (
-            <Card
-              key={event.id}
-              className="bg-dark text-light border-secondary"
-              style={{ cursor: "pointer" }}
-              onClick={() => navigate(`/events/${event.id}`)}
-            >
-              <Card.Body>
-                <div className="d-flex justify-content-between align-items-start mb-2">
-                  <Card.Title className="fs-6 mb-0 d-flex align-items-center gap-2">
+          {data.content.map((event) => {
+            const start = new Date(event.startDateTime)
+            return (
+              <div
+                key={event.id}
+                onClick={() => navigate(`/events/${event.id}`)}
+                style={{
+                  ...styles.card,
+                  padding: 16,
+                  cursor: "pointer",
+                  display: "flex",
+                  gap: 13,
+                }}
+              >
+                <div
+                  style={{
+                    width: 46,
+                    height: 46,
+                    flexShrink: 0,
+                    borderRadius: 12,
+                    background: COLORS.surfaceRaised,
+                    border: `1px solid ${COLORS.borderSoft}`,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontFamily: FONTS.mono,
+                    color: COLORS.accent,
+                  }}
+                >
+                  <span style={{ fontSize: 15, lineHeight: 1 }}>
+                    {start.getDate().toString().padStart(2, "0")}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 9,
+                      color: COLORS.textMuted,
+                      marginTop: 2,
+                    }}
+                  >
+                    {start
+                      .toLocaleDateString("it-IT", { month: "short" })
+                      .toUpperCase()}
+                  </span>
+                </div>
+
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 7,
+                      marginBottom: 4,
+                    }}
+                  >
                     {event.locked && (
                       <FaLock
-                        className="text-secondary"
-                        style={{ fontSize: "0.8rem" }}
+                        style={{
+                          fontSize: 11,
+                          color: COLORS.textMuted,
+                          flexShrink: 0,
+                        }}
                       />
                     )}
-                    {event.title}
-                  </Card.Title>
-                  {event.organizer && (
-                    <Badge bg="warning" text="dark">
-                      Tuo
-                    </Badge>
-                  )}
-                </div>
-
-                <p className="text-secondary small mb-2">
-                  {event.organizerUsername} ·{" "}
-                  {new Date(event.startDateTime).toLocaleDateString("it-IT", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
-
-                <div className="d-flex gap-2 flex-wrap">
-                  <Badge bg="secondary">
-                    {VISIBILITY_LABELS[event.visibility]}
-                  </Badge>
-                  <Badge bg="secondary">
-                    {event.currentParticipants}/{event.maxParticipants}
-                  </Badge>
-                  {event.myParticipationStatus && (
-                    <Badge
-                      bg={
-                        event.myParticipationStatus === "ACCEPTED"
-                          ? "success"
-                          : "info"
-                      }
+                    <span
+                      style={{
+                        fontFamily: FONTS.heading,
+                        fontWeight: 600,
+                        fontSize: 18,
+                        lineHeight: 1.1,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
                     >
-                      {event.myParticipationStatus === "ACCEPTED"
-                        ? "Confermato"
-                        : "In attesa"}
-                    </Badge>
-                  )}
+                      {event.title}
+                    </span>
+                    {event.organizer && (
+                      <span
+                        style={{
+                          padding: "2px 8px",
+                          borderRadius: 7,
+                          background: COLORS.accentSoftBg,
+                          border: `1px solid ${COLORS.accentSoftBorder}`,
+                          fontFamily: FONTS.mono,
+                          fontSize: 9,
+                          color: COLORS.accent,
+                          flexShrink: 0,
+                        }}
+                      >
+                        TUO
+                      </span>
+                    )}
+                  </div>
+
+                  <div
+                    style={{
+                      fontFamily: FONTS.mono,
+                      fontSize: 10,
+                      color: COLORS.textMuted,
+                      marginBottom: 8,
+                    }}
+                  >
+                    {event.organizerUsername} ·{" "}
+                    {start.toLocaleTimeString("it-IT", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </div>
+
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    <span
+                      style={{
+                        padding: "3px 9px",
+                        borderRadius: 8,
+                        background: COLORS.cardAlt,
+                        border: `1px solid ${COLORS.borderSoft}`,
+                        fontFamily: FONTS.mono,
+                        fontSize: 9.5,
+                        color: COLORS.textSecondary,
+                      }}
+                    >
+                      {VISIBILITY_LABELS[event.visibility]}
+                    </span>
+                    <span
+                      style={{
+                        padding: "3px 9px",
+                        borderRadius: 8,
+                        background: COLORS.cardAlt,
+                        border: `1px solid ${COLORS.borderSoft}`,
+                        fontFamily: FONTS.mono,
+                        fontSize: 9.5,
+                        color: COLORS.textSecondary,
+                      }}
+                    >
+                      {event.currentParticipants}/{event.maxParticipants}
+                    </span>
+                    {event.myParticipationStatus && (
+                      <span
+                        style={{
+                          padding: "3px 9px",
+                          borderRadius: 8,
+                          fontFamily: FONTS.mono,
+                          fontSize: 9.5,
+                          background:
+                            event.myParticipationStatus === "ACCEPTED"
+                              ? "#173323"
+                              : COLORS.accentSoftBg,
+                          border: `1px solid ${event.myParticipationStatus === "ACCEPTED" ? "rgba(52,199,89,.35)" : COLORS.accentSoftBorder}`,
+                          color:
+                            event.myParticipationStatus === "ACCEPTED"
+                              ? "#4ADE80"
+                              : COLORS.accent,
+                        }}
+                      >
+                        {event.myParticipationStatus === "ACCEPTED"
+                          ? "CONFERMATO"
+                          : "IN ATTESA"}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </Card.Body>
-            </Card>
-          ))}
+              </div>
+            )
+          })}
         </div>
       )}
 
       {data && data.totalPages > 1 && (
-        <div className="d-flex justify-content-center align-items-center gap-3 mt-4">
-          <Button
-            variant="outline-light"
-            size="sm"
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: 16,
+            padding: "24px 20px",
+          }}
+        >
+          <button
+            type="button"
             disabled={data.first || isFetching}
             onClick={() => setPage((p) => p - 1)}
+            style={{
+              ...styles.secondaryButton,
+              height: 40,
+              padding: "0 16px",
+              opacity: data.first ? 0.4 : 1,
+            }}
           >
-            Precedente
-          </Button>
-          <span className="text-secondary">
+            PRECEDENTE
+          </button>
+          <span
+            style={{
+              fontFamily: FONTS.mono,
+              fontSize: 11,
+              color: COLORS.textMuted,
+            }}
+          >
             {data.number + 1} / {data.totalPages}
           </span>
-          <Button
-            variant="outline-light"
-            size="sm"
+          <button
+            type="button"
             disabled={data.last || isFetching}
             onClick={() => setPage((p) => p + 1)}
+            style={{
+              ...styles.secondaryButton,
+              height: 40,
+              padding: "0 16px",
+              opacity: data.last ? 0.4 : 1,
+            }}
           >
-            Successiva
-          </Button>
+            SUCCESSIVA
+          </button>
         </div>
       )}
     </div>
