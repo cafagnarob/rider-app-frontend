@@ -33,6 +33,9 @@ export const apiSlice = createApi({
     "Follow",
     "Ride",
     "Route",
+    "Participation",
+    "Invite",
+    "MyInvites",
   ],
   endpoints: () => ({}),
 })
