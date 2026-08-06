@@ -33,3 +33,16 @@ export const RIDE_TYPE_LABELS = {
   EVENT: "Evento",
   TRAINING: "Allenamento",
 }
+
+export const VISIBILITY_LABELS = {
+  PUBLIC: "Pubblico",
+  PRIVATE_CODE: "Con codice",
+  INVITE_ONLY: "Solo su invito",
+}
+
+export const PARTICIPATION_LABELS = {
+  PENDING: "In attesa",
+  ACCEPTED: "Confermato",
+  REJECTED: "Rifiutato",
+  CANCELLED: "Annullato",
+}
