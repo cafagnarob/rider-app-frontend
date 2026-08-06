@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Card, Spinner, Button, Form, Badge, Carousel } from "react-bootstrap"
+import { Spinner } from "react-bootstrap"
 import { FaHeart, FaRegHeart, FaTrash, FaArrowLeft } from "react-icons/fa"
 import { useParams, useNavigate, Link } from "react-router-dom"
 import {
@@ -12,6 +12,8 @@ import {
 } from "../features/social/postsApi"
 import { useGetCurrentUserQuery } from "../features/users/usersApi"
 import { formatRelativeTime } from "../utils/dateFormat"
+import { COLORS, FONTS, styles } from "../styles/theme"
+import PostAutoCarousel from "../features/social/components/PostAutoCarousel"
 
 function PostDetailPage() {
   const { postId } = useParams()
@@ -30,6 +32,11 @@ function PostDetailPage() {
   const [errorMsg, setErrorMsg] = useState("")
 
   const isAuthor = me?.username === post?.authorUsername
+
+  const handleLike = () => {
+    if (!post) return
+    toggleLike({ postId, liked: post.likedByCurrentUser })
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -61,175 +68,331 @@ function PostDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="text-center py-5">
-        <Spinner animation="border" variant="light" />
+      <div style={{ textAlign: "center", padding: "60px 0" }}>
+        <Spinner animation="border" style={{ color: COLORS.accent }} />
       </div>
     )
   }
 
   if (isError) {
-    return <div className="alert alert-danger">Post non trovato.</div>
+    return (
+      <div style={{ ...styles.emptyState, margin: 20 }}>Post non trovato.</div>
+    )
   }
 
-  return (
-    <div style={{ maxWidth: "540px", margin: "0 auto" }}>
-      <Button
-        variant="outline-light"
-        size="sm"
-        className="mb-3"
-        onClick={() => navigate(-1)}
-      >
-        <FaArrowLeft /> Indietro
-      </Button>
+  if (!post) {
+    return null
+  }
 
-      <Card className="bg-dark text-light border-secondary mb-4">
-        <Card.Header className="bg-dark border-secondary d-flex align-items-center gap-2">
-          <img
-            src={post.authorProfilePicture}
-            alt={post.authorUsername}
-            className="rounded-circle"
-            style={{ width: "36px", height: "36px", objectFit: "cover" }}
-          />
-          <div className="flex-grow-1">
-            <span className="fw-semibold">{post.authorUsername}</span>
-            <div className="text-secondary" style={{ fontSize: "0.75rem" }}>
+  const bikeLabel = post.vehicle
+    ? post.vehicle.nickname ||
+      `${post.vehicle.brandName} ${post.vehicle.modelName}`
+    : null
+
+  return (
+    <div style={{ ...styles.pageBg, paddingTop: 20, paddingBottom: 20 }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          padding: "0 20px 16px",
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          style={styles.iconButton}
+        >
+          <FaArrowLeft />
+        </button>
+        {isAuthor && (
+          <button
+            type="button"
+            onClick={handleDeletePost}
+            disabled={isDeletingPost}
+            style={{
+              ...styles.iconButton,
+              marginLeft: "auto",
+              color: COLORS.danger,
+            }}
+          >
+            <FaTrash size={14} />
+          </button>
+        )}
+      </div>
+
+      <div style={{ padding: "0 20px" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            marginBottom: 14,
+          }}
+        >
+          <Link to={`/profile/${post.authorUsername}`}>
+            <img
+              src={post.authorProfilePicture}
+              alt={post.authorUsername}
+              style={{
+                width: 42,
+                height: 42,
+                borderRadius: "50%",
+                objectFit: "cover",
+                background: COLORS.surfaceRaised,
+              }}
+            />
+          </Link>
+          <div>
+            <Link
+              to={`/profile/${post.authorUsername}`}
+              style={{
+                fontFamily: FONTS.heading,
+                fontWeight: 600,
+                fontSize: 19,
+                color: COLORS.text,
+                textDecoration: "none",
+              }}
+            >
+              {post.authorUsername}
+            </Link>
+            <div
+              style={{
+                fontFamily: FONTS.mono,
+                fontSize: 10,
+                color: COLORS.textMuted,
+                marginTop: 2,
+              }}
+            >
+              {bikeLabel ? `${bikeLabel} · ` : ""}
               {formatRelativeTime(post.createdAt)}
             </div>
           </div>
-          {isAuthor && (
-            <Button
-              variant="outline-danger"
-              size="sm"
-              disabled={isDeletingPost}
-              onClick={handleDeletePost}
-            >
-              <FaTrash />
-            </Button>
-          )}
-        </Card.Header>
+        </div>
 
-        {post.media?.length === 1 && (
-          <div className="ratio ratio-1x1">
-            <img
-              src={post.media[0].mediaUrl}
-              alt=""
-              style={{ objectFit: "cover" }}
-            />
+        {post.event && (
+          <Link
+            to={`/events/${post.event.id}`}
+            style={{
+              display: "inline-block",
+              marginBottom: 14,
+              padding: "7px 12px",
+              borderRadius: 11,
+              background: COLORS.accentSoftBg,
+              border: `1px solid ${COLORS.accentSoftBorder}`,
+              fontFamily: FONTS.mono,
+              fontSize: 11,
+              color: COLORS.accent,
+              textDecoration: "none",
+            }}
+          >
+            {post.event.title}
+          </Link>
+        )}
+
+        {post.ride && (
+          <div
+            style={{
+              display: "inline-block",
+              marginBottom: 14,
+              marginLeft: post.event ? 8 : 0,
+              padding: "7px 12px",
+              borderRadius: 11,
+              background: COLORS.card,
+              border: `1px solid ${COLORS.border}`,
+              fontFamily: FONTS.mono,
+              fontSize: 11,
+              color: COLORS.textSecondary,
+            }}
+          >
+            {post.ride.distanceKm?.toFixed(1)} KM
           </div>
         )}
 
-        {post.media?.length > 1 && (
-          <Carousel interval={null} data-bs-theme="dark">
-            {post.media.map((m) => (
-              <Carousel.Item key={m.id}>
-                <div className="ratio ratio-1x1">
-                  <img src={m.mediaUrl} alt="" style={{ objectFit: "cover" }} />
-                </div>
-              </Carousel.Item>
-            ))}
-          </Carousel>
+        {post.media?.length > 0 && (
+          <div style={{ marginBottom: 14 }}>
+            <PostAutoCarousel media={post.media} onDoubleClick={handleLike} />
+          </div>
         )}
 
-        <Card.Body>
-          <Button
-            variant="link"
-            className="p-0 text-decoration-none d-flex align-items-center gap-1 mb-2"
-            style={{ color: post.likedByCurrentUser ? "#dc3545" : "#adb5bd" }}
-            onClick={() =>
-              toggleLike({ postId, liked: post.likedByCurrentUser })
-            }
+        {post.text && (
+          <p
+            style={{
+              fontSize: 15,
+              lineHeight: 1.5,
+              color: "rgba(255,255,255,.88)",
+              marginBottom: 16,
+            }}
           >
-            {post.likedByCurrentUser ? <FaHeart /> : <FaRegHeart />}
-            <span className="small">{post.likeCount}</span>
-          </Button>
+            {post.text}
+          </p>
+        )}
 
-          {post.text && <p className="mb-2">{post.text}</p>}
-
-          {post.event && (
-            <Link
-              to={`/events/${post.event.id}`}
-              className="text-decoration-none"
-            >
-              <Badge bg="warning" text="dark">
-                Evento: {post.event.title}
-              </Badge>
-            </Link>
+        <button
+          type="button"
+          onClick={handleLike}
+          style={{
+            height: 42,
+            padding: "0 15px",
+            borderRadius: 13,
+            marginBottom: 24,
+            background: post.likedByCurrentUser
+              ? COLORS.accentSoftBg
+              : COLORS.card,
+            border: `1px solid ${COLORS.border}`,
+            color: post.likedByCurrentUser
+              ? COLORS.accent
+              : COLORS.textSecondary,
+            fontFamily: FONTS.mono,
+            fontSize: 12,
+            display: "flex",
+            alignItems: "center",
+            gap: 7,
+            cursor: "pointer",
+          }}
+        >
+          {post.likedByCurrentUser ? (
+            <FaHeart size={14} />
+          ) : (
+            <FaRegHeart size={14} />
           )}
-        </Card.Body>
-      </Card>
+          MI PIACE · {post.likeCount}
+        </button>
+      </div>
 
-      <h5 className="mb-3">Commenti ({post.commentCount})</h5>
+      <div style={{ padding: "0 20px" }}>
+        <div style={styles.sectionTitle}>COMMENTI ({post.commentCount})</div>
 
-      <Form onSubmit={handleSubmit} className="mb-4">
-        <div className="d-flex gap-2">
-          <Form.Control
-            as="textarea"
-            rows={2}
+        <form
+          onSubmit={handleSubmit}
+          style={{ display: "flex", gap: 8, margin: "16px 0" }}
+        >
+          <input
+            type="text"
             maxLength={500}
-            className="bg-transparent text-light"
             placeholder="Scrivi un commento..."
             value={text}
             onChange={(e) => setText(e.target.value)}
             required
+            style={{ ...styles.input, height: 44, flex: 1 }}
           />
-          <Button
+          <button
             type="submit"
-            variant="warning"
             disabled={isSending || !text.trim()}
-            className="align-self-end"
+            style={{
+              height: 44,
+              padding: "0 16px",
+              borderRadius: 12,
+              background: COLORS.accent,
+              border: "none",
+              color: COLORS.onAccent,
+              fontFamily: FONTS.heading,
+              fontWeight: 700,
+              fontSize: 14,
+              cursor: "pointer",
+              opacity: isSending || !text.trim() ? 0.5 : 1,
+            }}
           >
-            Invia
-          </Button>
-        </div>
-        <Form.Text className="text-secondary">{text.length}/500</Form.Text>
-      </Form>
+            INVIA
+          </button>
+        </form>
 
-      {errorMsg && <div className="alert alert-danger py-2">{errorMsg}</div>}
-
-      <div className="d-flex flex-column gap-3">
-        {comments?.content.length === 0 && (
-          <p className="text-secondary small">
-            Nessun commento. Scrivi il primo!
-          </p>
+        {errorMsg && (
+          <div
+            style={{
+              fontFamily: FONTS.body,
+              fontSize: 13,
+              color: COLORS.danger,
+              marginBottom: 12,
+            }}
+          >
+            {errorMsg}
+          </div>
         )}
 
-        {comments?.content.map((comment) => {
-          const canDelete = me?.username === comment.authorUsername || isAuthor
-          return (
-            <div key={comment.id} className="d-flex gap-2">
-              <img
-                src={comment.authorProfilePicture}
-                alt={comment.authorUsername}
-                className="rounded-circle"
-                style={{ width: "32px", height: "32px", objectFit: "cover" }}
-              />
-              <div className="flex-grow-1">
-                <div className="d-flex align-items-baseline gap-2">
-                  <span className="fw-semibold small">
-                    {comment.authorUsername}
-                  </span>
-                  <span
-                    className="text-secondary"
-                    style={{ fontSize: "0.7rem" }}
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {comments?.content.length === 0 && (
+            <p
+              style={{
+                fontFamily: FONTS.body,
+                fontSize: 13,
+                color: COLORS.textFaint,
+              }}
+            >
+              Nessun commento. Scrivi il primo!
+            </p>
+          )}
+
+          {comments?.content.map((comment) => {
+            const canDelete =
+              me?.username === comment.authorUsername || isAuthor
+            return (
+              <div key={comment.id} style={{ display: "flex", gap: 10 }}>
+                <img
+                  src={comment.authorProfilePicture}
+                  alt={comment.authorUsername}
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    background: COLORS.surfaceRaised,
+                    flexShrink: 0,
+                  }}
+                />
+                <div style={{ flex: 1 }}>
+                  <div
+                    style={{ display: "flex", alignItems: "baseline", gap: 8 }}
                   >
-                    {formatRelativeTime(comment.createdAt)}
-                  </span>
+                    <span
+                      style={{
+                        fontFamily: FONTS.heading,
+                        fontWeight: 600,
+                        fontSize: 15,
+                      }}
+                    >
+                      {comment.authorUsername}
+                    </span>
+                    <span
+                      style={{
+                        fontFamily: FONTS.mono,
+                        fontSize: 9,
+                        color: COLORS.textFaint,
+                      }}
+                    >
+                      {formatRelativeTime(comment.createdAt)}
+                    </span>
+                  </div>
+                  <p
+                    style={{
+                      fontSize: 13.5,
+                      color: "rgba(255,255,255,.82)",
+                      margin: "3px 0 0",
+                    }}
+                  >
+                    {comment.text}
+                  </p>
                 </div>
-                <p className="mb-0 small">{comment.text}</p>
+                {canDelete && (
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteComment(comment.id)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: COLORS.textFaint,
+                      cursor: "pointer",
+                      padding: 4,
+                    }}
+                  >
+                    <FaTrash size={11} />
+                  </button>
+                )}
               </div>
-              {canDelete && (
-                <Button
-                  variant="link"
-                  size="sm"
-                  className="p-0 text-secondary"
-                  onClick={() => handleDeleteComment(comment.id)}
-                >
-                  <FaTrash />
-                </Button>
-              )}
-            </div>
-          )
-        })}
+            )
+          })}
+        </div>
       </div>
     </div>
   )
