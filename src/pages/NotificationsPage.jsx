@@ -60,6 +60,7 @@ function NotificationsPage() {
             const clickable = !!buildNotificationLink(
               n.referenceType,
               n.referenceId,
+              n.type,
             )
             return (
               <div
