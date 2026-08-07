@@ -4,11 +4,13 @@ import {
   usePreviewRouteMutation,
 } from "../features/routesMap/routesApi"
 import { useLocation, useNavigate } from "react-router-dom"
-import { Map, Marker, NavigationControl } from "maplibre-gl"
+import { Map, Marker, FullscreenControl } from "maplibre-gl"
 import { decodePolyline } from "../utils/polyline"
 import { searchPlaces } from "../utils/geocoding"
-import { Badge, Button, Form, ListGroup, Spinner } from "react-bootstrap"
+import { Spinner } from "react-bootstrap"
 import { FaArrowDown, FaArrowUp, FaSearch, FaTrash } from "react-icons/fa"
+import { COLORS, FONTS, styles } from "../styles/theme"
+import { MAP_STYLE_URL } from "../utils/mapStyle"
 
 const START_CENTER = [16.2977, 41.3203]
 
@@ -45,6 +47,7 @@ function RouteEditorPage() {
   const navigate = useNavigate()
 
   const waypointsRef = useRef([])
+
   useEffect(() => {
     waypointsRef.current = waypoints
   }, [waypoints])
@@ -84,13 +87,13 @@ function RouteEditorPage() {
 
     const map = new Map({
       container: containerRef.current,
-      style: `https://api.maptiler.com/maps/outdoor-v2/style.json?key=${import.meta.env.VITE_MAPTILER_KEY}`,
+      style: MAP_STYLE_URL,
       center: START_CENTER,
       zoom: 11,
     })
     mapRef.current = map
 
-    map.addControl(new NavigationControl(), "top-right")
+    map.addControl(new FullscreenControl(), "top-right")
     map.on("error", (e) => console.error("MapLibre error:", e.error))
 
     map.on("click", (e) => {
@@ -106,6 +109,7 @@ function RouteEditorPage() {
     })
 
     const initLayers = () => {
+      map.resize()
       const empty = { type: "FeatureCollection", features: [] }
 
       map.addSource("draft", { type: "geojson", data: empty })
@@ -242,15 +246,21 @@ function RouteEditorPage() {
     markersRef.current = []
 
     waypoints.forEach((wp, index) => {
+      const isStart = index === 0
+      const isEnd = index === waypoints.length - 1 && waypoints.length > 1
+
       const el = document.createElement("div")
-      el.textContent = String(index + 1)
-      el.style.cssText = `
-        width: 28px; height: 28px; border-radius: 50%;
-        background: ${index === 0 ? "#198754" : index === waypoints.length - 1 ? "#dc3545" : "#FFBE5D"};
-        color: #000; font-weight: bold; display: flex;
-        align-items: center; justify-content: center;
-        cursor: grab; border: 2px solid #fff;
+      el.style.cssText = "width: 28px; height: 28px; cursor: grab;"
+      const dot = document.createElement("div")
+      dot.style.cssText = `
+        width: 100%; height: 100%; border-radius: 50%; position: relative;
+        background: ${isStart ? "#4ADE80" : isEnd ? COLORS.danger : COLORS.accent};
+        color: #08080A; font-family: ${FONTS.mono}; font-weight: 700; font-size: 11px;
+        display: flex; align-items: center; justify-content: center;
+        border: 2px solid ${COLORS.bg};
       `
+      dot.textContent = String(index + 1)
+      el.appendChild(dot)
 
       const marker = new Marker({ element: el, draggable: true })
         .setLngLat([wp.longitude, wp.latitude])
@@ -346,226 +356,394 @@ function RouteEditorPage() {
   }
 
   return (
-    <div className="row g-3">
-      <div className="col-12 col-lg-7">
-        <div
-          ref={containerRef}
+    <div style={{ ...styles.pageBg, paddingBottom: 40 }}>
+      <div style={{ padding: "20px 20px 0" }}>
+        <div style={{ ...styles.pageTitle, fontSize: 26, marginBottom: 4 }}>
+          NUOVO PERCORSO
+        </div>
+        <p
           style={{
-            height: "520px",
-            borderRadius: "0.5rem",
-            overflow: "hidden",
+            fontFamily: FONTS.mono,
+            fontSize: 10,
+            color: COLORS.textMuted,
+            marginBottom: 14,
           }}
-        />
-        <small className="text-secondary d-block mt-2">
-          Clicca sulla mappa per aggiungere un punto, trascina i marcatori per
-          spostarli.
-        </small>
+        >
+          TOCCA LA MAPPA PER AGGIUNGERE UN PUNTO · TRASCINA PER SPOSTARE
+        </p>
       </div>
 
-      <div className="col-12 col-lg-5">
-        <Form onSubmit={handleSave}>
-          <Form.Group className="mb-3">
-            <Form.Label>Nome del percorso</Form.Label>
-            <Form.Control
+      <div
+        style={{
+          position: "relative",
+          height: 360,
+          margin: "0 20px 18px",
+          borderRadius: 18,
+          overflow: "hidden",
+          border: `1px solid ${COLORS.border}`,
+        }}
+      >
+        <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
+      </div>
+
+      <form
+        onSubmit={handleSave}
+        style={{
+          padding: "0 20px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 16,
+        }}
+      >
+        <div>
+          <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+            NOME DEL PERCORSO
+          </div>
+          <input
+            type="text"
+            placeholder="Giro dei trulli"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            style={styles.input}
+          />
+        </div>
+
+        <div style={{ position: "relative" }}>
+          <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+            CERCA UN LUOGO
+          </div>
+          <div style={{ position: "relative" }}>
+            <input
               type="text"
-              className="bg-transparent text-light"
-              placeholder="Giro dei trulli"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
+              placeholder="Via, città, monumento..."
+              value={searchText}
+              onChange={handleSearchChange}
+              style={{ ...styles.input, paddingRight: 44 }}
             />
-          </Form.Group>
+            <FaSearch
+              style={{
+                position: "absolute",
+                right: 15,
+                top: "50%",
+                transform: "translateY(-50%)",
+                color: COLORS.textMuted,
+              }}
+            />
+          </div>
 
-          <Form.Group className="mb-3 position-relative">
-            <Form.Label>Cerca un luogo</Form.Label>
-            <div className="position-relative">
-              <Form.Control
-                type="text"
-                className="bg-transparent text-light"
-                placeholder="Via, città, monumento..."
-                value={searchText}
-                onChange={handleSearchChange}
-              />
-              <FaSearch
-                className="position-absolute text-secondary"
-                style={{ right: "12px", top: "12px" }}
-              />
+          {results.length > 0 && (
+            <div
+              style={{
+                position: "absolute",
+                top: "100%",
+                left: 0,
+                right: 0,
+                marginTop: 6,
+                zIndex: 10,
+                ...styles.card,
+                overflow: "hidden",
+              }}
+            >
+              {results.map((r) => (
+                <button
+                  key={r.id}
+                  type="button"
+                  onClick={() => handlePickPlace(r)}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    textAlign: "left",
+                    padding: "11px 13px",
+                    background: "none",
+                    border: "none",
+                    borderBottom: `1px solid ${COLORS.borderSoft}`,
+                    color: COLORS.text,
+                    fontFamily: FONTS.body,
+                    fontSize: 13,
+                    cursor: "pointer",
+                  }}
+                >
+                  {r.name}
+                </button>
+              ))}
             </div>
+          )}
+        </div>
 
-            {results.length > 0 && (
-              <ListGroup
-                className="position-absolute w-100"
-                style={{ zIndex: 10 }}
-              >
-                {results.map((r) => (
-                  <ListGroup.Item
-                    key={r.id}
-                    action
-                    className="bg-dark text-light border-secondary small"
-                    onClick={() => handlePickPlace(r)}
-                  >
-                    {r.name}
-                  </ListGroup.Item>
-                ))}
-              </ListGroup>
-            )}
-          </Form.Group>
-
-          <div className="mb-3">
-            <Form.Label>Punti ({waypoints.length})</Form.Label>
-            {waypoints.length === 0 ? (
-              <p className="text-secondary small">
-                Nessun punto. Clicca sulla mappa per iniziare.
-              </p>
-            ) : (
-              <ListGroup>
-                {waypoints.map((wp, index) => (
-                  <ListGroup.Item
-                    key={wp.id}
-                    className="bg-dark text-light border-secondary d-flex align-items-center gap-2 py-2"
-                  >
-                    <Badge bg="secondary">{index + 1}</Badge>
-                    <Form.Control
-                      size="sm"
-                      className="bg-transparent text-light border-0"
-                      placeholder={
+        <div>
+          <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+            PUNTI ({waypoints.length})
+          </div>
+          {waypoints.length === 0 ? (
+            <p
+              style={{
+                fontFamily: FONTS.body,
+                fontSize: 13,
+                color: COLORS.textFaint,
+              }}
+            >
+              Nessun punto. Tocca la mappa per iniziare.
+            </p>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {waypoints.map((wp, index) => (
+                <div
+                  key={wp.id}
+                  style={{
+                    ...styles.card,
+                    padding: "9px 11px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 9,
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 22,
+                      height: 22,
+                      borderRadius: "50%",
+                      flexShrink: 0,
+                      background:
                         index === 0
-                          ? "Es. Ritrovo"
+                          ? "#173323"
                           : index === waypoints.length - 1
-                            ? "Es. Arrivo"
-                            : "Es. Sosta caffè"
-                      }
-                      value={wp.label}
-                      onChange={(e) => setLabel(wp.id, e.target.value)}
-                    />
-                    <Button
-                      variant="link"
-                      size="sm"
-                      className="p-0 text-secondary"
-                      disabled={index === 0}
-                      onClick={() => move(index, -1)}
-                    >
-                      <FaArrowUp />
-                    </Button>
-                    <Button
-                      variant="link"
-                      size="sm"
-                      className="p-0 text-secondary"
-                      disabled={index === waypoints.length - 1}
-                      onClick={() => move(index, 1)}
-                    >
-                      <FaArrowDown />
-                    </Button>
-                    <Button
-                      variant="link"
-                      size="sm"
-                      className="p-0 text-danger"
-                      onClick={() => remove(wp.id)}
-                    >
-                      <FaTrash />
-                    </Button>
-                  </ListGroup.Item>
-                ))}
-              </ListGroup>
-            )}
-          </div>
-
-          <div className="mb-3">
-            <Form.Check
-              type="switch"
-              id="avoid-highways"
-              label="Evita autostrade"
-              checked={options.avoidHighways}
-              onChange={(e) =>
-                setOptions({ ...options, avoidHighways: e.target.checked })
-              }
-            />
-            <Form.Check
-              type="switch"
-              id="avoid-tolls"
-              label="Evita pedaggi"
-              checked={options.avoidTolls}
-              onChange={(e) =>
-                setOptions({ ...options, avoidTolls: e.target.checked })
-              }
-            />
-            <Form.Check
-              type="switch"
-              id="avoid-ferries"
-              label="Evita traghetti"
-              checked={options.avoidFerries}
-              onChange={(e) =>
-                setOptions({ ...options, avoidFerries: e.target.checked })
-              }
-            />
-          </div>
-
-          {errorMsg && (
-            <div className="alert alert-danger py-2">{errorMsg}</div>
-          )}
-
-          {routeInfo && waypoints.length >= 2 && (
-            <div className="d-flex gap-3 mb-3 text-secondary small">
-              <span>
-                <strong className="text-light">
-                  {routeInfo.distanceKm.toFixed(1)}
-                </strong>{" "}
-                km
-              </span>
-              <span>
-                <strong className="text-light">
-                  {Math.round(routeInfo.durationMin)}
-                </strong>{" "}
-                min
-              </span>
+                            ? COLORS.dangerBg
+                            : COLORS.cardAlt,
+                      color:
+                        index === 0
+                          ? "#4ADE80"
+                          : index === waypoints.length - 1
+                            ? COLORS.danger
+                            : COLORS.textSecondary,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontFamily: FONTS.mono,
+                      fontSize: 10,
+                    }}
+                  >
+                    {index + 1}
+                  </span>
+                  <input
+                    type="text"
+                    placeholder={
+                      index === 0
+                        ? "Es. Ritrovo"
+                        : index === waypoints.length - 1
+                          ? "Es. Arrivo"
+                          : "Es. Sosta caffè"
+                    }
+                    value={wp.label}
+                    onChange={(e) => setLabel(wp.id, e.target.value)}
+                    style={{
+                      flex: 1,
+                      minWidth: 0,
+                      background: "none",
+                      border: "none",
+                      color: COLORS.text,
+                      fontFamily: FONTS.body,
+                      fontSize: 13,
+                      outline: "none",
+                    }}
+                  />
+                  <button
+                    type="button"
+                    disabled={index === 0}
+                    onClick={() => move(index, -1)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: COLORS.textMuted,
+                      cursor: "pointer",
+                      padding: 4,
+                      opacity: index === 0 ? 0.3 : 1,
+                    }}
+                  >
+                    <FaArrowUp size={11} />
+                  </button>
+                  <button
+                    type="button"
+                    disabled={index === waypoints.length - 1}
+                    onClick={() => move(index, 1)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: COLORS.textMuted,
+                      cursor: "pointer",
+                      padding: 4,
+                      opacity: index === waypoints.length - 1 ? 0.3 : 1,
+                    }}
+                  >
+                    <FaArrowDown size={11} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => remove(wp.id)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: COLORS.danger,
+                      cursor: "pointer",
+                      padding: 4,
+                    }}
+                  >
+                    <FaTrash size={11} />
+                  </button>
+                </div>
+              ))}
             </div>
           )}
+        </div>
 
-          {savedRoute && (
-            <div className="alert alert-success py-2">
-              Percorso "{savedRoute.name}" salvato.{" "}
-              {location.state?.returnTo ? (
-                <Button
-                  variant="link"
-                  size="sm"
-                  className="p-0"
-                  onClick={() =>
-                    navigate(location.state.returnTo, {
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {[
+            { key: "avoidHighways", label: "Evita autostrade" },
+            { key: "avoidTolls", label: "Evita pedaggi" },
+            { key: "avoidFerries", label: "Evita traghetti" },
+          ].map((opt) => (
+            <label
+              key={opt.key}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                fontFamily: FONTS.body,
+                fontSize: 13,
+                color: COLORS.textSecondary,
+                cursor: "pointer",
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={options[opt.key]}
+                onChange={(e) =>
+                  setOptions({ ...options, [opt.key]: e.target.checked })
+                }
+              />
+              {opt.label}
+            </label>
+          ))}
+        </div>
+
+        {errorMsg && (
+          <div
+            style={{
+              fontFamily: FONTS.body,
+              fontSize: 13,
+              color: COLORS.danger,
+            }}
+          >
+            {errorMsg}
+          </div>
+        )}
+
+        {routeInfo && waypoints.length >= 2 && (
+          <div style={{ display: "flex", gap: 20 }}>
+            <div>
+              <span
+                style={{
+                  fontFamily: FONTS.heading,
+                  fontWeight: 700,
+                  fontSize: 20,
+                }}
+              >
+                {routeInfo.distanceKm.toFixed(1).replace(".", ",")}
+              </span>
+              <span
+                style={{
+                  fontFamily: FONTS.mono,
+                  fontSize: 10,
+                  color: COLORS.textMuted,
+                  marginLeft: 5,
+                }}
+              >
+                KM
+              </span>
+            </div>
+            <div>
+              <span
+                style={{
+                  fontFamily: FONTS.heading,
+                  fontWeight: 700,
+                  fontSize: 20,
+                }}
+              >
+                {Math.round(routeInfo.durationMin)}
+              </span>
+              <span
+                style={{
+                  fontFamily: FONTS.mono,
+                  fontSize: 10,
+                  color: COLORS.textMuted,
+                  marginLeft: 5,
+                }}
+              >
+                MIN
+              </span>
+            </div>
+          </div>
+        )}
+
+        {savedRoute && (
+          <div
+            style={{
+              ...styles.card,
+              borderColor: COLORS.accentSoftBorder,
+              padding: 14,
+            }}
+          >
+            <div
+              style={{
+                fontFamily: FONTS.body,
+                fontSize: 13,
+                color: COLORS.textSecondary,
+                marginBottom: 8,
+              }}
+            >
+              Percorso "{savedRoute.name}" salvato.
+            </div>
+            <button
+              type="button"
+              onClick={() =>
+                location.state?.returnTo
+                  ? navigate(location.state.returnTo, {
                       state: { newRouteId: savedRoute.id, resumeDraft: true },
                     })
-                  }
-                >
-                  Torna alla creazione dell'evento
-                </Button>
-              ) : (
-                <Button
-                  variant="link"
-                  size="sm"
-                  className="p-0"
-                  onClick={() => navigate("/routes")}
-                >
-                  Vai ai miei percorsi
-                </Button>
-              )}
-            </div>
-          )}
-
-          <div className="d-grid">
-            <Button
-              type="submit"
-              disabled={isLoading || waypoints.length < 2}
-              className="rounded-pill fw-bold border-0"
-              style={{ backgroundColor: "#FFBE5D", color: "#000" }}
+                  : navigate("/routes")
+              }
+              style={{
+                background: "none",
+                border: "none",
+                color: COLORS.accent,
+                fontFamily: FONTS.mono,
+                fontSize: 11,
+                cursor: "pointer",
+                padding: 0,
+              }}
             >
-              {isLoading ? (
-                <Spinner size="sm" animation="border" />
-              ) : (
-                "Calcola e salva percorso"
-              )}
-            </Button>
+              {location.state?.returnTo
+                ? "TORNA ALLA CREAZIONE DELL'EVENTO"
+                : "VAI AI MIEI PERCORSI"}
+            </button>
           </div>
-        </Form>
-      </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={isLoading || waypoints.length < 2}
+          style={{
+            ...styles.primaryButton,
+            opacity: isLoading || waypoints.length < 2 ? 0.5 : 1,
+          }}
+        >
+          {isLoading ? (
+            <Spinner size="sm" animation="border" />
+          ) : (
+            "CALCOLA E SALVA PERCORSO"
+          )}
+        </button>
+      </form>
     </div>
   )
 }
