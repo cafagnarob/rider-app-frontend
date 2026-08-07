@@ -1,16 +1,18 @@
-import { useState } from "react"
-import { Card, Button, Form, Spinner, Badge } from "react-bootstrap"
+import { useEffect, useState } from "react"
+import { Spinner } from "react-bootstrap"
 import { useSelector, useDispatch } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { useGetMyVehiclesQuery } from "../features/vehicles/vehiclesApi"
 import {
   useStartRideMutation,
   useFinishRideMutation,
+  useDeleteRideMutation,
 } from "../features/rides/ridesApi"
 import { rideStarted, rideCleared } from "../features/rides/rideSlice"
 import { startTracking, stopTracking } from "../features/rides/trackingService"
 import { formatDuration, toLocalDateTimeString } from "../utils/geo"
 import { RIDE_TYPE_LABELS } from "../utils/constants"
+import { COLORS, FONTS, styles } from "../styles/theme"
 
 function RideTrackerPage() {
   const dispatch = useDispatch()
@@ -24,6 +26,16 @@ function RideTrackerPage() {
   const [form, setForm] = useState({ vehicleId: "", title: "", type: "TOUR" })
   const [notes, setNotes] = useState("")
   const [errorMsg, setErrorMsg] = useState("")
+
+  const [now, setNow] = useState(() => new Date())
+
+  useEffect(() => {
+    if (!ride.rideId) return
+    const interval = setInterval(() => setNow(new Date()), 1000)
+    return () => clearInterval(interval)
+  }, [ride.rideId])
+
+  const [deleteRide, { isLoading: isDiscarding }] = useDeleteRideMutation()
 
   const handleStart = async (e) => {
     e.preventDefault()
@@ -83,165 +95,359 @@ function RideTrackerPage() {
     }
   }
 
-  const handleDiscard = () => {
+  const handleDiscard = async () => {
     stopTracking()
-    dispatch(rideCleared())
+    try {
+      await deleteRide(ride.rideId).unwrap()
+    } catch (err) {
+      console.error("Impossibile eliminare il giro scartato sul server:", err)
+    } finally {
+      dispatch(rideCleared())
+    }
   }
 
   // --- giro in corso ---
   if (ride.rideId) {
     const lastPoint = ride.points[ride.points.length - 1]
-    const elapsed =
-      lastPoint && ride.startedAt
-        ? (new Date(lastPoint.recordedAt) - new Date(ride.startedAt)) / 1000
-        : 0
+    const elapsed = ride.startedAt
+      ? Math.max(0, (now - new Date(ride.startedAt)) / 1000)
+      : 0
 
     return (
-      <div style={{ maxWidth: "540px", margin: "0 auto" }}>
-        <Card className="bg-dark text-light border-warning mb-3">
-          <Card.Body className="text-center">
-            <Badge bg="danger" className="mb-3">
-              ● Registrazione in corso
-            </Badge>
+      <div style={{ ...styles.pageBg, paddingTop: 20, paddingBottom: 40 }}>
+        <div style={{ padding: "0 20px" }}>
+          <div
+            style={{
+              ...styles.card,
+              borderColor: COLORS.accentSoftBorder,
+              padding: 22,
+              textAlign: "center",
+              marginBottom: 20,
+            }}
+          >
+            <span
+              style={{
+                display: "inline-block",
+                padding: "5px 12px",
+                borderRadius: 9,
+                marginBottom: 16,
+                background: COLORS.dangerBg,
+                border: `1px solid ${COLORS.dangerBorder}`,
+                fontFamily: FONTS.mono,
+                fontSize: 10,
+                color: COLORS.danger,
+              }}
+            >
+              ● REGISTRAZIONE IN CORSO
+            </span>
 
-            <div className="display-4 fw-bold mb-0">
-              {ride.distanceKm.toFixed(2)}
+            <div
+              style={{
+                fontFamily: FONTS.heading,
+                fontWeight: 700,
+                fontSize: 52,
+                lineHeight: 1,
+              }}
+            >
+              {ride.distanceKm.toFixed(2).replace(".", ",")}
             </div>
-            <div className="text-secondary mb-4">km percorsi</div>
+            <div
+              style={{
+                fontFamily: FONTS.mono,
+                fontSize: 11,
+                color: COLORS.textMuted,
+                marginBottom: 26,
+              }}
+            >
+              KM PERCORSI
+            </div>
 
-            <div className="row text-center">
-              <div className="col-4">
-                <div className="fs-5 fw-semibold">
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-around",
+                marginBottom: 20,
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    fontFamily: FONTS.heading,
+                    fontWeight: 700,
+                    fontSize: 22,
+                  }}
+                >
                   {lastPoint ? lastPoint.speedKmh.toFixed(0) : "0"}
                 </div>
-                <small className="text-secondary">km/h attuali</small>
+                <div
+                  style={{
+                    fontFamily: FONTS.mono,
+                    fontSize: 9,
+                    color: COLORS.textMuted,
+                    marginTop: 3,
+                  }}
+                >
+                  KM/H ATTUALI
+                </div>
               </div>
-              <div className="col-4">
-                <div className="fs-5 fw-semibold">
+              <div>
+                <div
+                  style={{
+                    fontFamily: FONTS.heading,
+                    fontWeight: 700,
+                    fontSize: 22,
+                  }}
+                >
                   {ride.maxSpeedKmH.toFixed(0)}
                 </div>
-                <small className="text-secondary">km/h max</small>
+                <div
+                  style={{
+                    fontFamily: FONTS.mono,
+                    fontSize: 9,
+                    color: COLORS.textMuted,
+                    marginTop: 3,
+                  }}
+                >
+                  KM/H MAX
+                </div>
               </div>
-              <div className="col-4">
-                <div className="fs-5 fw-semibold">
+              <div>
+                <div
+                  style={{
+                    fontFamily: FONTS.heading,
+                    fontWeight: 700,
+                    fontSize: 22,
+                  }}
+                >
                   {formatDuration(elapsed)}
                 </div>
-                <small className="text-secondary">durata</small>
+                <div
+                  style={{
+                    fontFamily: FONTS.mono,
+                    fontSize: 9,
+                    color: COLORS.textMuted,
+                    marginTop: 3,
+                  }}
+                >
+                  DURATA
+                </div>
               </div>
             </div>
 
-            <div className="row text-center mt-3">
-              <div className="col-6">
-                <div className="fs-6">{ride.points.length}</div>
-                <small className="text-secondary">punti GPS</small>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-around",
+                paddingTop: 18,
+                borderTop: `1px solid ${COLORS.borderSoft}`,
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    fontFamily: FONTS.heading,
+                    fontWeight: 600,
+                    fontSize: 16,
+                  }}
+                >
+                  {ride.points.length}
+                </div>
+                <div
+                  style={{
+                    fontFamily: FONTS.mono,
+                    fontSize: 9,
+                    color: COLORS.textMuted,
+                    marginTop: 3,
+                  }}
+                >
+                  PUNTI GPS
+                </div>
               </div>
-              <div className="col-6">
-                <div className="fs-6">{ride.stopsCount}</div>
-                <small className="text-secondary">soste</small>
+              <div>
+                <div
+                  style={{
+                    fontFamily: FONTS.heading,
+                    fontWeight: 600,
+                    fontSize: 16,
+                  }}
+                >
+                  {ride.stopsCount}
+                </div>
+                <div
+                  style={{
+                    fontFamily: FONTS.mono,
+                    fontSize: 9,
+                    color: COLORS.textMuted,
+                    marginTop: 3,
+                  }}
+                >
+                  SOSTE
+                </div>
               </div>
             </div>
-          </Card.Body>
-        </Card>
+          </div>
 
-        <Form.Group className="mb-3">
-          <Form.Control
-            as="textarea"
-            rows={2}
-            maxLength={1000}
-            className="bg-transparent text-light"
-            placeholder="Note sul giro (opzionale)"
+          <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
+            rows={2}
+            maxLength={1000}
+            placeholder="Note sul giro (opzionale)"
+            style={{
+              width: "100%",
+              borderRadius: 14,
+              background: COLORS.card,
+              border: `1px solid ${COLORS.borderStrong}`,
+              color: COLORS.text,
+              fontFamily: FONTS.body,
+              fontSize: 14,
+              lineHeight: 1.5,
+              padding: 14,
+              outline: "none",
+              resize: "none",
+              boxSizing: "border-box",
+              marginBottom: 16,
+            }}
           />
-        </Form.Group>
 
-        {errorMsg && <div className="alert alert-danger py-2">{errorMsg}</div>}
+          {errorMsg && (
+            <div
+              style={{
+                fontFamily: FONTS.body,
+                fontSize: 13,
+                color: COLORS.danger,
+                marginBottom: 14,
+              }}
+            >
+              {errorMsg}
+            </div>
+          )}
 
-        <div className="d-grid gap-2">
-          <Button
-            variant="danger"
-            size="lg"
+          <button
+            type="button"
             disabled={isFinishing}
             onClick={handleFinish}
-            className="rounded-pill fw-bold"
+            style={{
+              width: "100%",
+              height: 56,
+              borderRadius: 15,
+              background: COLORS.danger,
+              border: "none",
+              color: "#fff",
+              fontFamily: FONTS.heading,
+              fontWeight: 700,
+              fontSize: 17,
+              letterSpacing: ".05em",
+              textTransform: "uppercase",
+              cursor: "pointer",
+              marginBottom: 10,
+              opacity: isFinishing ? 0.6 : 1,
+            }}
           >
             {isFinishing ? (
               <Spinner size="sm" animation="border" />
             ) : (
-              "Termina giro"
+              "TERMINA GIRO"
             )}
-          </Button>
-          <Button variant="outline-secondary" size="sm" onClick={handleDiscard}>
-            Scarta senza salvare
-          </Button>
+          </button>
+          <button
+            type="button"
+            onClick={handleDiscard}
+            disabled={isDiscarding}
+            style={{
+              width: "100%",
+              background: "none",
+              border: "none",
+              color: COLORS.textMuted,
+              fontFamily: FONTS.mono,
+              fontSize: 11,
+              cursor: "pointer",
+              padding: 8,
+              opacity: isDiscarding ? 0.5 : 1,
+            }}
+          >
+            {isDiscarding ? "ELIMINAZIONE..." : "SCARTA SENZA SALVARE"}
+          </button>
         </div>
       </div>
     )
   }
 
-  // --- nessun giro attivo ---
   return (
-    <div style={{ maxWidth: "480px", margin: "0 auto" }}>
-      <h2 className="mb-4">Registra un'uscita</h2>
-
-      <Form onSubmit={handleStart}>
-        <Form.Group className="mb-3">
-          <Form.Label>Moto</Form.Label>
-          <Form.Select
-            className="bg-transparent text-light"
-            value={form.vehicleId}
-            onChange={(e) => setForm({ ...form, vehicleId: e.target.value })}
-          >
-            <option value="">Nessuna moto</option>
-            {vehicles?.map((v) => (
-              <option key={v.id} value={v.id}>
-                {v.nickname || `${v.model.brand.name} ${v.model.name}`}
-              </option>
-            ))}
-          </Form.Select>
-        </Form.Group>
-
-        <Form.Group className="mb-3">
-          <Form.Label>Titolo</Form.Label>
-          <Form.Control
-            type="text"
-            maxLength={100}
-            className="bg-transparent text-light"
-            placeholder="Giro al Passo dello Stelvio"
-            value={form.title}
-            onChange={(e) => setForm({ ...form, title: e.target.value })}
-          />
-        </Form.Group>
-
-        <Form.Group className="mb-4">
-          <Form.Label>Tipo</Form.Label>
-          <Form.Select
-            className="bg-transparent text-light"
-            value={form.type}
-            onChange={(e) => setForm({ ...form, type: e.target.value })}
-          >
-            {Object.entries(RIDE_TYPE_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </Form.Select>
-        </Form.Group>
-
-        {errorMsg && <div className="alert alert-danger py-2">{errorMsg}</div>}
-
-        <div className="d-grid">
-          <Button
-            type="submit"
-            size="lg"
-            disabled={isStarting}
-            className="rounded-pill fw-bold border-0"
-            style={{ backgroundColor: "#FFBE5D", color: "#000" }}
-          >
-            {isStarting ? "Avvio..." : "Inizia"}
-          </Button>
+    <div style={{ ...styles.pageBg, paddingTop: 20, paddingBottom: 40 }}>
+      <div style={{ padding: "0 20px" }}>
+        <div style={{ ...styles.pageTitle, fontSize: 26, marginBottom: 20 }}>
+          REGISTRA UN'USCITA
         </div>
-      </Form>
+
+        <form
+          onSubmit={handleStart}
+          style={{ display: "flex", flexDirection: "column", gap: 16 }}
+        >
+          <div>
+            <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>MOTO</div>
+            <select
+              value={form.vehicleId}
+              onChange={(e) => setForm({ ...form, vehicleId: e.target.value })}
+              style={styles.input}
+            >
+              <option value="">Nessuna moto</option>
+              {vehicles?.map((v) => (
+                <option key={v.id} value={v.id}>
+                  {v.nickname || `${v.model.brand.name} ${v.model.name}`}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>TITOLO</div>
+            <input
+              type="text"
+              maxLength={100}
+              placeholder="Giro al Passo dello Stelvio"
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
+              style={styles.input}
+            />
+          </div>
+
+          <div>
+            <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>TIPO</div>
+            <select
+              value={form.type}
+              onChange={(e) => setForm({ ...form, type: e.target.value })}
+              style={styles.input}
+            >
+              {Object.entries(RIDE_TYPE_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {errorMsg && (
+            <div
+              style={{
+                fontFamily: FONTS.body,
+                fontSize: 13,
+                color: COLORS.danger,
+              }}
+            >
+              {errorMsg}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={isStarting}
+            style={{ ...styles.primaryButton, opacity: isStarting ? 0.6 : 1 }}
+          >
+            {isStarting ? "..." : "INIZIA"}
+          </button>
+        </form>
+      </div>
     </div>
   )
 }
