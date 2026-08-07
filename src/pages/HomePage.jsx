@@ -1,10 +1,9 @@
 import { useEffect, useRef, useMemo } from "react"
-import { Map as MapLibreMap, Marker } from "maplibre-gl"
+import { Map as MapLibreMap, Marker, FullscreenControl } from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
 import { useNavigate, Link } from "react-router-dom"
-import { FaBell } from "react-icons/fa"
 import { useGetCurrentUserQuery } from "../features/users/usersApi"
-import { useGetUnreadCountQuery } from "../features/notification/notificationsApi"
+
 import {
   useSearchEventsQuery,
   useGetParticipatingEventsQuery,
@@ -12,6 +11,8 @@ import {
 import { useGetFeedQuery } from "../features/social/postsApi"
 import { useGeolocation } from "../utils/useGeolocation"
 import { COLORS, FONTS, styles } from "../styles/theme"
+import NotificationBell from "../features/notification/components/NotificationBell"
+import { MAP_STYLE_URL } from "../utils/mapStyle"
 
 const RADIUS_KM = 40
 
@@ -20,9 +21,6 @@ function HomePage() {
   const { position } = useGeolocation()
 
   const { data: me } = useGetCurrentUserQuery()
-  const { data: unread } = useGetUnreadCountQuery(undefined, {
-    pollingInterval: 30000,
-  })
 
   const nearbyQuery = useSearchEventsQuery(
     {
@@ -76,11 +74,13 @@ function HomePage() {
 
     const map = new MapLibreMap({
       container: containerRef.current,
-      style: `https://api.maptiler.com/maps/outdoor-v2/style.json?key=${import.meta.env.VITE_MAPTILER_KEY}`,
+      style: MAP_STYLE_URL,
       center,
       zoom: 10,
     })
     mapRef.current = map
+
+    map.addControl(new FullscreenControl(), "top-right")
 
     return () => {
       map.remove()
@@ -145,26 +145,7 @@ function HomePage() {
           <div style={{ ...styles.pageTitle, fontSize: 30 }}>QJ RIDERS</div>
         </div>
         <div style={{ display: "flex", gap: 10 }}>
-          <button
-            type="button"
-            onClick={() => navigate("/notifications")}
-            style={{ ...styles.iconButton, position: "relative" }}
-          >
-            <FaBell />
-            {unread?.count > 0 && (
-              <span
-                style={{
-                  position: "absolute",
-                  top: 8,
-                  right: 8,
-                  width: 8,
-                  height: 8,
-                  borderRadius: "50%",
-                  background: COLORS.accent,
-                }}
-              />
-            )}
-          </button>
+          <NotificationBell />
           <Link to="/profile">
             <img
               src={me?.profilePicture}
