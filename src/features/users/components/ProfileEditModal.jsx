@@ -1,6 +1,7 @@
-import { Button, Form, Modal } from "react-bootstrap"
 import { useUpdateProfileMutation } from "../usersApi"
 import { useState } from "react"
+import { COLORS, FONTS, styles } from "../../../styles/theme"
+import { FaTimes } from "react-icons/fa"
 
 function ProfileEditModal({ profile, onClose }) {
   const [updateProfile, { isLoading }] = useUpdateProfileMutation()
@@ -13,6 +14,9 @@ function ProfileEditModal({ profile, onClose }) {
     location: profile?.location || "",
     birthDate: profile?.birthDate || "",
   })
+
+  const set = (field) => (e) =>
+    setForm((prev) => ({ ...prev, [field]: e.target.value }))
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -31,108 +35,173 @@ function ProfileEditModal({ profile, onClose }) {
     }
   }
 
+  if (!profile) return null
   return (
-    <Modal show={!!profile} onHide={onClose} centered data-bs-theme="dark">
-      {profile && (
-        <Form onSubmit={handleSubmit}>
-          <Modal.Header
-            closeButton
-            className="bg-dark text-light border-secondary"
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(6,6,7,.72)",
+        zIndex: 200,
+        display: "flex",
+        alignItems: "flex-end",
+        justifyContent: "center",
+      }}
+      onClick={onClose}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: "100%",
+          maxWidth: 480,
+          maxHeight: "92vh",
+          overflowY: "auto",
+          background: COLORS.bg,
+          borderRadius: "24px 24px 0 0",
+          border: `1px solid ${COLORS.borderSoft}`,
+          borderBottom: "none",
+        }}
+      >
+        <form onSubmit={handleSubmit}>
+          <div
+            style={{
+              position: "sticky",
+              top: 0,
+              background: COLORS.bg,
+              zIndex: 2,
+              borderBottom: `1px solid ${COLORS.borderSoft}`,
+              padding: "20px 20px 14px",
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+            }}
           >
-            <Modal.Title className="fs-5">Modifica profilo</Modal.Title>
-          </Modal.Header>
+            <button type="button" onClick={onClose} style={styles.iconButton}>
+              <FaTimes />
+            </button>
+            <div style={{ flex: 1, ...styles.pageTitle, fontSize: 20 }}>
+              MODIFICA PROFILO
+            </div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              style={{
+                height: 40,
+                padding: "0 16px",
+                borderRadius: 13,
+                background: COLORS.accent,
+                border: "none",
+                color: COLORS.onAccent,
+                fontFamily: FONTS.heading,
+                fontWeight: 700,
+                fontSize: 15,
+                letterSpacing: ".05em",
+                cursor: "pointer",
+                opacity: isLoading ? 0.5 : 1,
+              }}
+            >
+              {isLoading ? "..." : "SALVA"}
+            </button>
+          </div>
 
-          <Modal.Body className="bg-dark text-light">
-            <div className="row">
-              <div className="col-6">
-                <Form.Group className="mb-3">
-                  <Form.Label>Nome</Form.Label>
-                  <Form.Control
-                    type="text"
-                    className="bg-transparent"
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  />
-                </Form.Group>
+          <div
+            style={{
+              padding: 20,
+              display: "flex",
+              flexDirection: "column",
+              gap: 16,
+            }}
+          >
+            <div style={{ display: "flex", gap: 12 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+                  NOME
+                </div>
+                <input
+                  type="text"
+                  value={form.name}
+                  onChange={set("name")}
+                  style={{ ...styles.input, width: "100%" }}
+                />
               </div>
-              <div className="col-6">
-                <Form.Group className="mb-3">
-                  <Form.Label>Cognome</Form.Label>
-                  <Form.Control
-                    type="text"
-                    className="bg-transparent"
-                    value={form.surname}
-                    onChange={(e) =>
-                      setForm({ ...form, surname: e.target.value })
-                    }
-                  />
-                </Form.Group>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+                  COGNOME
+                </div>
+                <input
+                  type="text"
+                  value={form.surname}
+                  onChange={set("surname")}
+                  style={{ ...styles.input, width: "100%" }}
+                />
               </div>
             </div>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Bio</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                className="bg-transparent"
-                placeholder="Raccontaci qualcosa di te..."
+            <div>
+              <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>BIO</div>
+              <textarea
                 value={form.description}
-                onChange={(e) =>
-                  setForm({ ...form, description: e.target.value })
-                }
+                onChange={set("description")}
+                rows={3}
+                placeholder="Raccontaci qualcosa di te..."
+                style={{
+                  width: "100%",
+                  borderRadius: 14,
+                  background: COLORS.card,
+                  border: `1px solid ${COLORS.borderStrong}`,
+                  color: COLORS.text,
+                  fontFamily: FONTS.body,
+                  fontSize: 15,
+                  lineHeight: 1.5,
+                  padding: 14,
+                  outline: "none",
+                  resize: "none",
+                  boxSizing: "border-box",
+                }}
               />
-            </Form.Group>
+            </div>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Località</Form.Label>
-              <Form.Control
+            <div>
+              <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+                LOCALITÀ
+              </div>
+              <input
                 type="text"
-                className="bg-transparent"
                 placeholder="Latina, Italia"
                 value={form.location}
-                onChange={(e) => setForm({ ...form, location: e.target.value })}
+                onChange={set("location")}
+                style={styles.input}
               />
-            </Form.Group>
+            </div>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Data di nascita</Form.Label>
-              <Form.Control
+            <div>
+              <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+                DATA DI NASCITA
+              </div>
+              <input
                 type="date"
-                className="bg-transparent"
                 max={new Date().toISOString().split("T")[0]}
                 value={form.birthDate}
-                onChange={(e) =>
-                  setForm({ ...form, birthDate: e.target.value })
-                }
+                onChange={set("birthDate")}
+                style={styles.input}
               />
-            </Form.Group>
+            </div>
 
             {errorMsg && (
-              <div className="alert alert-danger py-2">{errorMsg}</div>
+              <div
+                style={{
+                  fontFamily: FONTS.body,
+                  fontSize: 13,
+                  color: COLORS.danger,
+                }}
+              >
+                {errorMsg}
+              </div>
             )}
-          </Modal.Body>
-
-          <Modal.Footer className="bg-dark border-secondary">
-            <Button
-              variant="outline-light"
-              onClick={onClose}
-              disabled={isLoading}
-            >
-              Annulla
-            </Button>
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="rounded-pill px-4 fw-bold border-0"
-              style={{ backgroundColor: "#FFBE5D", color: "#000" }}
-            >
-              {isLoading ? "Salvataggio..." : "Salva"}
-            </Button>
-          </Modal.Footer>
-        </Form>
-      )}
-    </Modal>
+          </div>
+        </form>
+      </div>
+    </div>
   )
 }
 
