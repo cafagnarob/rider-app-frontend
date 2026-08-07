@@ -1,10 +1,11 @@
 import { useState } from "react"
-import { Button, Form, Modal, Spinner } from "react-bootstrap"
 import {
   useDeleteVehiclePhotoMutation,
   useUpdateVehicleMutation,
   useUpdateVehiclePhotoMutation,
 } from "../vehiclesApi"
+import { COLORS, FONTS, styles } from "../../../styles/theme"
+import { FaTimes, FaTrash } from "react-icons/fa"
 
 function VehicleEditModal({ vehicle, onClose }) {
   const [updateVehicle, { isLoading: isSaving }] = useUpdateVehicleMutation()
@@ -24,6 +25,9 @@ function VehicleEditModal({ vehicle, onClose }) {
   const [newPhoto, setNewPhoto] = useState(null)
   const [preview, setPreview] = useState(null)
   const [errorMsg, setErrorMsg] = useState("")
+
+  const set = (field) => (e) =>
+    setForm((prev) => ({ ...prev, [field]: e.target.value }))
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0]
@@ -83,158 +87,288 @@ function VehicleEditModal({ vehicle, onClose }) {
     }
   }
 
+  if (!vehicle) return null
+
   const isBusy = isSaving || isUploading || isRemoving
   const currentImage = preview || vehicle?.photoUrl
 
   return (
-    <Modal show={!!vehicle} onHide={onClose} centered data-bs-theme="dark">
-      {vehicle && (
-        <Form onSubmit={handleSubmit}>
-          <Modal.Header
-            closeButton
-            className="bg-dark text-light border-secondary"
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(6,6,7,.72)",
+        zIndex: 200,
+        display: "flex",
+        alignItems: "flex-end",
+        justifyContent: "center",
+      }}
+      onClick={handleClose}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: "100%",
+          maxWidth: 480,
+          maxHeight: "92vh",
+          overflowY: "auto",
+          background: COLORS.bg,
+          borderRadius: "24px 24px 0 0",
+          border: `1px solid ${COLORS.borderSoft}`,
+          borderBottom: "none",
+        }}
+      >
+        <form onSubmit={handleSubmit}>
+          <div
+            style={{
+              position: "sticky",
+              top: 0,
+              background: COLORS.bg,
+              zIndex: 2,
+              borderBottom: `1px solid ${COLORS.borderSoft}`,
+              padding: "20px 20px 14px",
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+            }}
           >
-            <Modal.Title className="fs-5">
-              Modifica {vehicle.model.brand.name} {vehicle.model.name}
-            </Modal.Title>
-          </Modal.Header>
+            <button
+              type="button"
+              onClick={handleClose}
+              style={styles.iconButton}
+            >
+              <FaTimes />
+            </button>
+            <div
+              style={{
+                flex: 1,
+                ...styles.pageTitle,
+                fontSize: 20,
+                lineHeight: 1.15,
+              }}
+            >
+              {vehicle.model.brand.name} {vehicle.model.name}
+            </div>
+            <button
+              type="submit"
+              disabled={isBusy}
+              style={{
+                height: 40,
+                padding: "0 16px",
+                borderRadius: 13,
+                background: COLORS.accent,
+                border: "none",
+                color: COLORS.onAccent,
+                fontFamily: FONTS.heading,
+                fontWeight: 700,
+                fontSize: 15,
+                letterSpacing: ".05em",
+                cursor: "pointer",
+                opacity: isBusy ? 0.5 : 1,
+              }}
+            >
+              {isSaving || isUploading ? "..." : "SALVA"}
+            </button>
+          </div>
 
-          <Modal.Body className="bg-dark text-light">
-            <div className="mb-3">
+          <div
+            style={{
+              padding: 20,
+              display: "flex",
+              flexDirection: "column",
+              gap: 16,
+            }}
+          >
+            <div>
+              <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>FOTO</div>
+
               {currentImage ? (
-                <div className="ratio ratio-16x9 mb-2">
+                <div
+                  style={{
+                    height: 160,
+                    borderRadius: 14,
+                    overflow: "hidden",
+                    background: COLORS.cardAlt,
+                    marginBottom: 10,
+                  }}
+                >
                   <img
                     src={currentImage}
-                    alt="Foto veicolo"
-                    style={{ objectFit: "cover", borderRadius: "0.5rem" }}
+                    alt=""
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      display: "block",
+                    }}
                   />
                 </div>
               ) : (
                 <div
-                  className="d-flex align-items-center justify-content-center border border-secondary rounded mb-2"
-                  style={{ height: "140px" }}
+                  style={{
+                    height: 100,
+                    borderRadius: 14,
+                    background: COLORS.card,
+                    border: `1px dashed ${COLORS.borderStrong}`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginBottom: 10,
+                  }}
                 >
-                  <span className="text-secondary small">Nessuna foto</span>
+                  <span
+                    style={{
+                      fontFamily: FONTS.mono,
+                      fontSize: 11,
+                      color: COLORS.textFaint,
+                    }}
+                  >
+                    NESSUNA FOTO
+                  </span>
                 </div>
               )}
 
-              <div className="d-flex gap-2 align-items-center">
-                <Form.Control
-                  type="file"
-                  accept="image/*"
-                  size="sm"
-                  className="bg-transparent"
-                  onChange={handleFileChange}
-                />
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <label
+                  style={{
+                    ...styles.secondaryButton,
+                    height: 36,
+                    padding: "0 14px",
+                    fontSize: 12,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    cursor: "pointer",
+                  }}
+                >
+                  {currentImage ? "CAMBIA FOTO" : "AGGIUNGI FOTO"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    onChange={handleFileChange}
+                  />
+                </label>
                 {vehicle.photoUrl && !newPhoto && (
-                  <Button
-                    variant="outline-danger"
-                    size="sm"
-                    disabled={isBusy}
+                  <button
+                    type="button"
                     onClick={handleRemovePhoto}
+                    disabled={isBusy}
+                    style={{
+                      height: 36,
+                      padding: "0 12px",
+                      borderRadius: 10,
+                      background: COLORS.dangerBg,
+                      border: `1px solid ${COLORS.dangerBorder}`,
+                      color: COLORS.danger,
+                      fontFamily: FONTS.mono,
+                      fontSize: 10,
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 5,
+                      opacity: isBusy ? 0.5 : 1,
+                    }}
                   >
-                    {isRemoving ? (
-                      <Spinner size="sm" animation="border" />
-                    ) : (
-                      "Rimuovi"
-                    )}
-                  </Button>
+                    <FaTrash size={10} /> {isRemoving ? "..." : "RIMUOVI"}
+                  </button>
                 )}
               </div>
+
               {preview && (
-                <Form.Text className="text-warning">
+                <div
+                  style={{
+                    fontFamily: FONTS.body,
+                    fontSize: 12,
+                    color: COLORS.accent,
+                    marginTop: 8,
+                  }}
+                >
                   Nuova foto selezionata — verrà caricata al salvataggio.
-                </Form.Text>
+                </div>
               )}
             </div>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Soprannome</Form.Label>
-              <Form.Control
-                type="text"
-                className="bg-transparent"
-                value={form.nickname}
-                onChange={(e) => setForm({ ...form, nickname: e.target.value })}
-              />
-            </Form.Group>
-
-            <div className="row">
-              <div className="col-6">
-                <Form.Group className="mb-3">
-                  <Form.Label>Anno</Form.Label>
-                  <Form.Control
-                    type="number"
-                    className="bg-transparent"
-                    value={form.year}
-                    min={vehicle.model.yearStart}
-                    max={vehicle.model.yearEnd || new Date().getFullYear()}
-                    onChange={(e) => setForm({ ...form, year: e.target.value })}
-                  />
-                </Form.Group>
+            <div>
+              <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+                SOPRANNOME
               </div>
-              <div className="col-6">
-                <Form.Group className="mb-3">
-                  <Form.Label>Colore</Form.Label>
-                  <Form.Control
-                    type="text"
-                    className="bg-transparent"
-                    value={form.color}
-                    onChange={(e) =>
-                      setForm({ ...form, color: e.target.value })
-                    }
-                  />
-                </Form.Group>
+              <input
+                type="text"
+                value={form.nickname}
+                onChange={set("nickname")}
+                style={styles.input}
+              />
+            </div>
+
+            <div style={{ display: "flex", gap: 12 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+                  ANNO
+                </div>
+                <input
+                  type="number"
+                  value={form.year}
+                  min={vehicle.model.yearStart}
+                  max={vehicle.model.yearEnd || new Date().getFullYear()}
+                  onChange={set("year")}
+                  style={{ ...styles.input, width: "100%" }}
+                />
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+                  COLORE
+                </div>
+                <input
+                  type="text"
+                  value={form.color}
+                  onChange={set("color")}
+                  style={{ ...styles.input, width: "100%" }}
+                />
               </div>
             </div>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Targa</Form.Label>
-              <Form.Control
+            <div>
+              <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>TARGA</div>
+              <input
                 type="text"
-                className="bg-transparent text-uppercase"
                 value={form.licensePlate}
-                onChange={(e) =>
-                  setForm({ ...form, licensePlate: e.target.value })
-                }
+                onChange={set("licensePlate")}
+                style={{ ...styles.input, textTransform: "uppercase" }}
               />
-            </Form.Group>
+            </div>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Numero di telaio (VIN)</Form.Label>
-              <Form.Control
+            <div>
+              <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+                NUMERO DI TELAIO (VIN)
+              </div>
+              <input
                 type="text"
-                className="bg-transparent text-uppercase font-monospace"
                 maxLength={17}
                 value={form.vin}
-                onChange={(e) => setForm({ ...form, vin: e.target.value })}
+                onChange={set("vin")}
+                style={{
+                  ...styles.input,
+                  textTransform: "uppercase",
+                  fontFamily: FONTS.mono,
+                }}
               />
-            </Form.Group>
+            </div>
 
             {errorMsg && (
-              <div className="alert alert-danger py-2">{errorMsg}</div>
+              <div
+                style={{
+                  fontFamily: FONTS.body,
+                  fontSize: 13,
+                  color: COLORS.danger,
+                }}
+              >
+                {errorMsg}
+              </div>
             )}
-          </Modal.Body>
-
-          <Modal.Footer className="bg-dark border-secondary">
-            <Button
-              variant="outline-light"
-              onClick={handleClose}
-              disabled={isBusy}
-            >
-              Annulla
-            </Button>
-            <Button
-              type="submit"
-              disabled={isBusy}
-              className="rounded-pill px-4 fw-bold border-0"
-              style={{ backgroundColor: "#FFBE5D", color: "#000" }}
-            >
-              {isBusy ? "Salvataggio..." : "Salva"}
-            </Button>
-          </Modal.Footer>
-        </Form>
-      )}
-    </Modal>
+          </div>
+        </form>
+      </div>
+    </div>
   )
 }
 
