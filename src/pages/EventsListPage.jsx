@@ -1,7 +1,7 @@
 import { useRef, useState } from "react"
 import { Spinner } from "react-bootstrap"
-import { Link, useNavigate } from "react-router-dom"
-import { FaLock } from "react-icons/fa"
+import { Link, useLocation, useNavigate } from "react-router-dom"
+import { FaLock, FaTimes } from "react-icons/fa"
 import {
   useSearchEventsQuery,
   useGetOrganizedEventsQuery,
@@ -9,6 +9,7 @@ import {
 } from "../features/events/eventsApi"
 import { VISIBILITY_LABELS } from "../utils/constants"
 import { COLORS, FONTS, styles } from "../styles/theme"
+import NotificationBell from "../features/notification/components/NotificationBell"
 
 const TABS = [
   { key: "search", label: "SCOPRI" },
@@ -21,9 +22,20 @@ function EventsListPage() {
   const [page, setPage] = useState(0)
   const [title, setTitle] = useState("")
   const navigate = useNavigate()
+  const location = useLocation()
 
   const [titleInput, setTitleInput] = useState("")
   const timerRef = useRef(null)
+
+  const [geoFilter, setGeoFilter] = useState(
+    location.state?.nearLat
+      ? {
+          lat: location.state.nearLat,
+          lng: location.state.nearLng,
+          placeName: location.state.placeName,
+        }
+      : null,
+  )
 
   const handleSearchChange = (e) => {
     const value = e.target.value
@@ -37,7 +49,13 @@ function EventsListPage() {
   }
 
   const searchQuery = useSearchEventsQuery(
-    { title: title || undefined, page },
+    {
+      title: title || undefined,
+      page,
+      lat: geoFilter?.lat,
+      lng: geoFilter?.lng,
+      radiusKm: geoFilter ? 40 : undefined,
+    },
     { skip: tab !== "search" },
   )
   const organizedQuery = useGetOrganizedEventsQuery(
@@ -72,26 +90,29 @@ function EventsListPage() {
         }}
       >
         <div style={{ ...styles.pageTitle, fontSize: 28 }}>EVENTI</div>
-        <Link
-          to="/events/new"
-          style={{
-            height: 40,
-            padding: "0 15px",
-            borderRadius: 12,
-            background: COLORS.accent,
-            border: "none",
-            color: COLORS.onAccent,
-            fontFamily: FONTS.heading,
-            fontWeight: 700,
-            fontSize: 15,
-            letterSpacing: ".04em",
-            display: "inline-flex",
-            alignItems: "center",
-            textDecoration: "none",
-          }}
-        >
-          + CREA
-        </Link>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <NotificationBell />
+          <Link
+            to="/events/new"
+            style={{
+              height: 40,
+              padding: "0 15px",
+              borderRadius: 12,
+              background: COLORS.accent,
+              border: "none",
+              color: COLORS.onAccent,
+              fontFamily: FONTS.heading,
+              fontWeight: 700,
+              fontSize: 15,
+              letterSpacing: ".04em",
+              display: "inline-flex",
+              alignItems: "center",
+              textDecoration: "none",
+            }}
+          >
+            + CREA
+          </Link>
+        </div>
       </div>
 
       <div style={{ display: "flex", gap: 8, padding: "18px 20px 0" }}>
@@ -131,6 +152,41 @@ function EventsListPage() {
             onChange={handleSearchChange}
             style={{ ...styles.input, height: 46 }}
           />
+        </div>
+      )}
+
+      {geoFilter && (
+        <div style={{ padding: "0 20px 12px" }}>
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "6px 12px",
+              borderRadius: 9,
+              background: COLORS.accentSoftBg,
+              border: `1px solid ${COLORS.accentSoftBorder}`,
+              fontFamily: FONTS.mono,
+              fontSize: 10.5,
+              color: COLORS.accent,
+            }}
+          >
+            VICINO A {geoFilter.placeName?.toUpperCase()}
+            <button
+              type="button"
+              onClick={() => setGeoFilter(null)}
+              style={{
+                background: "none",
+                border: "none",
+                color: COLORS.accent,
+                cursor: "pointer",
+                padding: 0,
+                display: "flex",
+              }}
+            >
+              <FaTimes size={10} />
+            </button>
+          </span>
         </div>
       )}
 
