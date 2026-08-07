@@ -8,7 +8,15 @@ import {
   useUpdateUsernameMutation,
 } from "../usersApi"
 import { logout } from "../../auth/authSlice"
-import { Button, Card, Form, Modal } from "react-bootstrap"
+
+import { COLORS, FONTS, styles } from "../../../styles/theme"
+import PasswordInput from "../../../components/PasswordInput"
+
+const feedbackColor = {
+  success: "#4ADE80",
+  danger: COLORS.danger,
+  warning: COLORS.accent,
+}
 
 function SecuritySection({ profile }) {
   const dispatch = useDispatch()
@@ -46,6 +54,8 @@ function SecuritySection({ profile }) {
     setUserForm({ currentPassword: "", newUsername: "" })
     setMailForm({ currentPassword: "", newEmail: "" })
   }
+
+  const toggle = (form) => setActiveForm((cur) => (cur === form ? null : form))
 
   const handlePassword = async (e) => {
     e.preventDefault()
@@ -113,270 +123,449 @@ function SecuritySection({ profile }) {
     }
   }
 
+  const handleLogout = () => {
+    dispatch(logout())
+    navigate("/login")
+  }
+
+  const rowStyle = {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  }
+
   return (
     <>
-      <Card className="bg-dark text-light border-secondary mb-4">
-        <Card.Body>
-          <Card.Title className="fs-6 mb-3">Account e sicurezza</Card.Title>
+      <div style={{ ...styles.card, padding: 18, marginBottom: 16 }}>
+        <div style={{ ...styles.fieldLabel, marginBottom: 14 }}>
+          ACCOUNT E SICUREZZA
+        </div>
 
-          {feedback && (
-            <div className={`alert alert-${feedback.type} py-2`}>
-              {feedback.text}
+        {feedback && (
+          <div
+            style={{
+              fontFamily: FONTS.body,
+              fontSize: 13,
+              color: feedbackColor[feedback.type],
+              marginBottom: 14,
+            }}
+          >
+            {feedback.text}
+          </div>
+        )}
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={rowStyle}>
+            <div>
+              <div style={{ fontFamily: FONTS.body, fontSize: 14 }}>
+                Username
+              </div>
+              <div
+                style={{
+                  fontFamily: FONTS.mono,
+                  fontSize: 10,
+                  color: COLORS.textMuted,
+                  marginTop: 2,
+                }}
+              >
+                @{profile.username}
+              </div>
             </div>
+            <button
+              type="button"
+              onClick={() => toggle("username")}
+              style={{
+                ...styles.secondaryButton,
+                height: 34,
+                padding: "0 13px",
+                fontSize: 10,
+              }}
+            >
+              MODIFICA
+            </button>
+          </div>
+
+          {activeForm === "username" && (
+            <form
+              onSubmit={handleUsername}
+              style={{
+                paddingTop: 14,
+                borderTop: `1px solid ${COLORS.borderSoft}`,
+                display: "flex",
+                flexDirection: "column",
+                gap: 12,
+              }}
+            >
+              <div>
+                <div style={{ ...styles.fieldLabel, marginBottom: 6 }}>
+                  NUOVO USERNAME
+                </div>
+                <input
+                  type="text"
+                  value={userForm.newUsername}
+                  onChange={(e) =>
+                    setUserForm({ ...userForm, newUsername: e.target.value })
+                  }
+                  required
+                  style={{ ...styles.input, height: 42 }}
+                />
+              </div>
+              <div>
+                <div style={{ ...styles.fieldLabel, marginBottom: 6 }}>
+                  PASSWORD ATTUALE
+                </div>
+                <PasswordInput
+                  value={userForm.currentPassword}
+                  onChange={(e) =>
+                    setUserForm({
+                      ...userForm,
+                      currentPassword: e.target.value,
+                    })
+                  }
+                  required
+                  style={{ height: 42 }}
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={isChangingUser}
+                style={{
+                  ...styles.secondaryButton,
+                  background: COLORS.accent,
+                  color: COLORS.onAccent,
+                  border: "none",
+                }}
+              >
+                {isChangingUser ? "..." : "CONFERMA"}
+              </button>
+            </form>
           )}
 
-          <div className="d-flex flex-column gap-3">
-            <div className="d-flex justify-content-between align-items-center">
-              <div>
-                <p className="mb-0">Username</p>
-                <small className="text-secondary">@{profile.username}</small>
+          <div style={rowStyle}>
+            <div>
+              <div style={{ fontFamily: FONTS.body, fontSize: 14 }}>Email</div>
+              <div
+                style={{
+                  fontFamily: FONTS.mono,
+                  fontSize: 10,
+                  color: COLORS.textMuted,
+                  marginTop: 2,
+                }}
+              >
+                {profile.email}
               </div>
-              <Button
-                variant="outline-light"
-                size="sm"
-                onClick={() =>
-                  setActiveForm(activeForm === "username" ? null : "username")
-                }
-              >
-                Modifica
-              </Button>
             </div>
-
-            {activeForm === "username" && (
-              <Form
-                onSubmit={handleUsername}
-                className="border-top border-secondary pt-3"
-              >
-                <Form.Group className="mb-2">
-                  <Form.Label className="small">Nuovo username</Form.Label>
-                  <Form.Control
-                    type="text"
-                    size="sm"
-                    className="bg-transparent text-light"
-                    value={userForm.newUsername}
-                    onChange={(e) =>
-                      setUserForm({ ...userForm, newUsername: e.target.value })
-                    }
-                    required
-                  />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label className="small">Password attuale</Form.Label>
-                  <Form.Control
-                    type="password"
-                    size="sm"
-                    className="bg-transparent text-light"
-                    value={userForm.currentPassword}
-                    onChange={(e) =>
-                      setUserForm({
-                        ...userForm,
-                        currentPassword: e.target.value,
-                      })
-                    }
-                    required
-                  />
-                </Form.Group>
-                <Button
-                  type="submit"
-                  size="sm"
-                  variant="warning"
-                  disabled={isChangingUser}
-                >
-                  {isChangingUser ? "Salvataggio..." : "Conferma"}
-                </Button>
-              </Form>
-            )}
-
-            <div className="d-flex justify-content-between align-items-center">
-              <div>
-                <p className="mb-0">Email</p>
-                <small className="text-secondary">{profile.email}</small>
-              </div>
-              <Button
-                variant="outline-light"
-                size="sm"
-                onClick={() =>
-                  setActiveForm(activeForm === "email" ? null : "email")
-                }
-              >
-                Modifica
-              </Button>
-            </div>
-
-            {activeForm === "email" && (
-              <Form
-                onSubmit={handleEmail}
-                className="border-top border-secondary pt-3"
-              >
-                <Form.Group className="mb-2">
-                  <Form.Label className="small">Nuova email</Form.Label>
-                  <Form.Control
-                    type="email"
-                    size="sm"
-                    className="bg-transparent text-light"
-                    value={mailForm.newEmail}
-                    onChange={(e) =>
-                      setMailForm({ ...mailForm, newEmail: e.target.value })
-                    }
-                    required
-                  />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label className="small">Password attuale</Form.Label>
-                  <Form.Control
-                    type="password"
-                    size="sm"
-                    className="bg-transparent text-light"
-                    value={mailForm.currentPassword}
-                    onChange={(e) =>
-                      setMailForm({
-                        ...mailForm,
-                        currentPassword: e.target.value,
-                      })
-                    }
-                    required
-                  />
-                </Form.Group>
-                <Button
-                  type="submit"
-                  size="sm"
-                  variant="warning"
-                  disabled={isChangingMail}
-                >
-                  {isChangingMail ? "Salvataggio..." : "Conferma"}
-                </Button>
-              </Form>
-            )}
-
-            <div className="d-flex justify-content-between align-items-center">
-              <div>
-                <p className="mb-0">Password</p>
-                <small className="text-secondary">••••••••</small>
-              </div>
-              <Button
-                variant="outline-light"
-                size="sm"
-                onClick={() =>
-                  setActiveForm(activeForm === "password" ? null : "password")
-                }
-              >
-                Modifica
-              </Button>
-            </div>
-
-            {activeForm === "password" && (
-              <Form
-                onSubmit={handlePassword}
-                className="border-top border-secondary pt-3"
-              >
-                <Form.Group className="mb-2">
-                  <Form.Label className="small">Password attuale</Form.Label>
-                  <Form.Control
-                    type="password"
-                    size="sm"
-                    className="bg-transparent text-light"
-                    value={pwForm.oldPassword}
-                    onChange={(e) =>
-                      setPwForm({ ...pwForm, oldPassword: e.target.value })
-                    }
-                    required
-                  />
-                </Form.Group>
-                <Form.Group className="mb-2">
-                  <Form.Label className="small">Nuova password</Form.Label>
-                  <Form.Control
-                    type="password"
-                    size="sm"
-                    minLength={8}
-                    className="bg-transparent text-light"
-                    value={pwForm.newPassword}
-                    onChange={(e) =>
-                      setPwForm({ ...pwForm, newPassword: e.target.value })
-                    }
-                    required
-                  />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label className="small">
-                    Conferma nuova password
-                  </Form.Label>
-                  <Form.Control
-                    type="password"
-                    size="sm"
-                    className="bg-transparent text-light"
-                    value={pwForm.confirm}
-                    onChange={(e) =>
-                      setPwForm({ ...pwForm, confirm: e.target.value })
-                    }
-                    required
-                  />
-                </Form.Group>
-                <Button
-                  type="submit"
-                  size="sm"
-                  variant="warning"
-                  disabled={isChangingPw}
-                >
-                  {isChangingPw ? "Salvataggio..." : "Conferma"}
-                </Button>
-              </Form>
-            )}
+            <button
+              type="button"
+              onClick={() => toggle("email")}
+              style={{
+                ...styles.secondaryButton,
+                height: 34,
+                padding: "0 13px",
+                fontSize: 10,
+              }}
+            >
+              MODIFICA
+            </button>
           </div>
-        </Card.Body>
-      </Card>
 
-      <Card className="bg-dark text-light border-danger mb-4">
-        <Card.Body>
-          <Card.Title className="fs-6 mb-2 text-danger">
-            Zona pericolosa
-          </Card.Title>
-          <p className="small text-secondary mb-3">
-            Disattivando l'account non potrai più accedere finché non verrà
-            riattivato da un amministratore. I tuoi contenuti non vengono
-            eliminati.
-          </p>
-          <Button
-            variant="outline-danger"
-            size="sm"
-            onClick={() => setShowDeactivate(true)}
+          {activeForm === "email" && (
+            <form
+              onSubmit={handleEmail}
+              style={{
+                paddingTop: 14,
+                borderTop: `1px solid ${COLORS.borderSoft}`,
+                display: "flex",
+                flexDirection: "column",
+                gap: 12,
+              }}
+            >
+              <div>
+                <div style={{ ...styles.fieldLabel, marginBottom: 6 }}>
+                  NUOVA EMAIL
+                </div>
+                <input
+                  type="email"
+                  value={mailForm.newEmail}
+                  onChange={(e) =>
+                    setMailForm({ ...mailForm, newEmail: e.target.value })
+                  }
+                  required
+                  style={{ ...styles.input, height: 42 }}
+                />
+              </div>
+              <div>
+                <div style={{ ...styles.fieldLabel, marginBottom: 6 }}>
+                  PASSWORD ATTUALE
+                </div>
+                <PasswordInput
+                  value={mailForm.currentPassword}
+                  onChange={(e) =>
+                    setMailForm({
+                      ...mailForm,
+                      currentPassword: e.target.value,
+                    })
+                  }
+                  required
+                  style={{ height: 42 }}
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={isChangingMail}
+                style={{
+                  ...styles.secondaryButton,
+                  background: COLORS.accent,
+                  color: COLORS.onAccent,
+                  border: "none",
+                }}
+              >
+                {isChangingMail ? "..." : "CONFERMA"}
+              </button>
+            </form>
+          )}
+
+          <div style={rowStyle}>
+            <div>
+              <div style={{ fontFamily: FONTS.body, fontSize: 14 }}>
+                Password
+              </div>
+              <div
+                style={{
+                  fontFamily: FONTS.mono,
+                  fontSize: 10,
+                  color: COLORS.textMuted,
+                  marginTop: 2,
+                }}
+              >
+                ••••••••
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => toggle("password")}
+              style={{
+                ...styles.secondaryButton,
+                height: 34,
+                padding: "0 13px",
+                fontSize: 10,
+              }}
+            >
+              MODIFICA
+            </button>
+          </div>
+
+          {activeForm === "password" && (
+            <form
+              onSubmit={handlePassword}
+              style={{
+                paddingTop: 14,
+                borderTop: `1px solid ${COLORS.borderSoft}`,
+                display: "flex",
+                flexDirection: "column",
+                gap: 12,
+              }}
+            >
+              <div>
+                <div style={{ ...styles.fieldLabel, marginBottom: 6 }}>
+                  PASSWORD ATTUALE
+                </div>
+                <PasswordInput
+                  value={pwForm.oldPassword}
+                  onChange={(e) =>
+                    setPwForm({ ...pwForm, oldPassword: e.target.value })
+                  }
+                  required
+                  style={{ height: 42 }}
+                />
+              </div>
+              <div>
+                <div style={{ ...styles.fieldLabel, marginBottom: 6 }}>
+                  NUOVA PASSWORD
+                </div>
+                <PasswordInput
+                  value={pwForm.newPassword}
+                  onChange={(e) =>
+                    setPwForm({ ...pwForm, newPassword: e.target.value })
+                  }
+                  minLength={8}
+                  required
+                  style={{ height: 42 }}
+                />
+              </div>
+              <div>
+                <div style={{ ...styles.fieldLabel, marginBottom: 6 }}>
+                  CONFERMA NUOVA PASSWORD
+                </div>
+                <PasswordInput
+                  value={pwForm.confirm}
+                  onChange={(e) =>
+                    setPwForm({ ...pwForm, confirm: e.target.value })
+                  }
+                  required
+                  style={{ height: 42 }}
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={isChangingPw}
+                style={{
+                  ...styles.secondaryButton,
+                  background: COLORS.accent,
+                  color: COLORS.onAccent,
+                  border: "none",
+                }}
+              >
+                {isChangingPw ? "..." : "CONFERMA"}
+              </button>
+            </form>
+          )}
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            style={{
+              background: "none",
+              border: "none",
+              color: COLORS.textSecondary,
+              fontFamily: FONTS.mono,
+              fontSize: 11,
+              cursor: "pointer",
+              textAlign: "left",
+              padding: 0,
+              marginTop: 4,
+            }}
           >
-            Disattiva account
-          </Button>
-        </Card.Body>
-      </Card>
+            ESCI DALL'ACCOUNT
+          </button>
+        </div>
+      </div>
 
-      <Modal
-        show={showDeactivate}
-        onHide={() => setShowDeactivate(false)}
-        centered
-        data-bs-theme="dark"
+      <div
+        style={{
+          ...styles.card,
+          padding: 18,
+          marginBottom: 16,
+          borderColor: COLORS.dangerBorder,
+        }}
       >
-        <Modal.Header
-          closeButton
-          className="bg-dark text-light border-secondary"
+        <div
+          style={{
+            ...styles.fieldLabel,
+            color: COLORS.danger,
+            marginBottom: 8,
+          }}
         >
-          <Modal.Title className="fs-5">Disattivare l'account?</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="bg-dark text-light">
-          Verrai disconnesso immediatamente e non potrai più accedere con queste
-          credenziali. Sei sicuro di voler procedere?
-        </Modal.Body>
-        <Modal.Footer className="bg-dark border-secondary">
-          <Button
-            variant="outline-light"
-            onClick={() => setShowDeactivate(false)}
+          ZONA PERICOLOSA
+        </div>
+        <p
+          style={{
+            fontFamily: FONTS.body,
+            fontSize: 12.5,
+            color: COLORS.textSecondary,
+            lineHeight: 1.5,
+            marginBottom: 14,
+          }}
+        >
+          Disattivando l'account non potrai più accedere finché non verrà
+          riattivato da un amministratore. I tuoi contenuti non vengono
+          eliminati.
+        </p>
+        <button
+          type="button"
+          onClick={() => setShowDeactivate(true)}
+          style={{
+            height: 36,
+            padding: "0 14px",
+            borderRadius: 11,
+            background: COLORS.dangerBg,
+            border: `1px solid ${COLORS.dangerBorder}`,
+            color: COLORS.danger,
+            fontFamily: FONTS.mono,
+            fontSize: 10.5,
+            cursor: "pointer",
+          }}
+        >
+          DISATTIVA ACCOUNT
+        </button>
+      </div>
+
+      {showDeactivate && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(6,6,7,.72)",
+            zIndex: 300,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 24,
+          }}
+          onClick={() => setShowDeactivate(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              ...styles.card,
+              padding: 22,
+              width: "100%",
+              maxWidth: 340,
+            }}
           >
-            Annulla
-          </Button>
-          <Button
-            variant="danger"
-            disabled={isDeactivating}
-            onClick={handleDeactivate}
-          >
-            {isDeactivating ? "Disattivazione..." : "Disattiva"}
-          </Button>
-        </Modal.Footer>
-      </Modal>
+            <div
+              style={{
+                fontFamily: FONTS.heading,
+                fontWeight: 700,
+                fontSize: 20,
+                marginBottom: 10,
+              }}
+            >
+              DISATTIVARE L'ACCOUNT?
+            </div>
+            <p
+              style={{
+                fontFamily: FONTS.body,
+                fontSize: 13,
+                color: COLORS.textSecondary,
+                lineHeight: 1.5,
+                marginBottom: 18,
+              }}
+            >
+              Verrai disconnesso immediatamente e non potrai più accedere con
+              queste credenziali. Sei sicuro di voler procedere?
+            </p>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                type="button"
+                onClick={() => setShowDeactivate(false)}
+                style={{ ...styles.secondaryButton, flex: 1 }}
+              >
+                ANNULLA
+              </button>
+              <button
+                type="button"
+                onClick={handleDeactivate}
+                disabled={isDeactivating}
+                style={{
+                  flex: 1,
+                  height: 48,
+                  borderRadius: 15,
+                  background: COLORS.danger,
+                  border: "none",
+                  color: "#fff",
+                  fontFamily: FONTS.heading,
+                  fontWeight: 700,
+                  fontSize: 15,
+                  cursor: "pointer",
+                }}
+              >
+                {isDeactivating ? "..." : "DISATTIVA"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }
