@@ -3,8 +3,11 @@ import { apiSlice } from "../../api/apiSlice"
 export const ridesApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getMyRides: builder.query({
-      query: ({ page = 0, size = 20 } = {}) =>
-        `/rides?page=${page}&size=${size}`,
+      query: ({ vehicleId, page = 0, size = 20 } = {}) => {
+        const params = new URLSearchParams({ page, size })
+        if (vehicleId) params.append("vehicleId", vehicleId)
+        return `/rides?${params.toString()}`
+      },
       providesTags: ["Ride"],
     }),
     getRideById: builder.query({
