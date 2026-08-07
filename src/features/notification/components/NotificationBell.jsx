@@ -1,4 +1,3 @@
-import { Dropdown, Badge, Button } from "react-bootstrap"
 import { FaBell } from "react-icons/fa"
 import { useNavigate, Link } from "react-router-dom"
 import { useSelector } from "react-redux"
@@ -13,10 +12,13 @@ import {
   buildNotificationLink,
 } from "../../../utils/notifications"
 import { formatRelativeTime } from "../../../utils/dateFormat"
+import { useState } from "react"
+import { COLORS, FONTS, styles } from "../../../styles/theme"
 
 function NotificationBell() {
   const token = useSelector((state) => state.auth.token)
   const navigate = useNavigate()
+  const [open, setOpen] = useState(false)
 
   const { data: unread } = useGetUnreadCountQuery(undefined, {
     skip: !token,
@@ -39,98 +41,197 @@ function NotificationBell() {
       notification.referenceId,
       notification.type,
     )
+    setOpen(false)
     if (link) navigate(link)
   }
 
   const count = unread?.count || 0
 
   return (
-    <Dropdown align="end">
-      <Dropdown.Toggle
-        variant="dark"
-        id="notif-bell"
-        className="position-relative border-0"
+    <div style={{ position: "relative" }}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        style={{ ...styles.iconButton, position: "relative" }}
       >
-        <FaBell />
+        <FaBell size={15} />
         {count > 0 && (
-          <Badge
-            bg="danger"
-            pill
-            className="position-absolute top-0 start-100 translate-middle"
-            style={{ fontSize: "0.6rem" }}
+          <span
+            style={{
+              position: "absolute",
+              top: 4,
+              right: 4,
+              minWidth: 15,
+              height: 15,
+              borderRadius: 8,
+              background: COLORS.accent,
+              color: COLORS.onAccent,
+              fontFamily: FONTS.mono,
+              fontSize: 9,
+              fontWeight: 700,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "0 3px",
+            }}
           >
             {count > 99 ? "99+" : count}
-          </Badge>
+          </span>
         )}
-      </Dropdown.Toggle>
+      </button>
 
-      <Dropdown.Menu
-        style={{ width: "320px", maxHeight: "420px", overflowY: "auto" }}
-      >
-        <div className="d-flex justify-content-between align-items-center px-3 py-2">
-          <span className="fw-semibold small">Notifiche</span>
-          {count > 0 && (
-            <Button
-              variant="link"
-              size="sm"
-              className="p-0 text-decoration-none small"
-              onClick={() => markAllAsRead()}
+      {open && (
+        <>
+          <div
+            style={{ position: "fixed", inset: 0, zIndex: 49 }}
+            onClick={() => setOpen(false)}
+          />
+          <div
+            style={{
+              position: "absolute",
+              top: "calc(100% + 8px)",
+              right: 0,
+              zIndex: 50,
+              width: 320,
+              maxHeight: 420,
+              overflowY: "auto",
+              ...styles.card,
+              padding: 0,
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: "13px 15px",
+                borderBottom: `1px solid ${COLORS.borderSoft}`,
+              }}
             >
-              Segna tutte
-            </Button>
-          )}
-        </div>
-        <Dropdown.Divider className="my-1" />
-
-        {list?.content.length === 0 && (
-          <p className="text-secondary small text-center py-3 mb-0">
-            Nessuna notifica
-          </p>
-        )}
-
-        {list?.content.map((n) => {
-          const { Icon, color } =
-            NOTIFICATION_ICONS[n.type] || NOTIFICATION_ICONS.SYSTEM
-          return (
-            <Dropdown.Item
-              key={n.id}
-              onClick={() => handleClick(n)}
-              className={`d-flex align-items-start gap-2 py-2 ${n.read ? "" : "fw-semibold"}`}
-              style={{ whiteSpace: "normal" }}
-            >
-              <Icon style={{ color, marginTop: "3px", flexShrink: 0 }} />
-              <div className="flex-grow-1">
-                <div className="small">{n.message}</div>
-                <div className="text-secondary" style={{ fontSize: "0.7rem" }}>
-                  {formatRelativeTime(n.createdAt)}
-                </div>
-              </div>
-              {!n.read && (
-                <span
+              <span
+                style={{
+                  fontFamily: FONTS.heading,
+                  fontWeight: 600,
+                  fontSize: 15,
+                }}
+              >
+                Notifiche
+              </span>
+              {count > 0 && (
+                <button
+                  type="button"
+                  onClick={() => markAllAsRead()}
                   style={{
-                    width: "8px",
-                    height: "8px",
-                    borderRadius: "50%",
-                    backgroundColor: "#FFBE5D",
-                    flexShrink: 0,
-                    marginTop: "6px",
+                    background: "none",
+                    border: "none",
+                    color: COLORS.accent,
+                    fontFamily: FONTS.mono,
+                    fontSize: 10,
+                    cursor: "pointer",
                   }}
-                />
+                >
+                  SEGNA TUTTE
+                </button>
               )}
-            </Dropdown.Item>
-          )
-        })}
+            </div>
 
-        <Dropdown.Divider className="my-1" />
-        <Dropdown.Item
-          as={Link}
-          to="/notifications"
-          className="text-center small"
-        >
-          Vedi tutte
-        </Dropdown.Item>
-      </Dropdown.Menu>
-    </Dropdown>
+            {list?.content.length === 0 && (
+              <p
+                style={{
+                  fontFamily: FONTS.body,
+                  fontSize: 13,
+                  color: COLORS.textFaint,
+                  textAlign: "center",
+                  padding: "24px 0",
+                }}
+              >
+                Nessuna notifica
+              </p>
+            )}
+
+            {list?.content.map((n) => {
+              const { Icon, color } =
+                NOTIFICATION_ICONS[n.type] || NOTIFICATION_ICONS.SYSTEM
+              return (
+                <button
+                  key={n.id}
+                  type="button"
+                  onClick={() => handleClick(n)}
+                  style={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: 10,
+                    width: "100%",
+                    textAlign: "left",
+                    padding: "11px 15px",
+                    background: n.read ? "transparent" : "rgba(255,122,47,.06)",
+                    border: "none",
+                    borderBottom: `1px solid ${COLORS.borderSoft}`,
+                    cursor: "pointer",
+                  }}
+                >
+                  <Icon
+                    style={{ color, marginTop: 3, flexShrink: 0 }}
+                    size={13}
+                  />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div
+                      style={{
+                        fontFamily: FONTS.body,
+                        fontSize: 12.5,
+                        fontWeight: n.read ? 400 : 600,
+                        color: COLORS.text,
+                        lineHeight: 1.35,
+                      }}
+                    >
+                      {n.message}
+                    </div>
+                    <div
+                      style={{
+                        fontFamily: FONTS.mono,
+                        fontSize: 9,
+                        color: COLORS.textFaint,
+                        marginTop: 3,
+                      }}
+                    >
+                      {formatRelativeTime(n.createdAt)}
+                    </div>
+                  </div>
+                  {!n.read && (
+                    <span
+                      style={{
+                        width: 7,
+                        height: 7,
+                        borderRadius: "50%",
+                        background: COLORS.accent,
+                        flexShrink: 0,
+                        marginTop: 5,
+                      }}
+                    />
+                  )}
+                </button>
+              )
+            })}
+
+            <Link
+              to="/notifications"
+              onClick={() => setOpen(false)}
+              style={{
+                display: "block",
+                textAlign: "center",
+                padding: 11,
+                fontFamily: FONTS.mono,
+                fontSize: 10.5,
+                color: COLORS.accent,
+                textDecoration: "none",
+              }}
+            >
+              VEDI TUTTE
+            </Link>
+          </div>
+        </>
+      )}
+    </div>
   )
 }
 
