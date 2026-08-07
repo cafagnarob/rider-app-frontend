@@ -4,6 +4,7 @@ import { useGetFeedQuery } from "../features/social/postsApi"
 import PostCard from "../features/social/components/PostCard"
 import CreatePostModal from "../features/social/components/CreatePostModal"
 import { COLORS, FONTS, styles } from "../styles/theme"
+import NotificationBell from "../features/notification/components/NotificationBell"
 
 const TABS = [
   { key: "FOLLOWING", label: "SEGUITI" },
@@ -41,25 +42,29 @@ function FeedPage() {
           }}
         >
           <div style={{ ...styles.pageTitle, fontSize: 28 }}>FEED</div>
-          <button
-            type="button"
-            onClick={() => setShowCreate(true)}
-            style={{
-              height: 40,
-              padding: "0 15px",
-              borderRadius: 12,
-              background: COLORS.accent,
-              border: "none",
-              color: COLORS.onAccent,
-              fontFamily: FONTS.heading,
-              fontWeight: 700,
-              fontSize: 15,
-              letterSpacing: ".04em",
-              cursor: "pointer",
-            }}
-          >
-            + POST
-          </button>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <NotificationBell />
+            <button
+              type="button"
+              onClick={() => setShowCreate(true)}
+              style={{
+                height: 40,
+                padding: "0 15px",
+                borderRadius: 12,
+                background: COLORS.accent,
+                border: "none",
+                color: COLORS.onAccent,
+                fontFamily: FONTS.heading,
+                fontWeight: 700,
+                fontSize: 15,
+                letterSpacing: ".04em",
+                cursor: "pointer",
+              }}
+            >
+              + POST
+            </button>
+          </div>
         </div>
 
         <div style={{ display: "flex", gap: 8, padding: "18px 20px 0" }}>
