@@ -1,4 +1,3 @@
-import { Badge, Button, Form, Modal } from "react-bootstrap"
 import { CATEGORY_LABELS } from "../../../utils/constants"
 import { useNavigate } from "react-router-dom"
 import {
@@ -6,6 +5,7 @@ import {
   useGetMyVehiclesQuery,
 } from "../../vehicles/vehiclesApi"
 import { useState } from "react"
+import { COLORS, FONTS, styles } from "../../../styles/theme"
 
 function ModelDetailModal({ model, onClose }) {
   const navigate = useNavigate()
@@ -49,171 +49,294 @@ function ModelDetailModal({ model, onClose }) {
     }
   }
 
+  if (!model) return null
   return (
-    <Modal show={!!model} onHide={handleClose} centered data-bs-theme="dark">
-      {model && (
-        <>
-          <Modal.Header
-            closeButton
-            className="bg-dark text-light border-secondary"
-          >
-            <Modal.Title className="fs-5">
-              {model.brand?.name} {model.name}
-            </Modal.Title>
-          </Modal.Header>
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(6,6,7,.72)",
+        zIndex: 200,
+        display: "flex",
+        alignItems: "flex-end",
+        justifyContent: "center",
+      }}
+      onClick={handleClose}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: "100%",
+          maxWidth: 480,
+          maxHeight: "92vh",
+          overflowY: "auto",
+          background: COLORS.bg,
+          borderRadius: "24px 24px 0 0",
+          border: `1px solid ${COLORS.borderSoft}`,
+          borderBottom: "none",
+        }}
+      >
+        <div
+          style={{
+            position: "sticky",
+            top: 0,
+            background: COLORS.bg,
+            zIndex: 2,
+            borderBottom: `1px solid ${COLORS.borderSoft}`,
+            padding: "20px 20px 14px",
+          }}
+        >
+          <div style={{ ...styles.pageTitle, fontSize: 20, lineHeight: 1.15 }}>
+            {model.brand?.name} {model.name}
+          </div>
+        </div>
 
-          <Modal.Body className="bg-dark text-light">
-            {model.imageUrl && (
-              <div className="ratio ratio-16x9 mb-3">
-                <img
-                  src={model.imageUrl}
-                  alt={model.name}
-                  style={{ objectFit: "cover", borderRadius: "0.5rem" }}
-                />
+        <div style={{ padding: 20 }}>
+          {model.imageUrl && (
+            <div
+              style={{
+                aspectRatio: "16/9",
+                borderRadius: 16,
+                overflow: "hidden",
+                background: COLORS.cardAlt,
+                marginBottom: 16,
+              }}
+            >
+              <img
+                src={model.imageUrl}
+                alt={model.name}
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
+            </div>
+          )}
+
+          <div
+            style={{
+              display: "flex",
+              gap: 6,
+              flexWrap: "wrap",
+              marginBottom: 16,
+            }}
+          >
+            <span
+              style={{
+                padding: "4px 10px",
+                borderRadius: 8,
+                background: COLORS.cardAlt,
+                border: `1px solid ${COLORS.borderSoft}`,
+                fontFamily: FONTS.mono,
+                fontSize: 9.5,
+                color: COLORS.textSecondary,
+              }}
+            >
+              {CATEGORY_LABELS[model.category] || model.category}
+            </span>
+            <span
+              style={{
+                padding: "4px 10px",
+                borderRadius: 8,
+                background: COLORS.cardAlt,
+                border: `1px solid ${COLORS.borderSoft}`,
+                fontFamily: FONTS.mono,
+                fontSize: 9.5,
+                color: COLORS.textSecondary,
+              }}
+            >
+              {model.yearEnd
+                ? `${model.yearStart} – ${model.yearEnd}`
+                : `DAL ${model.yearStart}`}
+            </span>
+            {ownedCount > 0 && (
+              <span
+                style={{
+                  padding: "4px 10px",
+                  borderRadius: 8,
+                  background: COLORS.accentSoftBg,
+                  border: `1px solid ${COLORS.accentSoftBorder}`,
+                  fontFamily: FONTS.mono,
+                  fontSize: 9.5,
+                  color: COLORS.accent,
+                }}
+              >
+                NEL TUO GARAGE ({ownedCount})
+              </span>
+            )}
+          </div>
+
+          <div
+            style={{
+              ...styles.statGrid,
+              gridTemplateColumns: model.weightKg ? "1fr 1fr 1fr" : "1fr 1fr",
+              marginBottom: showForm ? 20 : 4,
+            }}
+          >
+            <div style={styles.statCell}>
+              <span style={styles.statLabel}>CILINDRATA</span>
+              <span style={{ ...styles.statValue, fontSize: 17 }}>
+                {model.engineCc} CC
+              </span>
+            </div>
+            <div style={styles.statCell}>
+              <span style={styles.statLabel}>POTENZA</span>
+              <span style={{ ...styles.statValue, fontSize: 17 }}>
+                {model.horsePower} CV
+              </span>
+            </div>
+            {model.weightKg && (
+              <div style={styles.statCell}>
+                <span style={styles.statLabel}>PESO</span>
+                <span style={{ ...styles.statValue, fontSize: 17 }}>
+                  {model.weightKg} KG
+                </span>
               </div>
             )}
+          </div>
 
-            <div className="d-flex gap-2 flex-wrap mb-3">
-              <Badge bg="secondary">
-                {CATEGORY_LABELS[model.category] || model.category}
-              </Badge>
-              <Badge bg="secondary">
-                {model.yearEnd
-                  ? `${model.yearStart} – ${model.yearEnd}`
-                  : `dal ${model.yearStart}`}
-              </Badge>
-              {ownedCount > 0 && (
-                <Badge bg="warning" text="dark">
-                  Nel tuo garage ({ownedCount})
-                </Badge>
-              )}
-            </div>
-
-            <dl className="row mb-0">
-              <dt className="col-6 text-secondary fw-normal">Cilindrata</dt>
-              <dd className="col-6 text-end">{model.engineCc} cc</dd>
-
-              <dt className="col-6 text-secondary fw-normal">Potenza</dt>
-              <dd className="col-6 text-end">{model.horsePower} CV</dd>
-
-              {model.weightKg && (
-                <>
-                  <dt className="col-6 text-secondary fw-normal">Peso</dt>
-                  <dd className="col-6 text-end">{model.weightKg} kg</dd>
-                </>
-              )}
-            </dl>
-            {showForm && (
-              <Form
-                onSubmit={handleAdd}
-                className="mt-4 pt-3 border-top border-secondary"
-              >
-                <div className="row">
-                  <div className="col-6">
-                    <Form.Group className="mb-3">
-                      <Form.Label>Anno</Form.Label>
-                      <Form.Control
-                        type="number"
-                        className="bg-transparent"
-                        value={form.year}
-                        min={model.yearStart}
-                        max={model.yearEnd || new Date().getFullYear()}
-                        onChange={(e) =>
-                          setForm({ ...form, year: e.target.value })
-                        }
-                        required
-                      />
-                    </Form.Group>
+          {showForm && (
+            <form
+              onSubmit={handleAdd}
+              style={{
+                marginTop: 20,
+                paddingTop: 18,
+                borderTop: `1px solid ${COLORS.borderSoft}`,
+                display: "flex",
+                flexDirection: "column",
+                gap: 14,
+              }}
+            >
+              <div style={{ display: "flex", gap: 12 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+                    ANNO
                   </div>
-                  <div className="col-6">
-                    <Form.Group className="mb-3">
-                      <Form.Label>Km attuali</Form.Label>
-                      <Form.Control
-                        type="number"
-                        className="bg-transparent"
-                        value={form.initialMileage}
-                        min={0}
-                        onChange={(e) =>
-                          setForm({ ...form, initialMileage: e.target.value })
-                        }
-                        required
-                      />
-                    </Form.Group>
-                  </div>
+                  <input
+                    type="number"
+                    value={form.year}
+                    min={model.yearStart}
+                    max={model.yearEnd || new Date().getFullYear()}
+                    onChange={(e) => setForm({ ...form, year: e.target.value })}
+                    required
+                    style={{ ...styles.input, width: "100%" }}
+                  />
                 </div>
-
-                <Form.Group className="mb-3">
-                  <Form.Label>Targa (opzionale)</Form.Label>
-                  <Form.Control
-                    type="text"
-                    className="bg-transparent text-uppercase"
-                    placeholder="AB12345"
-                    value={form.licensePlate}
-                    pattern="[A-Za-z]{2}[0-9]{5}"
-                    title="Formato: due lettere seguite da cinque cifre (es. AB12345)"
-                    onChange={(e) =>
-                      setForm({ ...form, licensePlate: e.target.value })
-                    }
-                  />
-                  <Form.Text className="text-secondary">
-                    Formato: AB12345
-                  </Form.Text>
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                  <Form.Label>Soprannome (opzionale)</Form.Label>
-                  <Form.Control
-                    type="text"
-                    className="bg-transparent"
-                    placeholder="La Rossa"
-                    value={form.nickname}
-                    onChange={(e) =>
-                      setForm({ ...form, nickname: e.target.value })
-                    }
-                  />
-                </Form.Group>
-
-                {error && (
-                  <div className="alert alert-danger py-2">
-                    {error.data?.message || "Errore durante il salvataggio."}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+                    KM ATTUALI
                   </div>
-                )}
+                  <input
+                    type="number"
+                    value={form.initialMileage}
+                    min={0}
+                    onChange={(e) =>
+                      setForm({ ...form, initialMileage: e.target.value })
+                    }
+                    required
+                    style={{ ...styles.input, width: "100%" }}
+                  />
+                </div>
+              </div>
 
-                <Button
-                  type="submit"
-                  disabled={isAdding}
-                  className="w-100 rounded-pill fw-bold border-0"
-                  style={{ backgroundColor: "#FFBE5D", color: "#000" }}
+              <div>
+                <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+                  TARGA (OPZIONALE)
+                </div>
+                <input
+                  type="text"
+                  placeholder="AB12345"
+                  value={form.licensePlate}
+                  pattern="[A-Za-z]{2}[0-9]{5}"
+                  title="Formato: due lettere seguite da cinque cifre (es. AB12345)"
+                  onChange={(e) =>
+                    setForm({ ...form, licensePlate: e.target.value })
+                  }
+                  style={{ ...styles.input, textTransform: "uppercase" }}
+                />
+                <div
+                  style={{
+                    fontFamily: FONTS.mono,
+                    fontSize: 9.5,
+                    color: COLORS.textFaint,
+                    marginTop: 6,
+                  }}
                 >
-                  {isAdding ? "Salvataggio..." : "Conferma"}
-                </Button>
-              </Form>
-            )}
-          </Modal.Body>
+                  FORMATO: AB12345
+                </div>
+              </div>
 
-          {!showForm && (
-            <Modal.Footer className="bg-dark border-secondary">
-              {ownedCount > 0 && (
-                <Button
-                  variant="outline-light"
-                  onClick={() => navigate("/garage")}
+              <div>
+                <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+                  SOPRANNOME (OPZIONALE)
+                </div>
+                <input
+                  type="text"
+                  placeholder="La Rossa"
+                  value={form.nickname}
+                  onChange={(e) =>
+                    setForm({ ...form, nickname: e.target.value })
+                  }
+                  style={styles.input}
+                />
+              </div>
+
+              {error && (
+                <div
+                  style={{
+                    fontFamily: FONTS.body,
+                    fontSize: 13,
+                    color: COLORS.danger,
+                  }}
                 >
-                  Vai al garage
-                </Button>
+                  {error.data?.message || "Errore durante il salvataggio."}
+                </div>
               )}
 
-              <Button
-                className="rounded-pill px-4 fw-bold border-0"
-                style={{ backgroundColor: "#FFBE5D", color: "#000" }}
-                onClick={() => setShowForm(true)}
+              <button
+                type="submit"
+                disabled={isAdding}
+                style={{ ...styles.primaryButton, opacity: isAdding ? 0.6 : 1 }}
               >
-                Aggiungi al garage
-              </Button>
-            </Modal.Footer>
+                {isAdding ? "..." : "CONFERMA"}
+              </button>
+            </form>
           )}
-        </>
-      )}
-    </Modal>
+        </div>
+
+        {!showForm && (
+          <div
+            style={{
+              position: "sticky",
+              bottom: 0,
+              background: COLORS.bg,
+              borderTop: `1px solid ${COLORS.borderSoft}`,
+              padding: 20,
+              display: "flex",
+              gap: 10,
+            }}
+          >
+            {ownedCount > 0 && (
+              <button
+                type="button"
+                onClick={() => navigate("/garage")}
+                style={{ ...styles.secondaryButton, flex: 1 }}
+              >
+                VAI AL GARAGE
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setShowForm(true)}
+              style={{
+                ...styles.primaryButton,
+                flex: ownedCount > 0 ? 1 : undefined,
+                width: ownedCount > 0 ? undefined : "100%",
+              }}
+            >
+              AGGIUNGI AL GARAGE
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
   )
 }
 
