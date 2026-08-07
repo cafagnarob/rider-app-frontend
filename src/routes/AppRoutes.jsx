@@ -26,6 +26,8 @@ import EventsListPage from "../pages/EventsListPage"
 import EventCreatePage from "../pages/EventCreatePage"
 import EventDetailPage from "../pages/EventDetailPage"
 import MyInvitesPage from "../pages/MyInvitesPage"
+import VehicleDetailPage from "../pages/VehicleDetailPage"
+import SearchPage from "../pages/SearchPage"
 
 function AppRoutes() {
   return (
@@ -59,6 +61,8 @@ function AppRoutes() {
           <Route path="/events/new" element={<EventCreatePage />} />
           <Route path="/events/:eventId" element={<EventDetailPage />} />
           <Route path="/invites" element={<MyInvitesPage />} />
+          <Route path="/garage/:vehicleId" element={<VehicleDetailPage />} />
+          <Route path="/search" element={<SearchPage />} />
         </Route>
       </Route>
       <Route path="/login" element={<LoginPage />} />
