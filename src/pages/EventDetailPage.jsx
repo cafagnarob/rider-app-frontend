@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState } from "react"
 import { Spinner } from "react-bootstrap"
 import { useParams, useNavigate } from "react-router-dom"
-import { Map as MapLibreMap, Marker, LngLatBounds, Popup } from "maplibre-gl"
+import {
+  Map as MapLibreMap,
+  Marker,
+  LngLatBounds,
+  Popup,
+  FullscreenControl,
+} from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
 import {
   useGetEventByIdQuery,
@@ -18,6 +24,7 @@ import { VISIBILITY_LABELS } from "../utils/constants"
 import { COLORS, FONTS, styles } from "../styles/theme"
 import { FaArrowLeft } from "react-icons/fa"
 import AccessCodeCard from "../features/events/components/AccessCodeCard"
+import { MAP_STYLE_URL } from "../utils/mapStyle"
 
 function EventDetailPage() {
   const { eventId } = useParams()
@@ -56,11 +63,13 @@ function EventDetailPage() {
 
     const map = new MapLibreMap({
       container: containerRef.current,
-      style: `https://api.maptiler.com/maps/outdoor-v2/style.json?key=${import.meta.env.VITE_MAPTILER_KEY}`,
+      style: MAP_STYLE_URL,
       center: coordinates[0],
       zoom: 11,
     })
     mapRef.current = map
+
+    map.addControl(new FullscreenControl(), "top-right")
 
     const draw = () => {
       map.resize()
@@ -196,6 +205,138 @@ function EventDetailPage() {
         Evento non trovato o accesso negato.
       </div>
     )
+
+  if (event.locked) {
+    const distanceKmLocked = event.route
+      ? (event.route.distanceMeters / 1000).toFixed(1).replace(".", ",")
+      : null
+    const durationMinLocked = event.route
+      ? Math.round(event.route.durationSeconds / 60)
+      : null
+
+    return (
+      <div style={{ ...styles.pageBg, minHeight: "100vh", paddingTop: 20 }}>
+        <div style={{ padding: "0 20px" }}>
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            style={{ ...styles.iconButton, marginBottom: 16 }}
+          >
+            <FaArrowLeft />
+          </button>
+
+          <div style={{ ...styles.pageTitle, fontSize: 30, marginBottom: 8 }}>
+            {event.title}
+          </div>
+          <div
+            style={{
+              fontFamily: FONTS.mono,
+              fontSize: 11,
+              color: COLORS.textMuted,
+              marginBottom: 16,
+            }}
+          >
+            Organizzato da {event.organizerUsername}
+          </div>
+
+          <span
+            style={{
+              display: "inline-block",
+              padding: "5px 11px",
+              borderRadius: 9,
+              marginBottom: 18,
+              background: COLORS.accentSoftBg,
+              border: `1px solid ${COLORS.accentSoftBorder}`,
+              fontFamily: FONTS.mono,
+              fontSize: 10,
+              color: COLORS.accent,
+            }}
+          >
+            EVENTO CON CODICE
+          </span>
+
+          <p
+            style={{
+              fontSize: 14.5,
+              lineHeight: 1.55,
+              color: "rgba(255,255,255,.85)",
+              marginBottom: 20,
+            }}
+          >
+            {event.description}
+          </p>
+
+          {event.route && (
+            <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
+              <span
+                style={{
+                  padding: "5px 11px",
+                  borderRadius: 8,
+                  background: COLORS.cardAlt,
+                  border: `1px solid ${COLORS.borderSoft}`,
+                  fontFamily: FONTS.mono,
+                  fontSize: 10,
+                  color: COLORS.textSecondary,
+                }}
+              >
+                {distanceKmLocked} KM
+              </span>
+              <span
+                style={{
+                  padding: "5px 11px",
+                  borderRadius: 8,
+                  background: COLORS.cardAlt,
+                  border: `1px solid ${COLORS.borderSoft}`,
+                  fontFamily: FONTS.mono,
+                  fontSize: 10,
+                  color: COLORS.textSecondary,
+                }}
+              >
+                {durationMinLocked} MIN
+              </span>
+            </div>
+          )}
+
+          <div style={{ ...styles.card, padding: 18 }}>
+            <div style={{ ...styles.fieldLabel, marginBottom: 10 }}>
+              HAI IL CODICE DI ACCESSO?
+            </div>
+            <input
+              type="text"
+              placeholder="Inserisci il codice"
+              value={accessCode}
+              onChange={(e) => setAccessCode(e.target.value)}
+              style={{ ...styles.input, height: 46, marginBottom: 12 }}
+            />
+            {joinError && (
+              <div
+                style={{
+                  fontFamily: FONTS.body,
+                  fontSize: 13,
+                  color: COLORS.danger,
+                  marginBottom: 12,
+                }}
+              >
+                {joinError}
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={handleJoin}
+              disabled={isJoining || !accessCode.trim()}
+              style={{
+                ...styles.primaryButton,
+                width: "100%",
+                opacity: isJoining || !accessCode.trim() ? 0.6 : 1,
+              }}
+            >
+              {isJoining ? "..." : "SBLOCCA EVENTO"}
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   const isFull = event.currentParticipants >= event.maxParticipants
   const start = new Date(event.startDateTime)
