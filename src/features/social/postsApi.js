@@ -92,7 +92,6 @@ export const postsApi = apiSlice.injectEndpoints({
         "Post",
       ],
     }),
-
     createPost: builder.mutation({
       query: ({ data, files }) => {
         const formData = new FormData()
@@ -115,6 +114,11 @@ export const postsApi = apiSlice.injectEndpoints({
         `/posts/user/${userId}?page=${page}&size=${size}`,
       providesTags: ["Post"],
     }),
+    getPostsByVehicle: builder.query({
+      query: ({ vehicleId, page = 0, size = 20 }) =>
+        `/posts/vehicle/${vehicleId}?page=${page}&size=${size}`,
+      providesTags: ["Post"],
+    }),
   }),
 })
 
@@ -127,5 +131,6 @@ export const {
   useAddCommentMutation,
   useDeleteCommentMutation,
   useCreatePostMutation,
+  useGetPostsByVehicleQuery,
   useGetUserPostsQuery,
 } = postsApi
