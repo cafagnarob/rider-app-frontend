@@ -56,3 +56,43 @@ body {
 .qj-popup .maplibregl-popup-tip {
   border-top-color: #13141a;
 }
+
+.maplibregl-ctrl-group {
+  background: #13141a !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+.maplibregl-ctrl-group button:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.maplibregl-ctrl-icon {
+  filter: invert(1) brightness(1.5);
+}
+
+.maplibregl-ctrl-attrib {
+  background: transparent !important;
+  opacity: 0.3;
+  transition: opacity 0.2s ease;
+  box-shadow: none !important;
+}
+
+.maplibregl-ctrl-attrib:hover,
+.maplibregl-ctrl-attrib:focus-within {
+  opacity: 0.9;
+}
+
+.maplibregl-ctrl-attrib-button {
+  filter: invert(1) brightness(1.8);
+}
+
+.maplibregl-ctrl-attrib.maplibregl-compact::after {
+  filter: invert(1) brightness(1.8);
+  width: 16px !important;
+  height: 16px !important;
+}
+
+.maplibregl-ctrl-bottom-right {
+  bottom: 4px !important;
+  right: 4px !important;
+}
