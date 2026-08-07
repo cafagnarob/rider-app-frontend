@@ -1,12 +1,37 @@
 import { useEffect, useRef } from "react"
 import {
   Map,
-  NavigationControl,
   Marker,
   Popup,
   LngLatBounds,
+  FullscreenControl,
 } from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
+import { COLORS, FONTS } from "../../styles/theme"
+import { MAP_STYLE_URL } from "../../utils/mapStyle"
+
+function buildEndpointMarker(color, isPulsing) {
+  const el = document.createElement("div")
+  el.style.cssText = "width: 20px; height: 20px;"
+
+  const dot = document.createElement("div")
+  dot.style.cssText = `
+    width: 100%; height: 100%; border-radius: 50%; position: relative;
+    background: ${color}; border: 3px solid ${COLORS.bg};
+  `
+  el.appendChild(dot)
+
+  if (isPulsing) {
+    const pulse = document.createElement("span")
+    pulse.style.cssText = `
+      position: absolute; inset: -8px; border-radius: 50%;
+      background: ${color}; animation: qjpulse 2.6s ease-out infinite;
+    `
+    dot.appendChild(pulse)
+  }
+
+  return el
+}
 
 function RideMap({ points, height = "360px" }) {
   const containerRef = useRef(null)
@@ -22,14 +47,13 @@ function RideMap({ points, height = "360px" }) {
 
     const map = new Map({
       container: containerRef.current,
-      style: `https://api.maptiler.com/maps/outdoor-v2/style.json?key=${import.meta.env.VITE_MAPTILER_KEY}`,
+      style: MAP_STYLE_URL,
       center: coordinates[0],
       zoom: 12,
     })
-
     mapRef.current = map
 
-    map.addControl(new NavigationControl(), "top-right")
+    map.addControl(new FullscreenControl(), "top-right")
 
     map.on("error", (e) => {
       console.error("MapLibre error:", e.error)
@@ -58,19 +82,29 @@ function RideMap({ points, height = "360px" }) {
           "line-cap": "round",
         },
         paint: {
-          "line-color": "#FFBE5D",
+          "line-color": COLORS.accent,
           "line-width": 4,
         },
       })
 
-      new Marker({ color: "#198754" })
+      const popupClass = { className: "qj-popup" }
+
+      new Marker({ element: buildEndpointMarker("#4ADE80", true) })
         .setLngLat(coordinates[0])
-        .setPopup(new Popup().setText("Partenza"))
+        .setPopup(
+          new Popup({ offset: 16, closeButton: false, ...popupClass }).setText(
+            "Partenza",
+          ),
+        )
         .addTo(map)
 
-      new Marker({ color: "#dc3545" })
+      new Marker({ element: buildEndpointMarker(COLORS.danger, false) })
         .setLngLat(coordinates[coordinates.length - 1])
-        .setPopup(new Popup().setText("Arrivo"))
+        .setPopup(
+          new Popup({ offset: 16, closeButton: false, ...popupClass }).setText(
+            "Arrivo",
+          ),
+        )
         .addTo(map)
 
       const first = coordinates[0]
@@ -116,10 +150,23 @@ function RideMap({ points, height = "360px" }) {
   if (!points || points.length === 0) {
     return (
       <div
-        className="d-flex align-items-center justify-content-center border border-secondary rounded"
-        style={{ height }}
+        style={{
+          height,
+          borderRadius: 16,
+          background: COLORS.cardAlt,
+          border: `1px solid ${COLORS.borderSoft}`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
       >
-        <span className="text-secondary small">
+        <span
+          style={{
+            fontFamily: FONTS.body,
+            fontSize: 13,
+            color: COLORS.textFaint,
+          }}
+        >
           Nessun tracciato disponibile
         </span>
       </div>
@@ -129,12 +176,7 @@ function RideMap({ points, height = "360px" }) {
   return (
     <div
       ref={containerRef}
-      style={{
-        width: "100%",
-        height,
-        borderRadius: "0.5rem",
-        overflow: "hidden",
-      }}
+      style={{ width: "100%", height, borderRadius: 16, overflow: "hidden" }}
     />
   )
 }
