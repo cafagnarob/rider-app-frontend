@@ -1,8 +1,20 @@
 import { useState } from "react"
-import { Card, Spinner, Button, Badge } from "react-bootstrap"
+import { Spinner } from "react-bootstrap"
 import { Link } from "react-router-dom"
 import { useGetMyRidesQuery } from "../features/rides/ridesApi"
 import { RIDE_TYPE_LABELS } from "../utils/constants"
+import NotificationBell from "../features/notification/components/NotificationBell"
+import { COLORS, FONTS, styles } from "../styles/theme"
+
+const pillStyle = {
+  padding: "4px 10px",
+  borderRadius: 8,
+  background: COLORS.cardAlt,
+  border: `1px solid ${COLORS.borderSoft}`,
+  fontFamily: FONTS.mono,
+  fontSize: 9.5,
+  color: COLORS.textSecondary,
+}
 
 function RidesHistoryPage() {
   const [page, setPage] = useState(0)
@@ -10,116 +22,219 @@ function RidesHistoryPage() {
 
   if (isLoading) {
     return (
-      <div className="text-center py-5">
-        <Spinner animation="border" variant="light" />
+      <div style={{ textAlign: "center", padding: "60px 0" }}>
+        <Spinner animation="border" style={{ color: COLORS.accent }} />
       </div>
     )
   }
 
   if (isError) {
     return (
-      <div className="alert alert-danger">Impossibile caricare lo storico.</div>
+      <div style={{ ...styles.emptyState, margin: 20 }}>
+        Impossibile caricare lo storico.
+      </div>
     )
   }
 
   return (
-    <div style={{ maxWidth: "640px", margin: "0 auto" }}>
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="mb-0">I miei giri</h2>
-        <Link to="/rides/new">
-          <Button
-            className="rounded-pill px-3 fw-bold border-0"
-            style={{ backgroundColor: "#FFBE5D", color: "#000" }}
+    <div style={{ ...styles.pageBg, paddingTop: 20, paddingBottom: 40 }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "0 20px 18px",
+        }}
+      >
+        <div style={{ ...styles.pageTitle, fontSize: 26 }}>I MIEI GIRI</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <NotificationBell />
+          <Link
+            to="/rides/new"
+            style={{
+              height: 40,
+              padding: "0 15px",
+              borderRadius: 12,
+              background: COLORS.accent,
+              border: "none",
+              color: COLORS.onAccent,
+              fontFamily: FONTS.heading,
+              fontWeight: 700,
+              fontSize: 14,
+              letterSpacing: ".04em",
+              display: "inline-flex",
+              alignItems: "center",
+              textDecoration: "none",
+            }}
           >
-            + Nuova uscita
-          </Button>
-        </Link>
+            + USCITA
+          </Link>
+        </div>
       </div>
 
       {data.content.length === 0 ? (
-        <p className="text-secondary text-center py-5">
+        <p
+          style={{
+            fontFamily: FONTS.body,
+            fontSize: 13,
+            color: COLORS.textFaint,
+            textAlign: "center",
+            padding: "60px 20px",
+          }}
+        >
           Non hai ancora registrato nessuna uscita.
         </p>
       ) : (
         <div
-          className="d-flex flex-column gap-3"
-          style={{ opacity: isFetching ? 0.6 : 1 }}
+          style={{
+            padding: "0 20px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 12,
+            opacity: isFetching ? 0.6 : 1,
+          }}
         >
           {data.content.map((ride) => (
             <Link
               key={ride.id}
               to={`/rides/${ride.id}`}
-              className="text-decoration-none"
+              style={{ textDecoration: "none" }}
             >
-              <Card className="bg-dark text-light border-secondary">
-                <Card.Body>
-                  <div className="d-flex justify-content-between align-items-start mb-2">
-                    <div>
-                      <Card.Title className="fs-6 mb-1">
-                        {ride.title || "Uscita senza titolo"}
-                      </Card.Title>
-                      <small className="text-secondary">
-                        {new Date(ride.startedAt).toLocaleDateString("it-IT", {
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        })}
-                      </small>
+              <div style={{ ...styles.card, padding: 16 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                    marginBottom: 10,
+                  }}
+                >
+                  <div>
+                    <div
+                      style={{
+                        fontFamily: FONTS.heading,
+                        fontWeight: 700,
+                        fontSize: 17,
+                        lineHeight: 1.15,
+                        color: COLORS.text,
+                      }}
+                    >
+                      {ride.title || "Uscita senza titolo"}
                     </div>
-                    {ride.inProgress && <Badge bg="danger">In corso</Badge>}
+                    <div
+                      style={{
+                        fontFamily: FONTS.mono,
+                        fontSize: 10,
+                        color: COLORS.textMuted,
+                        marginTop: 3,
+                      }}
+                    >
+                      {new Date(ride.startedAt).toLocaleDateString("it-IT", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })}
+                    </div>
                   </div>
+                  {ride.inProgress && (
+                    <span
+                      style={{
+                        padding: "4px 10px",
+                        borderRadius: 8,
+                        background: COLORS.dangerBg,
+                        border: `1px solid ${COLORS.dangerBorder}`,
+                        fontFamily: FONTS.mono,
+                        fontSize: 9,
+                        color: COLORS.danger,
+                        flexShrink: 0,
+                      }}
+                    >
+                      IN CORSO
+                    </span>
+                  )}
+                </div>
 
-                  <div className="d-flex gap-2 flex-wrap">
-                    {ride.type && (
-                      <Badge bg="secondary">
-                        {RIDE_TYPE_LABELS[ride.type] || ride.type}
-                      </Badge>
-                    )}
-                    {ride.distanceKm != null && (
-                      <Badge bg="secondary">
-                        {ride.distanceKm.toFixed(1)} km
-                      </Badge>
-                    )}
-                    {ride.avgSpeedKmH != null && (
-                      <Badge bg="secondary">
-                        {ride.avgSpeedKmH.toFixed(0)} km/h media
-                      </Badge>
-                    )}
-                    {ride.vehicle && (
-                      <Badge bg="warning" text="dark">
-                        {ride.vehicle.nickname ||
-                          `${ride.vehicle.brandName} ${ride.vehicle.modelName}`}
-                      </Badge>
-                    )}
-                  </div>
-                </Card.Body>
-              </Card>
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                  {ride.type && (
+                    <span style={pillStyle}>
+                      {RIDE_TYPE_LABELS[ride.type] || ride.type}
+                    </span>
+                  )}
+                  {ride.distanceKm != null && (
+                    <span style={pillStyle}>
+                      {ride.distanceKm.toFixed(1).replace(".", ",")} KM
+                    </span>
+                  )}
+                  {ride.avgSpeedKmH != null && (
+                    <span style={pillStyle}>
+                      {ride.avgSpeedKmH.toFixed(0)} KM/H MEDIA
+                    </span>
+                  )}
+                  {ride.vehicle && (
+                    <span
+                      style={{
+                        ...pillStyle,
+                        background: COLORS.accentSoftBg,
+                        border: `1px solid ${COLORS.accentSoftBorder}`,
+                        color: COLORS.accent,
+                      }}
+                    >
+                      {ride.vehicle.nickname ||
+                        `${ride.vehicle.brandName} ${ride.vehicle.modelName}`}
+                    </span>
+                  )}
+                </div>
+              </div>
             </Link>
           ))}
         </div>
       )}
 
       {data.totalPages > 1 && (
-        <div className="d-flex justify-content-center align-items-center gap-3 mt-4">
-          <Button
-            variant="outline-light"
-            size="sm"
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: 16,
+            padding: "24px 20px",
+          }}
+        >
+          <button
+            type="button"
             disabled={data.first || isFetching}
             onClick={() => setPage((p) => p - 1)}
+            style={{
+              ...styles.secondaryButton,
+              height: 40,
+              padding: "0 16px",
+              opacity: data.first ? 0.4 : 1,
+            }}
           >
-            Precedente
-          </Button>
-          <span className="text-secondary">
+            PRECEDENTE
+          </button>
+          <span
+            style={{
+              fontFamily: FONTS.mono,
+              fontSize: 11,
+              color: COLORS.textMuted,
+            }}
+          >
             {data.number + 1} / {data.totalPages}
           </span>
-          <Button
-            variant="outline-light"
-            size="sm"
+          <button
+            type="button"
             disabled={data.last || isFetching}
             onClick={() => setPage((p) => p + 1)}
+            style={{
+              ...styles.secondaryButton,
+              height: 40,
+              padding: "0 16px",
+              opacity: data.last ? 0.4 : 1,
+            }}
           >
-            Successiva
-          </Button>
+            SUCCESSIVA
+          </button>
         </div>
       )}
     </div>
