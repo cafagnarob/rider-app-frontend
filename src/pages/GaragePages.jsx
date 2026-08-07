@@ -1,17 +1,12 @@
-import { Badge, Button, Card, Modal, Spinner } from "react-bootstrap"
-import { Link } from "react-router-dom"
-import { CATEGORY_LABELS } from "../utils/constants"
-import VehicleEditModal from "../features/vehicles/components/VehicleEditModal"
-import {
-  useDeleteVehicleMutation,
-  useGetMyVehiclesQuery,
-} from "../features/vehicles/vehiclesApi"
-import { useState } from "react"
+import { Spinner } from "react-bootstrap"
+import { Link, useNavigate } from "react-router-dom"
+import { useGetMyVehiclesQuery } from "../features/vehicles/vehiclesApi"
 import {
   useClearVehicleMutation,
   useGetCurrentUserQuery,
   useSelectVehicleMutation,
 } from "../features/users/usersApi"
+import { COLORS, FONTS, styles } from "../styles/theme"
 
 function GaragePage() {
   const { data: profile } = useGetCurrentUserQuery()
@@ -21,10 +16,8 @@ function GaragePage() {
   const activeVehicleId = profile?.currentVehicle?.id
 
   const { data: vehicles, isLoading, isError } = useGetMyVehiclesQuery()
-  const [deleteVehicle, { isLoading: isDeleting }] = useDeleteVehicleMutation()
 
-  const [editing, setEditing] = useState(null)
-  const [confirmDelete, setConfirmDelete] = useState(null)
+  const navigate = useNavigate()
 
   const handleToggleActive = async (vehicleId) => {
     try {
@@ -38,192 +31,218 @@ function GaragePage() {
     }
   }
 
-  const handleDelete = async () => {
-    try {
-      await deleteVehicle(confirmDelete.id).unwrap()
-      setConfirmDelete(null)
-    } catch (err) {
-      console.error("Eliminazione fallita:", err)
-    }
-  }
-
   if (isLoading) {
     return (
-      <div className="text-center py-5">
-        <Spinner animation="border" variant="light" />
+      <div style={{ textAlign: "center", padding: "60px 0" }}>
+        <Spinner animation="border" style={{ color: COLORS.accent }} />
       </div>
     )
   }
 
   if (isError) {
     return (
-      <div className="alert alert-danger">Impossibile caricare il garage.</div>
-    )
-  }
-
-  if (vehicles.length === 0) {
-    return (
-      <div className="text-center py-5">
-        <h2 className="mb-3">Il tuo garage è vuoto</h2>
-        <p className="text-secondary mb-4">
-          Aggiungi la tua prima moto scegliendola dal catalogo.
-        </p>
-        <Link to="/catalog">
-          <Button
-            className="rounded-pill px-4 fw-bold border-0"
-            style={{ backgroundColor: "#FFBE5D", color: "#000" }}
-          >
-            Vai al catalogo
-          </Button>
-        </Link>
+      <div style={{ ...styles.emptyState, margin: 20 }}>
+        Impossibile caricare il garage.
       </div>
     )
   }
 
   return (
-    <>
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="mb-0">Il mio garage</h2>
-        <Link to="/catalog">
-          <Button variant="outline-light" size="sm">
-            + Aggiungi moto
-          </Button>
+    <div style={{ ...styles.pageBg, paddingTop: 20, paddingBottom: 40 }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "0 20px 20px",
+        }}
+      >
+        <div style={{ ...styles.pageTitle, fontSize: 28 }}>IL MIO GARAGE</div>
+        <Link
+          to="/catalog"
+          style={{
+            height: 40,
+            padding: "0 15px",
+            borderRadius: 12,
+            background: COLORS.accent,
+            border: "none",
+            color: COLORS.onAccent,
+            fontFamily: FONTS.heading,
+            fontWeight: 700,
+            fontSize: 15,
+            letterSpacing: ".04em",
+            display: "inline-flex",
+            alignItems: "center",
+            textDecoration: "none",
+          }}
+        >
+          + MOTO
         </Link>
       </div>
 
-      <div className="row g-3">
-        {vehicles.map((vehicle) => {
-          const isActive = vehicle.id === activeVehicleId
+      {vehicles.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "60px 20px" }}>
+          <div
+            style={{
+              fontFamily: FONTS.heading,
+              fontWeight: 700,
+              fontSize: 22,
+              marginBottom: 10,
+            }}
+          >
+            IL TUO GARAGE È VUOTO
+          </div>
+          <p
+            style={{
+              fontFamily: FONTS.body,
+              fontSize: 13,
+              color: COLORS.textSecondary,
+              marginBottom: 22,
+            }}
+          >
+            Aggiungi la tua prima moto scegliendola dal catalogo.
+          </p>
+          <Link
+            to="/catalog"
+            style={{
+              ...styles.primaryButton,
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "0 32px",
+              textDecoration: "none",
+            }}
+          >
+            VAI AL CATALOGO
+          </Link>
+        </div>
+      ) : (
+        <div
+          style={{
+            padding: "0 20px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 14,
+          }}
+        >
+          {vehicles.map((vehicle) => {
+            const isActive = vehicle.id === activeVehicleId
+            const label =
+              vehicle.nickname ||
+              `${vehicle.model.brand.name} ${vehicle.model.name}`
 
-          return (
-            <div className="col-12 col-md-6" key={vehicle.id}>
-              <Card
-                className="bg-dark text-light h-100"
+            return (
+              <div
+                key={vehicle.id}
+                onClick={() => navigate(`/garage/${vehicle.id}`)}
                 style={{
-                  borderColor: isActive ? "#FFBE5D" : "#6c757d",
-                  borderWidth: isActive ? "2px" : "1px",
+                  ...styles.card,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 14,
+                  padding: 14,
+                  cursor: "pointer",
+                  borderColor: isActive
+                    ? COLORS.accentSoftBorder
+                    : COLORS.border,
                 }}
               >
-                {(vehicle.photoUrl || vehicle.model.imageUrl) && (
-                  <div className="ratio ratio-16x9">
+                <div
+                  style={{
+                    width: 64,
+                    height: 64,
+                    borderRadius: 12,
+                    overflow: "hidden",
+                    background: COLORS.cardAlt,
+                    flexShrink: 0,
+                  }}
+                >
+                  {(vehicle.photoUrl || vehicle.model.imageUrl) && (
                     <img
                       src={vehicle.photoUrl || vehicle.model.imageUrl}
-                      alt={vehicle.model.name}
-                      style={{ objectFit: "cover" }}
+                      alt={label}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
                     />
-                  </div>
-                )}
-
-                <Card.Body>
-                  {isActive && (
-                    <Badge bg="warning" text="dark" className="mb-2">
-                      Moto attiva
-                    </Badge>
                   )}
+                </div>
 
-                  <div className="d-flex justify-content-between align-items-start">
-                    <div>
-                      <Card.Title className="fs-6 mb-1">
-                        {vehicle.nickname ||
-                          `${vehicle.model.brand.name} ${vehicle.model.name}`}
-                      </Card.Title>
-                      {vehicle.nickname && (
-                        <p className="text-secondary small mb-2">
-                          {vehicle.model.brand.name} {vehicle.model.name}
-                        </p>
-                      )}
-                    </div>
-                    {vehicle.licensePlate && (
-                      <Badge bg="light" text="dark" className="font-monospace">
-                        {vehicle.licensePlate}
-                      </Badge>
-                    )}
-                  </div>
-
-                  <div className="d-flex gap-2 flex-wrap mb-3">
-                    <Badge bg="secondary">{vehicle.year}</Badge>
-                    <Badge bg="secondary">{vehicle.model.engineCc} cc</Badge>
-                    <Badge bg="secondary">
-                      {CATEGORY_LABELS[vehicle.model.category] ||
-                        vehicle.model.category}
-                    </Badge>
-                    <Badge bg="secondary">
-                      {vehicle.currentMileage.toLocaleString("it-IT")} km
-                    </Badge>
-                  </div>
-
-                  <div className="d-flex gap-2 flex-wrap">
-                    <Button
-                      variant={isActive ? "warning" : "outline-warning"}
-                      size="sm"
-                      disabled={isSelecting || isClearing}
-                      onClick={() => handleToggleActive(vehicle.id)}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  {isActive && (
+                    <span
+                      style={{
+                        display: "inline-block",
+                        padding: "2px 8px",
+                        borderRadius: 6,
+                        marginBottom: 4,
+                        background: COLORS.accentSoftBg,
+                        border: `1px solid ${COLORS.accentSoftBorder}`,
+                        fontFamily: FONTS.mono,
+                        fontSize: 9,
+                        color: COLORS.accent,
+                      }}
                     >
-                      {isActive ? "Disattiva" : "Rendi attiva"}
-                    </Button>
-                    <Button
-                      variant="outline-light"
-                      size="sm"
-                      onClick={() => setEditing(vehicle)}
-                    >
-                      Modifica
-                    </Button>
-                    <Button
-                      variant="outline-danger"
-                      size="sm"
-                      onClick={() => setConfirmDelete(vehicle)}
-                    >
-                      Elimina
-                    </Button>
+                      PRINCIPALE
+                    </span>
+                  )}
+                  <div
+                    style={{
+                      fontFamily: FONTS.heading,
+                      fontWeight: 700,
+                      fontSize: 18,
+                      lineHeight: 1.15,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {label}
                   </div>
-                </Card.Body>
-              </Card>
-            </div>
-          )
-        })}
-      </div>
+                  <div
+                    style={{
+                      fontFamily: FONTS.mono,
+                      fontSize: 10,
+                      color: COLORS.textMuted,
+                      marginTop: 3,
+                    }}
+                  >
+                    {vehicle.model.brand.name} {vehicle.model.name}
+                    {vehicle.licensePlate && ` · ${vehicle.licensePlate}`}
+                  </div>
+                </div>
 
-      <VehicleEditModal
-        key={editing?.id}
-        vehicle={editing}
-        onClose={() => setEditing(null)}
-      />
-
-      <Modal
-        show={!!confirmDelete}
-        onHide={() => setConfirmDelete(null)}
-        centered
-        data-bs-theme="dark"
-      >
-        <Modal.Header
-          closeButton
-          className="bg-dark text-light border-secondary"
-        >
-          <Modal.Title className="fs-5">Eliminare il veicolo?</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="bg-dark text-light">
-          Stai per eliminare{" "}
-          <strong>
-            {confirmDelete?.nickname ||
-              `${confirmDelete?.model.brand.name} ${confirmDelete?.model.name}`}
-          </strong>
-          . I giri già registrati con questa moto verranno mantenuti, ma non
-          saranno più collegati ad alcun veicolo. L'operazione non è
-          reversibile.
-        </Modal.Body>
-        <Modal.Footer className="bg-dark border-secondary">
-          <Button
-            variant="outline-light"
-            onClick={() => setConfirmDelete(null)}
-          >
-            Annulla
-          </Button>
-          <Button variant="danger" disabled={isDeleting} onClick={handleDelete}>
-            {isDeleting ? "Eliminazione..." : "Elimina"}
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleToggleActive(vehicle.id)
+                  }}
+                  disabled={isSelecting || isClearing}
+                  style={{
+                    height: 32,
+                    padding: "0 11px",
+                    borderRadius: 9,
+                    flexShrink: 0,
+                    background: isActive ? COLORS.accent : COLORS.card,
+                    border: `1px solid ${isActive ? COLORS.accent : COLORS.borderStrong}`,
+                    color: isActive ? COLORS.onAccent : COLORS.textSecondary,
+                    fontFamily: FONTS.mono,
+                    fontSize: 9,
+                    cursor: "pointer",
+                  }}
+                >
+                  {isActive ? "ATTIVA" : "USA"}
+                </button>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
   )
 }
+
 export default GaragePage
