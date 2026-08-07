@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Card, Spinner, Button, Badge, Modal } from "react-bootstrap"
+import { Spinner } from "react-bootstrap"
 import { useParams, useNavigate } from "react-router-dom"
 import { FaArrowLeft, FaTrash } from "react-icons/fa"
 import {
@@ -10,6 +10,7 @@ import RideMap from "../components/map/RideMap"
 import { RIDE_TYPE_LABELS } from "../utils/constants"
 import { formatDuration } from "../utils/geo"
 import RideCharts from "../features/rides/components/RideCharts"
+import { COLORS, FONTS, styles } from "../styles/theme"
 
 function RideDetailPage() {
   const { rideId } = useParams()
@@ -29,130 +30,275 @@ function RideDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="text-center py-5">
-        <Spinner animation="border" variant="light" />
+      <div style={{ textAlign: "center", padding: "60px 0" }}>
+        <Spinner animation="border" style={{ color: COLORS.accent }} />
       </div>
     )
   }
 
   if (isError)
-    return <div className="alert alert-danger">Giro non trovato.</div>
+    return (
+      <div style={{ ...styles.emptyState, margin: 20 }}>Giro non trovato.</div>
+    )
 
   const duration = ride.endedAt
     ? (new Date(ride.endedAt) - new Date(ride.startedAt)) / 1000
     : 0
 
   return (
-    <div style={{ maxWidth: "640px", margin: "0 auto" }}>
-      <div className="d-flex align-items-center gap-3 mb-3">
-        <Button variant="outline-light" size="sm" onClick={() => navigate(-1)}>
-          <FaArrowLeft />
-        </Button>
-        <div className="flex-grow-1">
-          <h4 className="mb-0">{ride.title || "Uscita senza titolo"}</h4>
-          <small className="text-secondary">
-            {new Date(ride.startedAt).toLocaleString("it-IT")}
-          </small>
-        </div>
-        <Button
-          variant="outline-danger"
-          size="sm"
-          onClick={() => setConfirm(true)}
+    <div style={{ ...styles.pageBg, paddingTop: 20, paddingBottom: 40 }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          padding: "0 20px 16px",
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          style={styles.iconButton}
         >
-          <FaTrash />
-        </Button>
+          <FaArrowLeft />
+        </button>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div
+            style={{
+              fontFamily: FONTS.heading,
+              fontWeight: 700,
+              fontSize: 20,
+              lineHeight: 1.15,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {ride.title || "Uscita senza titolo"}
+          </div>
+          <div
+            style={{
+              fontFamily: FONTS.mono,
+              fontSize: 10,
+              color: COLORS.textMuted,
+              marginTop: 2,
+            }}
+          >
+            {new Date(ride.startedAt).toLocaleString("it-IT")}
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => setConfirm(true)}
+          style={{ ...styles.iconButton, color: COLORS.danger, flexShrink: 0 }}
+        >
+          <FaTrash size={13} />
+        </button>
       </div>
 
-      <div className="mb-4">
+      <div
+        style={{
+          margin: "0 20px 18px",
+          borderRadius: 18,
+          overflow: "hidden",
+          border: `1px solid ${COLORS.border}`,
+        }}
+      >
         <RideMap points={ride.points} />
       </div>
 
-      <Card className="bg-dark text-light border-secondary mb-4">
-        <Card.Body>
-          <RideCharts points={ride.points} />
-        </Card.Body>
-      </Card>
+      <div style={{ ...styles.card, padding: 16, margin: "0 20px 16px" }}>
+        <RideCharts points={ride.points} />
+      </div>
 
-      <Card className="bg-dark text-light border-secondary mb-4">
-        <Card.Body>
-          <div className="row text-center g-3">
-            <div className="col-4">
-              <div className="fs-4 fw-bold">
-                {ride.distanceKm?.toFixed(1) ?? "—"}
-              </div>
-              <small className="text-secondary">km</small>
-            </div>
-            <div className="col-4">
-              <div className="fs-4 fw-bold">
-                {ride.avgSpeedKmH?.toFixed(0) ?? "—"}
-              </div>
-              <small className="text-secondary">km/h media</small>
-            </div>
-            <div className="col-4">
-              <div className="fs-4 fw-bold">
-                {ride.maxSpeedKmH?.toFixed(0) ?? "—"}
-              </div>
-              <small className="text-secondary">km/h max</small>
-            </div>
-            <div className="col-4">
-              <div className="fs-5">{formatDuration(duration)}</div>
-              <small className="text-secondary">durata</small>
-            </div>
-            <div className="col-4">
-              <div className="fs-5">{ride.stopsCount}</div>
-              <small className="text-secondary">soste</small>
-            </div>
-            <div className="col-4">
-              <div className="fs-5">
-                {formatDuration(ride.totalStopDurationSeconds)}
-              </div>
-              <small className="text-secondary">tempo fermo</small>
-            </div>
-          </div>
-
-          <div className="d-flex gap-2 flex-wrap mt-3">
-            {ride.type && (
-              <Badge bg="secondary">
-                {RIDE_TYPE_LABELS[ride.type] || ride.type}
-              </Badge>
-            )}
-            {ride.vehicle && (
-              <Badge bg="warning" text="dark">
-                {ride.vehicle.nickname ||
-                  `${ride.vehicle.brandName} ${ride.vehicle.modelName}`}
-              </Badge>
-            )}
-            <Badge bg="secondary">{ride.points.length} punti GPS</Badge>
-          </div>
-
-          {ride.notes && <p className="mt-3 mb-0">{ride.notes}</p>}
-        </Card.Body>
-      </Card>
-
-      <Modal
-        show={confirm}
-        onHide={() => setConfirm(false)}
-        centered
-        data-bs-theme="dark"
-      >
-        <Modal.Header
-          closeButton
-          className="bg-dark text-light border-secondary"
+      <div style={{ padding: "0 20px" }}>
+        <div
+          style={{
+            ...styles.statGrid,
+            gridTemplateColumns: "1fr 1fr 1fr",
+            marginBottom: 20,
+          }}
         >
-          <Modal.Title className="fs-5">Eliminare il giro?</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="bg-dark text-light">
-          Il tracciato e le statistiche verranno persi definitivamente.
-        </Modal.Body>
-        <Modal.Footer className="bg-dark border-secondary">
-          <Button variant="outline-light" onClick={() => setConfirm(false)}>
-            Annulla
-          </Button>
-          <Button variant="danger" disabled={isDeleting} onClick={handleDelete}>
-            {isDeleting ? "Eliminazione..." : "Elimina"}
-          </Button>
-        </Modal.Footer>
-      </Modal>
+          <div style={styles.statCell}>
+            <span style={styles.statLabel}>DISTANZA</span>
+            <span style={styles.statValue}>
+              {ride.distanceKm != null
+                ? ride.distanceKm.toFixed(1).replace(".", ",")
+                : "—"}
+            </span>
+          </div>
+          <div style={styles.statCell}>
+            <span style={styles.statLabel}>MEDIA</span>
+            <span style={styles.statValue}>
+              {ride.avgSpeedKmH != null ? ride.avgSpeedKmH.toFixed(0) : "—"}
+            </span>
+          </div>
+          <div style={styles.statCell}>
+            <span style={styles.statLabel}>MASSIMA</span>
+            <span style={styles.statValue}>
+              {ride.maxSpeedKmH != null ? ride.maxSpeedKmH.toFixed(0) : "—"}
+            </span>
+          </div>
+          <div style={styles.statCell}>
+            <span style={styles.statLabel}>DURATA</span>
+            <span style={{ ...styles.statValue, fontSize: 17 }}>
+              {formatDuration(duration)}
+            </span>
+          </div>
+          <div style={styles.statCell}>
+            <span style={styles.statLabel}>SOSTE</span>
+            <span style={styles.statValue}>{ride.stopsCount}</span>
+          </div>
+          <div style={styles.statCell}>
+            <span style={styles.statLabel}>TEMPO FERMO</span>
+            <span style={{ ...styles.statValue, fontSize: 17 }}>
+              {formatDuration(ride.totalStopDurationSeconds)}
+            </span>
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            gap: 6,
+            flexWrap: "wrap",
+            marginBottom: ride.notes ? 18 : 0,
+          }}
+        >
+          {ride.type && (
+            <span
+              style={{
+                padding: "4px 10px",
+                borderRadius: 8,
+                background: COLORS.cardAlt,
+                border: `1px solid ${COLORS.borderSoft}`,
+                fontFamily: FONTS.mono,
+                fontSize: 9.5,
+                color: COLORS.textSecondary,
+              }}
+            >
+              {RIDE_TYPE_LABELS[ride.type] || ride.type}
+            </span>
+          )}
+          {ride.vehicle && (
+            <span
+              style={{
+                padding: "4px 10px",
+                borderRadius: 8,
+                background: COLORS.accentSoftBg,
+                border: `1px solid ${COLORS.accentSoftBorder}`,
+                fontFamily: FONTS.mono,
+                fontSize: 9.5,
+                color: COLORS.accent,
+              }}
+            >
+              {ride.vehicle.nickname ||
+                `${ride.vehicle.brandName} ${ride.vehicle.modelName}`}
+            </span>
+          )}
+          <span
+            style={{
+              padding: "4px 10px",
+              borderRadius: 8,
+              background: COLORS.cardAlt,
+              border: `1px solid ${COLORS.borderSoft}`,
+              fontFamily: FONTS.mono,
+              fontSize: 9.5,
+              color: COLORS.textSecondary,
+            }}
+          >
+            {ride.points.length} PUNTI GPS
+          </span>
+        </div>
+
+        {ride.notes && (
+          <p
+            style={{
+              fontSize: 14,
+              lineHeight: 1.5,
+              color: "rgba(255,255,255,.85)",
+            }}
+          >
+            {ride.notes}
+          </p>
+        )}
+      </div>
+
+      {confirm && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(6,6,7,.72)",
+            zIndex: 300,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 24,
+          }}
+          onClick={() => setConfirm(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              ...styles.card,
+              padding: 22,
+              width: "100%",
+              maxWidth: 340,
+            }}
+          >
+            <div
+              style={{
+                fontFamily: FONTS.heading,
+                fontWeight: 700,
+                fontSize: 20,
+                marginBottom: 10,
+              }}
+            >
+              ELIMINARE IL GIRO?
+            </div>
+            <p
+              style={{
+                fontFamily: FONTS.body,
+                fontSize: 13,
+                color: COLORS.textSecondary,
+                lineHeight: 1.5,
+                marginBottom: 18,
+              }}
+            >
+              Il tracciato e le statistiche verranno persi definitivamente.
+            </p>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                type="button"
+                onClick={() => setConfirm(false)}
+                style={{ ...styles.secondaryButton, flex: 1 }}
+              >
+                ANNULLA
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={isDeleting}
+                style={{
+                  flex: 1,
+                  height: 48,
+                  borderRadius: 15,
+                  background: COLORS.danger,
+                  border: "none",
+                  color: "#fff",
+                  fontFamily: FONTS.heading,
+                  fontWeight: 700,
+                  fontSize: 15,
+                  cursor: "pointer",
+                }}
+              >
+                {isDeleting ? "..." : "ELIMINA"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
