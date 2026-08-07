@@ -1,11 +1,14 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 import {
   useDeleteRouteMutation,
   useGetMyRoutesQuery,
   useSetImportableMutation,
 } from "../features/routesMap/routesApi"
 import { Link, useNavigate } from "react-router-dom"
-import { Badge, Button, Card, Form, Spinner } from "react-bootstrap"
+import { Spinner } from "react-bootstrap"
+import { downloadGpx } from "../utils/gpx"
+import { COLORS, FONTS, styles } from "../styles/theme"
+import { FaDownload, FaTrash } from "react-icons/fa"
 
 function RoutesListPage() {
   const [page, setPage] = useState(0)
@@ -13,6 +16,19 @@ function RoutesListPage() {
   const [deleteRoute] = useDeleteRouteMutation()
   const [setImportable] = useSetImportableMutation()
   const navigate = useNavigate()
+  const [searchInput, setSearchInput] = useState("")
+  const timerRef = useRef(null)
+
+  const handleSearchChange = (e) => {
+    const value = e.target.value
+    setSearchInput(value)
+    clearTimeout(timerRef.current)
+    timerRef.current = setTimeout(() => setPage(0), 400)
+  }
+
+  const filtered = data?.content.filter((r) =>
+    r.name.toLowerCase().includes(searchInput.toLowerCase()),
+  )
 
   const handleDelete = async (routeId) => {
     try {
@@ -22,151 +38,318 @@ function RoutesListPage() {
     }
   }
 
-  const handleToggleImportable = (routeId, current) => {
+  const handleExport = (e, route) => {
+    e.stopPropagation()
+    downloadGpx(route)
+  }
+
+  const handleToggleImportable = (e, routeId, current) => {
+    e.stopPropagation()
     setImportable({ routeId, value: !current })
   }
 
   if (isLoading) {
     return (
-      <div className="text-center py-5">
-        <Spinner animation="border" variant="light" />
+      <div style={{ textAlign: "center", padding: "60px 0" }}>
+        <Spinner animation="border" style={{ color: COLORS.accent }} />
       </div>
     )
   }
 
   if (isError) {
     return (
-      <div className="alert alert-danger">Impossibile caricare i percorsi.</div>
+      <div style={{ ...styles.emptyState, margin: 20 }}>
+        Impossibile caricare i percorsi.
+      </div>
     )
   }
 
   return (
-    <div style={{ maxWidth: "640px", margin: "0 auto" }}>
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="mb-0">I miei percorsi</h2>
-        <Link to="/routes/new">
-          <Button
-            className="rounded-pill px-3 fw-bold border-0"
-            style={{ backgroundColor: "#FFBE5D", color: "#000" }}
-          >
-            + Nuovo percorso
-          </Button>
+    <div style={{ ...styles.pageBg, paddingTop: 20, paddingBottom: 40 }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "0 20px 16px",
+        }}
+      >
+        <div style={{ ...styles.pageTitle, fontSize: 28 }}>PERCORSI</div>
+        <Link
+          to="/routes/new"
+          style={{
+            height: 40,
+            padding: "0 15px",
+            borderRadius: 12,
+            background: COLORS.accent,
+            border: "none",
+            color: COLORS.onAccent,
+            fontFamily: FONTS.heading,
+            fontWeight: 700,
+            fontSize: 15,
+            letterSpacing: ".04em",
+            display: "inline-flex",
+            alignItems: "center",
+            textDecoration: "none",
+          }}
+        >
+          + NUOVO
         </Link>
       </div>
 
+      <div style={{ padding: "0 20px 16px" }}>
+        <input
+          type="search"
+          placeholder="Cerca percorso..."
+          value={searchInput}
+          onChange={handleSearchChange}
+          style={{ ...styles.input, height: 44 }}
+        />
+      </div>
+
       {data.content.length === 0 ? (
-        <div className="text-center py-5">
-          <p className="text-secondary mb-3">
+        <div style={{ textAlign: "center", padding: "60px 20px" }}>
+          <p
+            style={{
+              fontFamily: FONTS.body,
+              fontSize: 13,
+              color: COLORS.textSecondary,
+              marginBottom: 22,
+            }}
+          >
             Non hai ancora creato nessun percorso.
           </p>
-          <Link to="/routes/new">
-            <Button variant="outline-light">Crea il primo</Button>
+          <Link
+            to="/routes/new"
+            style={{
+              ...styles.primaryButton,
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "0 32px",
+              textDecoration: "none",
+            }}
+          >
+            CREA IL PRIMO
           </Link>
         </div>
+      ) : filtered.length === 0 ? (
+        <p
+          style={{
+            fontFamily: FONTS.body,
+            fontSize: 13,
+            color: COLORS.textFaint,
+            textAlign: "center",
+            padding: "40px 20px",
+          }}
+        >
+          Nessun percorso corrisponde alla ricerca.
+        </p>
       ) : (
         <div
-          className="d-flex flex-column gap-3"
-          style={{ opacity: isFetching ? 0.6 : 1 }}
+          style={{
+            padding: "0 20px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 12,
+            opacity: isFetching ? 0.6 : 1,
+          }}
         >
-          {data.content.map((route) => (
-            <Card
+          {filtered.map((route) => (
+            <div
               key={route.id}
-              className="bg-dark text-light border-secondary"
+              onClick={() => navigate(`/routes/${route.id}`)}
+              style={{ ...styles.card, padding: 16, cursor: "pointer" }}
             >
-              <Card.Body>
-                <div className="d-flex justify-content-between align-items-start mb-2">
-                  <Card.Title
-                    className="fs-6 mb-0"
-                    style={{ cursor: "pointer" }}
-                    onClick={() => navigate(`/routes/${route.id}`)}
-                  >
-                    {route.name}
-                  </Card.Title>
-                  {route.importable && <Badge bg="success">Importabile</Badge>}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  marginBottom: 10,
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: FONTS.heading,
+                    fontWeight: 700,
+                    fontSize: 18,
+                    lineHeight: 1.15,
+                  }}
+                >
+                  {route.name}
                 </div>
-
-                <div className="d-flex gap-2 flex-wrap mb-3">
-                  <Badge bg="secondary">
-                    {(route.distanceMeters / 1000).toFixed(1)} km
-                  </Badge>
-                  <Badge bg="secondary">
-                    {Math.round(route.durationSeconds / 60)} min
-                  </Badge>
-                  <Badge bg="secondary">{route.waypoints.length} tappe</Badge>
-                  {route.avoidHighways && (
-                    <Badge bg="secondary">No autostrade</Badge>
-                  )}
-                  {route.avoidTolls && <Badge bg="secondary">No pedaggi</Badge>}
-                </div>
-
-                <div className="d-flex gap-2 flex-wrap align-items-center">
-                  <Button
-                    variant="outline-light"
-                    size="sm"
-                    onClick={() => navigate(`/routes/${route.id}`)}
+                {route.importable && (
+                  <span
+                    style={{
+                      padding: "3px 8px",
+                      borderRadius: 7,
+                      background: COLORS.accentSoftBg,
+                      border: `1px solid ${COLORS.accentSoftBorder}`,
+                      fontFamily: FONTS.mono,
+                      fontSize: 9,
+                      color: COLORS.accent,
+                      flexShrink: 0,
+                      marginLeft: 8,
+                    }}
                   >
-                    Visualizza
-                  </Button>
-                  <Button
-                    variant="outline-danger"
-                    size="sm"
-                    onClick={() => handleDelete(route.id)}
-                  >
-                    Elimina
-                  </Button>
-                  {route.googleMapsUrl && (
-                    <Button
-                      variant="outline-primary"
-                      size="sm"
-                      href={route.googleMapsUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Apri in Google Maps
-                    </Button>
-                  )}
-                  <Form.Check
-                    type="switch"
-                    id={`importable-${route.id}`}
-                    label="Rendi importabile"
-                    className="small ms-auto"
+                    IMPORTABILE
+                  </span>
+                )}
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  gap: 6,
+                  flexWrap: "wrap",
+                  marginBottom: 14,
+                }}
+              >
+                <span style={pillStyle}>
+                  {(route.distanceMeters / 1000).toFixed(1).replace(".", ",")}{" "}
+                  KM
+                </span>
+                <span style={pillStyle}>
+                  {Math.round(route.durationSeconds / 60)} MIN
+                </span>
+                <span style={pillStyle}>{route.waypoints.length} TAPPE</span>
+                {route.avoidHighways && (
+                  <span style={pillStyle}>NO AUTOSTRADE</span>
+                )}
+                {route.avoidTolls && <span style={pillStyle}>NO PEDAGGI</span>}
+              </div>
+
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <button
+                  type="button"
+                  onClick={(e) => handleExport(e, route)}
+                  style={{
+                    height: 32,
+                    padding: "0 12px",
+                    borderRadius: 9,
+                    background: COLORS.card,
+                    border: `1px solid ${COLORS.borderStrong}`,
+                    color: COLORS.textSecondary,
+                    fontFamily: FONTS.mono,
+                    fontSize: 9.5,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 5,
+                  }}
+                >
+                  <FaDownload size={9} /> GPX
+                </button>
+
+                <button
+                  type="button"
+                  onClick={(e) => handleDelete(e, route.id)}
+                  style={{
+                    height: 32,
+                    padding: "0 12px",
+                    borderRadius: 9,
+                    background: COLORS.dangerBg,
+                    border: `1px solid ${COLORS.dangerBorder}`,
+                    color: COLORS.danger,
+                    fontFamily: FONTS.mono,
+                    fontSize: 9.5,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 5,
+                  }}
+                >
+                  <FaTrash size={9} /> ELIMINA
+                </button>
+
+                <label
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    marginLeft: "auto",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    fontFamily: FONTS.mono,
+                    fontSize: 9.5,
+                    color: COLORS.textMuted,
+                    cursor: "pointer",
+                  }}
+                >
+                  <input
+                    type="checkbox"
                     checked={route.importable}
-                    onChange={() =>
-                      handleToggleImportable(route.id, route.importable)
+                    onChange={(e) =>
+                      handleToggleImportable(e, route.id, route.importable)
                     }
                   />
-                </div>
-              </Card.Body>
-            </Card>
+                  IMPORTABILE
+                </label>
+              </div>
+            </div>
           ))}
         </div>
       )}
 
       {data.totalPages > 1 && (
-        <div className="d-flex justify-content-center align-items-center gap-3 mt-4">
-          <Button
-            variant="outline-light"
-            size="sm"
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: 16,
+            padding: "24px 20px",
+          }}
+        >
+          <button
+            type="button"
             disabled={data.first || isFetching}
             onClick={() => setPage((p) => p - 1)}
+            style={{
+              ...styles.secondaryButton,
+              height: 40,
+              padding: "0 16px",
+              opacity: data.first ? 0.4 : 1,
+            }}
           >
-            Precedente
-          </Button>
-          <span className="text-secondary">
+            PRECEDENTE
+          </button>
+          <span
+            style={{
+              fontFamily: FONTS.mono,
+              fontSize: 11,
+              color: COLORS.textMuted,
+            }}
+          >
             {data.number + 1} / {data.totalPages}
           </span>
-          <Button
-            variant="outline-light"
-            size="sm"
+          <button
+            type="button"
             disabled={data.last || isFetching}
             onClick={() => setPage((p) => p + 1)}
+            style={{
+              ...styles.secondaryButton,
+              height: 40,
+              padding: "0 16px",
+              opacity: data.last ? 0.4 : 1,
+            }}
           >
-            Successiva
-          </Button>
+            SUCCESSIVA
+          </button>
         </div>
       )}
     </div>
   )
+}
+
+const pillStyle = {
+  padding: "4px 10px",
+  borderRadius: 8,
+  background: COLORS.cardAlt,
+  border: `1px solid ${COLORS.borderSoft}`,
+  fontFamily: FONTS.mono,
+  fontSize: 9.5,
+  color: COLORS.textSecondary,
 }
 
 export default RoutesListPage
