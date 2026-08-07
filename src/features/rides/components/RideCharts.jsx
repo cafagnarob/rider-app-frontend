@@ -9,6 +9,7 @@ import {
   ResponsiveContainer,
 } from "recharts"
 import { haversineDistance } from "../../../utils/geo"
+import { COLORS, FONTS } from "../../../styles/theme"
 
 function RideCharts({ points }) {
   const chartData = useMemo(() => {
@@ -29,7 +30,13 @@ function RideCharts({ points }) {
 
   if (chartData.length === 0) {
     return (
-      <p className="text-secondary small">
+      <p
+        style={{
+          fontFamily: FONTS.body,
+          fontSize: 13,
+          color: COLORS.textFaint,
+        }}
+      >
         Dati insufficienti per generare i grafici.
       </p>
     )
@@ -37,52 +44,73 @@ function RideCharts({ points }) {
 
   const hasAltitude = chartData.some((d) => d.altitude != null)
 
+  const axisStyle = {
+    fontSize: 10,
+    fontFamily: FONTS.mono,
+    fill: COLORS.textMuted,
+  }
+  const tooltipStyle = {
+    backgroundColor: COLORS.card,
+    border: `1px solid ${COLORS.borderStrong}`,
+    borderRadius: 10,
+    fontFamily: FONTS.body,
+    fontSize: 12,
+  }
+
   return (
-    <div className="d-flex flex-column gap-4">
+    <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
       <div>
-        <p className="text-secondary small mb-2">Velocità lungo il percorso</p>
+        <p
+          style={{
+            ...axisStyle,
+            fontSize: 10,
+            letterSpacing: ".08em",
+            textTransform: "uppercase",
+            marginBottom: 10,
+          }}
+        >
+          VELOCITÀ LUNGO IL PERCORSO
+        </p>
         <ResponsiveContainer width="100%" height={200}>
           <LineChart
             data={chartData}
             margin={{ top: 5, right: 10, left: 0, bottom: 0 }}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="#495057" />
+            <CartesianGrid strokeDasharray="3 3" stroke={COLORS.borderSoft} />
             <XAxis
               dataKey="km"
-              stroke="#adb5bd"
-              tick={{ fontSize: 11 }}
+              stroke={COLORS.textMuted}
+              tick={axisStyle}
               label={{
                 value: "km",
                 position: "insideBottomRight",
                 offset: -5,
-                fill: "#adb5bd",
-                fontSize: 11,
+                fill: COLORS.textMuted,
+                fontSize: 10,
               }}
             />
             <YAxis
-              stroke="#adb5bd"
-              tick={{ fontSize: 11 }}
+              stroke={COLORS.textMuted}
+              tick={axisStyle}
               label={{
                 value: "km/h",
                 angle: -90,
                 position: "insideLeft",
-                fill: "#adb5bd",
-                fontSize: 11,
+                fill: COLORS.textMuted,
+                fontSize: 10,
               }}
             />
             <Tooltip
-              contentStyle={{
-                backgroundColor: "#212529",
-                border: "1px solid #495057",
-              }}
-              labelStyle={{ color: "#fff" }}
+              contentStyle={tooltipStyle}
+              labelStyle={{ color: COLORS.text }}
+              itemStyle={{ color: COLORS.accent }}
               formatter={(value) => [`${value} km/h`, "Velocità"]}
               labelFormatter={(km) => `${km} km`}
             />
             <Line
               type="monotone"
               dataKey="speed"
-              stroke="#FFBE5D"
+              stroke={COLORS.accent}
               strokeWidth={2}
               dot={false}
               isAnimationActive={false}
@@ -93,49 +121,57 @@ function RideCharts({ points }) {
 
       {hasAltitude && (
         <div>
-          <p className="text-secondary small mb-2">Altimetria</p>
+          <p
+            style={{
+              ...axisStyle,
+              fontSize: 10,
+              letterSpacing: ".08em",
+              textTransform: "uppercase",
+              marginBottom: 10,
+            }}
+          >
+            ALTIMETRIA
+          </p>
           <ResponsiveContainer width="100%" height={200}>
             <LineChart
               data={chartData}
               margin={{ top: 5, right: 10, left: 0, bottom: 0 }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#495057" />
+              <CartesianGrid strokeDasharray="3 3" stroke={COLORS.borderSoft} />
               <XAxis
                 dataKey="km"
-                stroke="#adb5bd"
-                tick={{ fontSize: 11 }}
+                stroke={COLORS.textMuted}
+                tick={axisStyle}
                 label={{
                   value: "km",
                   position: "insideBottomRight",
                   offset: -5,
-                  fill: "#adb5bd",
-                  fontSize: 11,
+                  fill: COLORS.textMuted,
+                  fontSize: 10,
                 }}
               />
               <YAxis
-                stroke="#adb5bd"
-                tick={{ fontSize: 11 }}
+                stroke={COLORS.textMuted}
+                tick={axisStyle}
                 label={{
                   value: "m",
                   angle: -90,
                   position: "insideLeft",
-                  fill: "#adb5bd",
-                  fontSize: 11,
+                  fill: COLORS.textMuted,
+                  fontSize: 10,
                 }}
               />
               <Tooltip
-                contentStyle={{
-                  backgroundColor: "#212529",
-                  border: "1px solid #495057",
-                }}
-                labelStyle={{ color: "#fff" }}
+                contentStyle={tooltipStyle}
+                labelStyle={{ color: COLORS.text }}
+                itemStyle={{ color: "#5B9FFF" }}
                 formatter={(value) => [`${value} m`, "Altitudine"]}
                 labelFormatter={(km) => `${km} km`}
               />
               <Line
                 type="monotone"
                 dataKey="altitude"
-                stroke="#0d6efd"
+                stroke="#5B9FFF"
                 strokeWidth={2}
                 dot={false}
                 isAnimationActive={false}
