@@ -40,6 +40,7 @@ function NotificationBell() {
       notification.referenceType,
       notification.referenceId,
       notification.type,
+      notification.actorUsername,
     )
     setOpen(false)
     if (link) navigate(link)
@@ -170,10 +171,35 @@ function NotificationBell() {
                     cursor: "pointer",
                   }}
                 >
-                  <Icon
-                    style={{ color, marginTop: 3, flexShrink: 0 }}
-                    size={13}
-                  />
+                  {n.actorProfilePicture ? (
+                    <img
+                      src={n.actorProfilePicture}
+                      alt=""
+                      style={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: "50%",
+                        objectFit: "cover",
+                        background: COLORS.surfaceRaised,
+                        flexShrink: 0,
+                      }}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: "50%",
+                        background: COLORS.cardAlt,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                      }}
+                    >
+                      <Icon style={{ color }} size={14} />
+                    </div>
+                  )}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div
                       style={{
