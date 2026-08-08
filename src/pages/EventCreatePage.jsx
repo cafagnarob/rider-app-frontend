@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { Spinner } from "react-bootstrap"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { useGetMyRoutesQuery } from "../features/routesMap/routesApi"
@@ -8,6 +8,7 @@ import { generateAccessCode } from "../utils/codeGenerator"
 import { COLORS, FONTS, styles } from "../styles/theme"
 import { useInviteUserMutation } from "../features/events/invitesApi"
 import InviteSelector from "../features/events/components/InviteSelector"
+import { searchPlaces } from "../utils/geocoding"
 
 const DRAFT_KEY = "eventDraft"
 
@@ -19,6 +20,24 @@ const loadDraft = () => {
     return null
   }
 }
+
+const EVENT_TYPE_OPTIONS = [
+  {
+    value: "STANDARD",
+    label: "GIRO",
+    hint: "Un percorso su strada, con partenza e arrivo",
+  },
+  {
+    value: "RADUNO",
+    label: "RADUNO",
+    hint: "Un punto di ritrovo, senza un tragitto obbligato",
+  },
+  {
+    value: "MULTI_DAY_TRIP",
+    label: "VIAGGIO",
+    hint: "Più giorni, ciascuno con il proprio programma",
+  },
+]
 
 const VISIBILITY_OPTIONS = [
   { value: "PUBLIC", label: "PUBBLICO", hint: "Visibile a tutti" },
@@ -46,25 +65,17 @@ function EventCreatePage() {
   )
   const [inviteUser] = useInviteUserMutation()
 
-  const updateInvitees = (list) => {
-    setInviteUsernames(list)
-    try {
-      localStorage.setItem(
-        DRAFT_KEY,
-        JSON.stringify({ ...form, inviteUsernames: list }),
-      )
-    } catch {
-      // localStorage non disponibile
-    }
-  }
-
   const [inviteSummary, setInviteSummary] = useState(null)
   const [createdEventId, setCreatedEventId] = useState(null)
 
   const [form, setForm] = useState({
     title: draft?.title || "",
     description: draft?.description || "",
+    type: draft?.type || "STANDARD",
     routeId: location.state?.newRouteId || draft?.routeId || "",
+    meetingPointLat: draft?.meetingPointLat || null,
+    meetingPointLng: draft?.meetingPointLng || null,
+    meetingPointLabel: draft?.meetingPointLabel || "",
     startDateTime: draft?.startDateTime || "",
     endDateTime: draft?.endDateTime || "",
     maxParticipants: draft?.maxParticipants ?? 10,
@@ -74,16 +85,22 @@ function EventCreatePage() {
   })
   const [errorMsg, setErrorMsg] = useState("")
 
-  const saveDraft = () => {
+  const [placeSearch, setPlaceSearch] = useState("")
+  const [placeResults, setPlaceResults] = useState([])
+  const placeTimerRef = useRef(null)
+
+  const persist = (next) => {
     try {
       localStorage.setItem(
         DRAFT_KEY,
-        JSON.stringify({ ...form, inviteUsernames }),
+        JSON.stringify({ ...next, inviteUsernames }),
       )
     } catch {
       // localStorage non disponibile
     }
   }
+
+  const saveDraft = () => persist({ ...form })
 
   const regenerateCode = () => {
     setForm((prev) => {
@@ -105,18 +122,20 @@ function EventCreatePage() {
       e.target.type === "checkbox" ? e.target.checked : e.target.value
     setForm((prev) => {
       const next = { ...prev, [field]: value }
-      try {
-        localStorage.setItem(DRAFT_KEY, JSON.stringify(next))
-      } catch {
-        // localStorage non disponibile, continuo senza salvare la bozza
-      }
+      persist(next)
       return next
     })
+  }
+
+  const updateInvitees = (list) => {
+    setInviteUsernames(list)
+    persist(form)
   }
 
   const nowLocal = toLocalDateTimeString(new Date()).slice(0, 16)
 
   const selectedRoute = routesPage?.content?.find((r) => r.id === form.routeId)
+
   const minEndDateTime =
     selectedRoute && form.startDateTime
       ? addSecondsToLocalDateTime(
@@ -125,12 +144,79 @@ function EventCreatePage() {
         )
       : form.startDateTime || nowLocal
 
+  const handleTypeChange = (value) => {
+    setForm((prev) => {
+      const next = { ...prev, type: value }
+      if (value === "MULTI_DAY_TRIP") {
+        next.routeId = ""
+        next.meetingPointLat = null
+        next.meetingPointLng = null
+        next.meetingPointLabel = ""
+      }
+      persist(next)
+      return next
+    })
+  }
+
+  const handlePlaceSearchChange = (e) => {
+    const value = e.target.value
+    setPlaceSearch(value)
+    clearTimeout(placeTimerRef.current)
+    placeTimerRef.current = setTimeout(async () => {
+      if (!value.trim()) {
+        setPlaceResults([])
+        return
+      }
+      try {
+        setPlaceResults(await searchPlaces(value))
+      } catch {
+        setPlaceResults([])
+      }
+    }, 500)
+  }
+
+  const handlePickPlace = (place) => {
+    setForm((prev) => {
+      const next = {
+        ...prev,
+        meetingPointLat: place.latitude,
+        meetingPointLng: place.longitude,
+        meetingPointLabel: place.name,
+      }
+      persist(next)
+      return next
+    })
+    setPlaceSearch("")
+    setPlaceResults([])
+  }
+
+  const clearMeetingPoint = () => {
+    setForm((prev) => {
+      const next = {
+        ...prev,
+        meetingPointLat: null,
+        meetingPointLng: null,
+        meetingPointLabel: "",
+      }
+      persist(next)
+      return next
+    })
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setErrorMsg("")
 
-    if (!form.routeId) {
-      setErrorMsg("Seleziona un percorso.")
+    if (form.type === "STANDARD" && !form.routeId) {
+      setErrorMsg("Un giro richiede un percorso.")
+      return
+    }
+    if (
+      form.type === "RADUNO" &&
+      !form.routeId &&
+      !(form.meetingPointLat && form.meetingPointLng)
+    ) {
+      setErrorMsg("Un raduno richiede un percorso oppure un punto di ritrovo.")
       return
     }
     if (selectedRoute && form.startDateTime) {
@@ -160,7 +246,10 @@ function EventCreatePage() {
       const created = await createEvent({
         title: form.title,
         description: form.description,
-        routeId: form.routeId,
+        type: form.type,
+        routeId: form.routeId || null,
+        meetingPointLat: !form.routeId ? form.meetingPointLat : null,
+        meetingPointLng: !form.routeId ? form.meetingPointLng : null,
         startDateTime: form.startDateTime + ":00",
         endDateTime: form.endDateTime + ":00",
         maxParticipants:
@@ -173,6 +262,11 @@ function EventCreatePage() {
       }).unwrap()
 
       localStorage.removeItem(DRAFT_KEY)
+
+      if (form.type === "MULTI_DAY_TRIP") {
+        navigate(`/events/${created.id}/days/new`)
+        return
+      }
 
       if (form.visibility === "INVITE_ONLY" && inviteUsernames.length > 0) {
         const results = await Promise.allSettled(
@@ -286,10 +380,61 @@ function EventCreatePage() {
         }}
       >
         <div>
+          <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+            TIPO DI EVENTO
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {EVENT_TYPE_OPTIONS.map((opt) => {
+              const active = form.type === opt.value
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => handleTypeChange(opt.value)}
+                  style={{
+                    textAlign: "left",
+                    padding: "13px 15px",
+                    borderRadius: 13,
+                    background: active ? COLORS.accentSoftBg : COLORS.card,
+                    border: `1px solid ${active ? COLORS.accentSoftBorder : COLORS.borderStrong}`,
+                    cursor: "pointer",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontFamily: FONTS.heading,
+                      fontWeight: 700,
+                      fontSize: 15,
+                      color: active ? COLORS.accent : COLORS.text,
+                    }}
+                  >
+                    {opt.label}
+                  </div>
+                  <div
+                    style={{
+                      fontFamily: FONTS.body,
+                      fontSize: 12,
+                      color: COLORS.textMuted,
+                      marginTop: 2,
+                    }}
+                  >
+                    {opt.hint}
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        <div>
           <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>TITOLO</div>
           <input
             type="text"
-            placeholder="Giro dei trulli"
+            placeholder={
+              form.type === "MULTI_DAY_TRIP"
+                ? "Tour delle Dolomiti"
+                : "Giro dei trulli"
+            }
             value={form.title}
             onChange={set("title")}
             required
@@ -323,64 +468,152 @@ function EventCreatePage() {
           />
         </div>
 
-        <div>
-          <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>PERCORSO</div>
-          {isLoadingRoutes ? (
-            <Spinner
-              size="sm"
-              animation="border"
-              style={{ color: COLORS.accent }}
-            />
-          ) : routesPage?.content?.length === 0 ? (
-            <div style={{ ...styles.emptyState, fontSize: 13 }}>
-              Non hai ancora nessun percorso.{" "}
-              <Link
-                to="/routes/new"
-                state={{ returnTo: "/events/new", resumeDraft: true }}
-                onClick={saveDraft}
-                style={{ color: COLORS.accent }}
-              >
-                Creane uno
-              </Link>{" "}
-              prima di continuare.
+        {form.type !== "MULTI_DAY_TRIP" && (
+          <div>
+            <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+              PERCORSO {form.type === "RADUNO" ? "(OPZIONALE)" : ""}
             </div>
-          ) : (
-            <>
-              <select
-                value={form.routeId}
-                onChange={set("routeId")}
-                required
-                style={styles.input}
-              >
-                <option value="">Seleziona un percorso</option>
-                {routesPage?.content?.map((r) => (
-                  <option key={r.id} value={r.id}>
-                    {r.name} (
-                    {(r.distanceMeters / 1000).toFixed(1).replace(".", ",")} km)
-                  </option>
-                ))}
-              </select>
-              <div
-                style={{
-                  fontFamily: FONTS.body,
-                  fontSize: 12,
-                  color: COLORS.textFaint,
-                  marginTop: 8,
-                }}
-              >
-                Non trovi quello che cerchi?{" "}
-                <Link
-                  to="/routes/new"
-                  state={{ returnTo: "/events/new", resumeDraft: true }}
-                  onClick={saveDraft}
-                  style={{ color: COLORS.accent }}
+            {isLoadingRoutes ? (
+              <Spinner
+                size="sm"
+                animation="border"
+                style={{ color: COLORS.accent }}
+              />
+            ) : (
+              <>
+                <select
+                  value={form.routeId}
+                  onChange={set("routeId")}
+                  style={styles.input}
                 >
-                  Crea un nuovo percorso
-                </Link>
+                  <option value="">
+                    {form.type === "RADUNO"
+                      ? "Nessun percorso"
+                      : "Seleziona un percorso"}
+                  </option>
+                  {routesPage?.content?.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {r.name} (
+                      {(r.distanceMeters / 1000).toFixed(1).replace(".", ",")}{" "}
+                      km)
+                    </option>
+                  ))}
+                </select>
+                <div
+                  style={{
+                    fontFamily: FONTS.body,
+                    fontSize: 12,
+                    color: COLORS.textFaint,
+                    marginTop: 8,
+                  }}
+                >
+                  Non trovi quello che cerchi?{" "}
+                  <Link
+                    to="/routes/new"
+                    state={{ returnTo: "/events/new", resumeDraft: true }}
+                    onClick={saveDraft}
+                    style={{ color: COLORS.accent }}
+                  >
+                    Crea un nuovo percorso
+                  </Link>
+                </div>
+              </>
+            )}
+
+            {form.type === "RADUNO" && !form.routeId && (
+              <div style={{ marginTop: 14, position: "relative" }}>
+                <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+                  PUNTO DI RITROVO
+                </div>
+
+                {form.meetingPointLabel ? (
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "11px 14px",
+                      borderRadius: 12,
+                      background: COLORS.accentSoftBg,
+                      border: `1px solid ${COLORS.accentSoftBorder}`,
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontFamily: FONTS.body,
+                        fontSize: 13,
+                        color: COLORS.accent,
+                      }}
+                    >
+                      {form.meetingPointLabel}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={clearMeetingPoint}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: COLORS.accent,
+                        cursor: "pointer",
+                        fontFamily: FONTS.mono,
+                        fontSize: 10,
+                      }}
+                    >
+                      CAMBIA
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <input
+                      type="text"
+                      placeholder="Cerca una città o un luogo..."
+                      value={placeSearch}
+                      onChange={handlePlaceSearchChange}
+                      style={styles.input}
+                    />
+                    {placeResults.length > 0 && (
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: "100%",
+                          left: 0,
+                          right: 0,
+                          marginTop: 6,
+                          zIndex: 10,
+                          ...styles.card,
+                          overflow: "hidden",
+                        }}
+                      >
+                        {placeResults.map((r) => (
+                          <button
+                            key={r.id}
+                            type="button"
+                            onClick={() => handlePickPlace(r)}
+                            style={{
+                              display: "block",
+                              width: "100%",
+                              textAlign: "left",
+                              padding: "11px 13px",
+                              background: "none",
+                              border: "none",
+                              borderBottom: `1px solid ${COLORS.borderSoft}`,
+                              color: COLORS.text,
+                              fontFamily: FONTS.body,
+                              fontSize: 13,
+                              cursor: "pointer",
+                            }}
+                          >
+                            {r.name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
-            </>
-          )}
-        </div>
+            )}
+          </div>
+        )}
 
         <div style={{ display: "flex", gap: 12 }}>
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -391,7 +624,7 @@ function EventCreatePage() {
               value={form.startDateTime}
               onChange={set("startDateTime")}
               required
-              style={styles.input}
+              style={{ ...styles.input, width: "100%" }}
             />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -402,7 +635,7 @@ function EventCreatePage() {
               value={form.endDateTime}
               onChange={set("endDateTime")}
               required
-              style={styles.input}
+              style={{ ...styles.input, width: "100%" }}
             />
             {selectedRoute && (
               <div
@@ -423,7 +656,9 @@ function EventCreatePage() {
         {form.visibility !== "INVITE_ONLY" && (
           <div>
             <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
-              NUMERO MASSIMO DI PARTECIPANTI
+              {form.type === "MULTI_DAY_TRIP"
+                ? "NUMERO MASSIMO DI PARTECIPANTI AL VIAGGIO"
+                : "NUMERO MASSIMO DI PARTECIPANTI"}
             </div>
             <input
               type="number"
@@ -457,11 +692,7 @@ function EventCreatePage() {
                             ? generateAccessCode()
                             : prev.accessCode,
                       }
-                      try {
-                        localStorage.setItem(DRAFT_KEY, JSON.stringify(next))
-                      } catch {
-                        // localStorage non disponibile
-                      }
+                      persist(next)
                       return next
                     })
                   }}
@@ -557,17 +788,18 @@ function EventCreatePage() {
           </div>
         )}
 
-        {form.visibility === "INVITE_ONLY" && (
-          <div>
-            <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
-              INVITA DAI TUOI CONTATTI
+        {form.visibility === "INVITE_ONLY" &&
+          form.type !== "MULTI_DAY_TRIP" && (
+            <div>
+              <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+                INVITA DAI TUOI CONTATTI
+              </div>
+              <InviteSelector
+                selected={inviteUsernames}
+                onChange={updateInvitees}
+              />
             </div>
-            <InviteSelector
-              selected={inviteUsernames}
-              onChange={updateInvitees}
-            />
-          </div>
-        )}
+          )}
 
         {errorMsg && (
           <div
@@ -586,7 +818,11 @@ function EventCreatePage() {
           disabled={isLoading}
           style={{ ...styles.primaryButton, opacity: isLoading ? 0.6 : 1 }}
         >
-          {isLoading ? "..." : "CREA EVENTO"}
+          {isLoading
+            ? "..."
+            : form.type === "MULTI_DAY_TRIP"
+              ? "CREA IL VIAGGIO"
+              : "CREA EVENTO"}
         </button>
       </form>
     </div>
