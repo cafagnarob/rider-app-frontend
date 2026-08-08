@@ -86,6 +86,17 @@ export const eventsApi = apiSlice.injectEndpoints({
         { type: "Event", id: eventId },
       ],
     }),
+    addEventDay: builder.mutation({
+      query: ({ tripId, ...body }) => ({
+        url: `/events/${tripId}/days`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: (result, error, { tripId }) => [
+        { type: "Event", id: tripId },
+        "Event",
+      ],
+    }),
   }),
 })
 
@@ -99,4 +110,5 @@ export const {
   useChangeEventStatusMutation,
   useGetAccessCodeQuery,
   useRegenerateAccessCodeMutation,
+  useAddEventDayMutation,
 } = eventsApi
