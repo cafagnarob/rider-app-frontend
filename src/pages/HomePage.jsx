@@ -483,6 +483,11 @@ function HomePage() {
                   marginTop: 4,
                 }}
               >
+                {ev.type !== "STANDARD" && (
+                  <span style={{ color: COLORS.accent }}>
+                    {EVENT_TYPE_LABELS[ev.type]} ·{" "}
+                  </span>
+                )}
                 {ev.organizerUsername} · {ev.currentParticipants}/
                 {ev.maxParticipants}
               </div>
