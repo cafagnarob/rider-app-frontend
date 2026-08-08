@@ -23,7 +23,12 @@ function NotificationsPage() {
 
   const handleClick = (n) => {
     if (!n.read) markAsRead(n.id)
-    const link = buildNotificationLink(n.referenceType, n.referenceId)
+    const link = buildNotificationLink(
+      n.referenceType,
+      n.referenceId,
+      n.type,
+      n.actorUsername,
+    )
     if (link) navigate(link)
   }
 
@@ -96,9 +101,35 @@ function NotificationsPage() {
                   background: n.read ? "transparent" : "rgba(255,122,47,.05)",
                 }}
               >
-                <Icon
-                  style={{ color, fontSize: 17, marginTop: 2, flexShrink: 0 }}
-                />
+                {n.actorProfilePicture ? (
+                  <img
+                    src={n.actorProfilePicture}
+                    alt=""
+                    style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                      background: COLORS.surfaceRaised,
+                      flexShrink: 0,
+                    }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: "50%",
+                      background: COLORS.cardAlt,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Icon style={{ color }} size={17} />
+                  </div>
+                )}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p
                     style={{
