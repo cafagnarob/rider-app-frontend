@@ -1,14 +1,9 @@
 import { useEffect, useRef, useState } from "react"
 import { Spinner } from "react-bootstrap"
-import { useParams, useNavigate } from "react-router-dom"
-import {
-  Map as MapLibreMap,
-  Marker,
-  LngLatBounds,
-  Popup,
-  FullscreenControl,
-} from "maplibre-gl"
+import { useParams, useNavigate, Link } from "react-router-dom"
+import { Map as MapLibreMap, Marker, Popup, LngLatBounds } from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
+import { FaArrowLeft } from "react-icons/fa"
 import {
   useGetEventByIdQuery,
   useChangeEventStatusMutation,
@@ -19,12 +14,11 @@ import {
   useGetAcceptedParticipantsQuery,
 } from "../features/events/participationApi"
 import OrganizerPanel from "../features/events/components/OrganizerPanel"
-import { decodePolyline } from "../utils/polyline"
-import { VISIBILITY_LABELS } from "../utils/constants"
-import { COLORS, FONTS, styles } from "../styles/theme"
-import { FaArrowLeft } from "react-icons/fa"
 import AccessCodeCard from "../features/events/components/AccessCodeCard"
+import { decodePolyline } from "../utils/polyline"
 import { MAP_STYLE_URL } from "../utils/mapStyle"
+import { EVENT_TYPE_LABELS, VISIBILITY_LABELS } from "../utils/constants"
+import { COLORS, FONTS, styles } from "../styles/theme"
 
 function EventDetailPage() {
   const { eventId } = useParams()
@@ -46,9 +40,14 @@ function EventDetailPage() {
   const mapRef = useRef(null)
 
   useEffect(() => {
-    if (!containerRef.current || !event?.route?.encodedPolyline) return
+    if (!containerRef.current || !event) return
 
-    const coordinates = decodePolyline(event.route.encodedPolyline)
+    const hasRoute = !!event.route?.encodedPolyline
+    const hasDirectMeetingPoint =
+      !hasRoute &&
+      event.meetingPointLat != null &&
+      event.meetingPointLng != null
+    if (!hasRoute && !hasDirectMeetingPoint) return
 
     const isValidCoordinate = ([lng, lat]) =>
       Number.isFinite(lng) &&
@@ -58,89 +57,115 @@ function EventDetailPage() {
       lat >= -90 &&
       lat <= 90
 
-    if (coordinates.length === 0 || !coordinates.every(isValidCoordinate))
-      return
+    let coordinates = []
+    if (hasRoute) {
+      coordinates = decodePolyline(event.route.encodedPolyline)
+      if (coordinates.length === 0 || !coordinates.every(isValidCoordinate))
+        return
+    } else {
+      coordinates = [[event.meetingPointLng, event.meetingPointLat]]
+      if (!isValidCoordinate(coordinates[0])) return
+    }
 
     const map = new MapLibreMap({
       container: containerRef.current,
       style: MAP_STYLE_URL,
       center: coordinates[0],
-      zoom: 11,
+      zoom: hasRoute ? 12 : 13,
     })
     mapRef.current = map
 
-    map.addControl(new FullscreenControl(), "top-right")
-
     const draw = () => {
       map.resize()
-      map.addSource("route", {
-        type: "geojson",
-        data: {
-          type: "Feature",
-          geometry: { type: "LineString", coordinates },
-        },
-      })
-      map.addLayer({
-        id: "route-line",
-        type: "line",
-        source: "route",
-        layout: { "line-join": "round", "line-cap": "round" },
-        paint: {
-          "line-color": COLORS.accent,
-          "line-width": 4,
-          "line-opacity": 0.85,
-        },
-      })
-      const validWaypoints = (event.route.waypoints || []).filter((wp) =>
-        isValidCoordinate([wp.longitude, wp.latitude]),
-      )
-      const lastIndex = validWaypoints.length - 1
 
-      validWaypoints.forEach((wp, index) => {
-        const isStart = index === 0
-        const isEnd = index === lastIndex && lastIndex > 0
-        const isEndpoint = isStart || isEnd
+      if (hasRoute) {
+        map.addSource("route", {
+          type: "geojson",
+          data: {
+            type: "Feature",
+            geometry: { type: "LineString", coordinates },
+          },
+        })
+        map.addLayer({
+          id: "route-line",
+          type: "line",
+          source: "route",
+          layout: { "line-join": "round", "line-cap": "round" },
+          paint: {
+            "line-color": COLORS.accent,
+            "line-width": 4,
+            "line-opacity": 0.85,
+          },
+        })
 
+        const validWaypoints = (event.route.waypoints || []).filter((wp) =>
+          isValidCoordinate([wp.longitude, wp.latitude]),
+        )
+        const lastIndex = validWaypoints.length - 1
+
+        validWaypoints.forEach((wp, index) => {
+          const isStart = index === 0
+          const isEnd = index === lastIndex && lastIndex > 0
+          const isEndpoint = isStart || isEnd
+
+          const el = document.createElement("div")
+          el.style.cssText = `width: ${isEndpoint ? 20 : 11}px; height: ${isEndpoint ? 20 : 11}px;`
+
+          const dot = document.createElement("div")
+          dot.style.cssText = `
+            width: 100%; height: 100%; border-radius: 50%; position: relative;
+            background: ${isStart ? "#4ADE80" : isEnd ? COLORS.danger : COLORS.accent};
+            border: ${isEndpoint ? 3 : 2}px solid ${COLORS.bg};
+          `
+          el.appendChild(dot)
+
+          if (isStart) {
+            const pulse = document.createElement("span")
+            pulse.style.cssText = `
+              position: absolute; inset: -8px; border-radius: 50%;
+              background: #4ADE80; animation: qjpulse 2.6s ease-out infinite;
+            `
+            dot.appendChild(pulse)
+          }
+
+          const marker = new Marker({ element: el }).setLngLat([
+            wp.longitude,
+            wp.latitude,
+          ])
+          if (wp.label && wp.label.trim()) {
+            marker.setPopup(
+              new Popup({
+                offset: 14,
+                closeButton: false,
+                className: "qj-popup",
+              }).setText(wp.label),
+            )
+          }
+          marker.addTo(map)
+        })
+
+        const bounds = coordinates.reduce(
+          (b, c) => b.extend(c),
+          new LngLatBounds(coordinates[0], coordinates[0]),
+        )
+        map.fitBounds(bounds, { padding: 40, maxZoom: 14 })
+      } else {
         const el = document.createElement("div")
-        el.style.cssText = `
-       width: ${isEndpoint ? 20 : 11}px;
-      height: ${isEndpoint ? 20 : 11}px;
-      border-radius: 50%;
-      background: ${isStart ? "#4ADE80" : isEnd ? COLORS.danger : COLORS.accent};
-      border: ${isEndpoint ? 3 : 2}px solid ${COLORS.bg};
-
-    `
-        if (isStart) {
-          const pulse = document.createElement("span")
-          pulse.style.cssText = `
-         position: absolute; inset: -8px; border-radius: 50%;
-        background: #4ADE80; animation: qjpulse 2.6s ease-out infinite;
-      `
-          el.appendChild(pulse)
-        }
-        const marker = new Marker({ element: el }).setLngLat([
-          wp.longitude,
-          wp.latitude,
-        ])
-
-        if (wp.label && wp.label.trim()) {
-          marker.setPopup(
-            new Popup({
-              offset: 14,
-              closeButton: false,
-              className: "qj-popup",
-            }).setText(wp.label),
-          )
-        }
-
-        marker.addTo(map)
-      })
-
-      const bounds = coordinates.reduce(
-        (b, c) => b.extend(c),
-        new LngLatBounds(coordinates[0], coordinates[0]),
-      )
-      map.fitBounds(bounds, { padding: 40, maxZoom: 14 })
+        el.style.cssText = "width: 22px; height: 22px;"
+        const dot = document.createElement("div")
+        dot.style.cssText = `
+          width: 100%; height: 100%; border-radius: 50%; position: relative;
+          background: ${COLORS.accent}; border: 3px solid ${COLORS.bg};
+        `
+        el.appendChild(dot)
+        const pulse = document.createElement("span")
+        pulse.style.cssText = `
+          position: absolute; inset: -8px; border-radius: 50%;
+          background: ${COLORS.accent}; animation: qjpulse 2.6s ease-out infinite;
+        `
+        dot.appendChild(pulse)
+        new Marker({ element: el }).setLngLat(coordinates[0]).addTo(map)
+      }
     }
 
     let initialized = false
@@ -157,7 +182,7 @@ function EventDetailPage() {
       map.remove()
       mapRef.current = null
     }
-  }, [event?.route?.encodedPolyline])
+  }, [event])
 
   const handleJoin = async () => {
     setJoinError("")
@@ -199,12 +224,13 @@ function EventDetailPage() {
     )
   }
 
-  if (isError)
+  if (isError || !event) {
     return (
       <div style={{ ...styles.emptyState, margin: 20 }}>
         Evento non trovato o accesso negato.
       </div>
     )
+  }
 
   if (event.locked) {
     const distanceKmLocked = event.route
@@ -347,6 +373,7 @@ function EventDetailPage() {
       month: "short",
     })
     .toUpperCase()
+
   const timeLabel = start.toLocaleTimeString("it-IT", {
     hour: "2-digit",
     minute: "2-digit",
@@ -354,11 +381,16 @@ function EventDetailPage() {
   const distanceKm = event.route
     ? (event.route.distanceMeters / 1000).toFixed(1).replace(".", ",")
     : null
+  const showMap =
+    !!event.route?.encodedPolyline ||
+    (event.meetingPointLat != null && event.meetingPointLng != null)
+  const isChild = !!event.parentEventId
+  const isTrip = event.type === "MULTI_DAY_TRIP"
 
   return (
     <div style={{ ...styles.pageBg, paddingBottom: 100 }}>
       <div style={{ position: "relative", height: 250 }}>
-        {event.route?.encodedPolyline ? (
+        {showMap ? (
           <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
         ) : (
           <div
@@ -366,8 +398,22 @@ function EventDetailPage() {
               width: "100%",
               height: "100%",
               background: COLORS.cardAlt,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
-          />
+          >
+            <span
+              style={{
+                fontFamily: FONTS.mono,
+                fontSize: 11,
+                color: COLORS.textFaint,
+                letterSpacing: ".08em",
+              }}
+            >
+              VIAGGIO MULTIGIORNO
+            </span>
+          </div>
         )}
 
         <button
@@ -407,26 +453,56 @@ function EventDetailPage() {
           </button>
         )}
       </div>
+
       <div style={{ padding: "22px 20px 0" }}>
+        {isChild && (
+          <Link
+            to={`/events/${event.parentEventId}`}
+            style={{
+              display: "inline-block",
+              marginBottom: 14,
+              padding: "6px 12px",
+              borderRadius: 9,
+              background: COLORS.cardAlt,
+              border: `1px solid ${COLORS.borderSoft}`,
+              fontFamily: FONTS.mono,
+              fontSize: 10.5,
+              color: COLORS.textSecondary,
+              textDecoration: "none",
+            }}
+          >
+            ← TORNA AL VIAGGIO "{event.parentEventTitle?.toUpperCase()}"
+          </Link>
+        )}
+
         <div
-          style={{
-            display: "flex",
-            gap: 8,
-            alignItems: "center",
-            marginBottom: 10,
-          }}
+          style={{ display: "flex", alignItems: "center", marginBottom: 10 }}
         >
-          <span style={{ ...styles.screenLabel, color: COLORS.accent }}>
-            {dayLabel} · {timeLabel}
-          </span>
-          {event.status === "CANCELLED" && (
-            <span style={{ ...styles.screenLabel, color: COLORS.danger }}>
-              ANNULLATO
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <span style={{ ...styles.screenLabel, color: COLORS.accent }}>
+              {dayLabel} · {timeLabel}
             </span>
-          )}
-          {event.status === "FINISHED" && (
-            <span style={{ ...styles.screenLabel, color: COLORS.textMuted }}>
-              CONCLUSO
+            {event.status === "CANCELLED" && (
+              <span style={{ ...styles.screenLabel, color: COLORS.danger }}>
+                ANNULLATO
+              </span>
+            )}
+            {event.status === "FINISHED" && (
+              <span style={{ ...styles.screenLabel, color: COLORS.textMuted }}>
+                CONCLUSO
+              </span>
+            )}
+          </div>
+
+          {event.type !== "STANDARD" && (
+            <span
+              style={{
+                ...styles.screenLabel,
+                color: COLORS.accent,
+                marginLeft: "auto",
+              }}
+            >
+              {EVENT_TYPE_LABELS[event.type]}
             </span>
           )}
         </div>
@@ -443,7 +519,9 @@ function EventDetailPage() {
             marginBottom: 18,
           }}
         >
-          {event.meetingPointAddress || "Ritrovo da definire"}
+          {isTrip
+            ? `${event.children?.length || 0} GIORNI`
+            : event.meetingPointAddress || "Ritrovo da definire"}
           {distanceKm && ` · ${distanceKm} KM`}
           {` · ${event.currentParticipants}/${event.maxParticipants}`}
         </div>
@@ -459,51 +537,96 @@ function EventDetailPage() {
           {event.description}
         </p>
 
-        <div
-          style={{
-            ...styles.statGrid,
-            gridTemplateColumns: "1fr 1fr",
-            marginBottom: 22,
-          }}
-        >
-          <div style={styles.statCell}>
-            <span style={styles.statLabel}>RITROVO</span>
-            <span
-              style={{
-                fontFamily: FONTS.heading,
-                fontWeight: 600,
-                fontSize: 15,
-                lineHeight: 1.2,
-              }}
-            >
-              {event.meetingPointAddress || "—"}
-            </span>
+        {isTrip ? (
+          <div
+            style={{
+              ...styles.statGrid,
+              gridTemplateColumns: "1fr 1fr",
+              marginBottom: 22,
+            }}
+          >
+            <div style={styles.statCell}>
+              <span style={styles.statLabel}>GIORNI</span>
+              <span style={styles.statValue}>
+                {event.children?.length || 0}
+              </span>
+            </div>
+            <div style={styles.statCell}>
+              <span style={styles.statLabel}>POSTI</span>
+              <span style={styles.statValue}>
+                {event.currentParticipants}/{event.maxParticipants}
+              </span>
+            </div>
+            <div style={styles.statCell}>
+              <span style={styles.statLabel}>KM TOTALI</span>
+              <span style={styles.statValue}>
+                {event.totalDistanceMeters
+                  ? (event.totalDistanceMeters / 1000)
+                      .toFixed(1)
+                      .replace(".", ",")
+                  : "—"}
+              </span>
+            </div>
+            <div style={styles.statCell}>
+              <span style={styles.statLabel}>VISIBILITÀ</span>
+              <span
+                style={{
+                  fontFamily: FONTS.heading,
+                  fontWeight: 700,
+                  fontSize: 21,
+                }}
+              >
+                {VISIBILITY_LABELS[event.visibility]}
+              </span>
+            </div>
           </div>
-          <div style={styles.statCell}>
-            <span style={styles.statLabel}>POSTI</span>
-            <span style={styles.statValue}>
-              {event.currentParticipants}/{event.maxParticipants}
-            </span>
+        ) : (
+          <div
+            style={{
+              ...styles.statGrid,
+              gridTemplateColumns: "1fr 1fr",
+              marginBottom: 22,
+            }}
+          >
+            <div style={styles.statCell}>
+              <span style={styles.statLabel}>RITROVO</span>
+              <span
+                style={{
+                  fontFamily: FONTS.heading,
+                  fontWeight: 600,
+                  fontSize: 15,
+                  lineHeight: 1.2,
+                }}
+              >
+                {event.meetingPointAddress || "—"}
+              </span>
+            </div>
+            <div style={styles.statCell}>
+              <span style={styles.statLabel}>POSTI</span>
+              <span style={styles.statValue}>
+                {event.currentParticipants}/{event.maxParticipants}
+              </span>
+            </div>
+            <div style={styles.statCell}>
+              <span style={styles.statLabel}>PERCORSO</span>
+              <span style={styles.statValue}>
+                {distanceKm ? `${distanceKm} KM` : "—"}
+              </span>
+            </div>
+            <div style={styles.statCell}>
+              <span style={styles.statLabel}>VISIBILITÀ</span>
+              <span
+                style={{
+                  fontFamily: FONTS.heading,
+                  fontWeight: 700,
+                  fontSize: 21,
+                }}
+              >
+                {VISIBILITY_LABELS[event.visibility]}
+              </span>
+            </div>
           </div>
-          <div style={styles.statCell}>
-            <span style={styles.statLabel}>PERCORSO</span>
-            <span style={styles.statValue}>
-              {distanceKm ? `${distanceKm} KM` : "—"}
-            </span>
-          </div>
-          <div style={styles.statCell}>
-            <span style={styles.statLabel}>VISIBILITÀ</span>
-            <span
-              style={{
-                fontFamily: FONTS.heading,
-                fontWeight: 700,
-                fontSize: 21,
-              }}
-            >
-              {VISIBILITY_LABELS[event.visibility]}
-            </span>
-          </div>
-        </div>
+        )}
 
         {event.route?.googleMapsUrl && (
           <a
@@ -522,6 +645,123 @@ function EventDetailPage() {
           >
             APRI IN GOOGLE MAPS
           </a>
+        )}
+
+        {isTrip && (
+          <div style={{ marginBottom: 22 }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "baseline",
+                marginBottom: 12,
+              }}
+            >
+              <div style={styles.sectionTitle}>GIORNI</div>
+              {event.organizer && (
+                <Link
+                  to={`/events/${eventId}/days/new`}
+                  style={{
+                    fontFamily: FONTS.mono,
+                    fontSize: 10.5,
+                    color: COLORS.accent,
+                    textDecoration: "none",
+                  }}
+                >
+                  + AGGIUNGI
+                </Link>
+              )}
+            </div>
+
+            {!event.children || event.children.length === 0 ? (
+              <p
+                style={{
+                  fontFamily: FONTS.body,
+                  fontSize: 13,
+                  color: COLORS.textFaint,
+                }}
+              >
+                Nessun giorno ancora aggiunto a questo viaggio.
+              </p>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {event.children.map((day, index) => {
+                  const dayStart = new Date(day.startDateTime)
+                  return (
+                    <Link
+                      key={day.id}
+                      to={`/events/${day.id}`}
+                      style={{
+                        ...styles.card,
+                        padding: 13,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 12,
+                        textDecoration: "none",
+                      }}
+                    >
+                      <span
+                        style={{
+                          width: 30,
+                          height: 30,
+                          borderRadius: "50%",
+                          flexShrink: 0,
+                          background: COLORS.cardAlt,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontFamily: FONTS.mono,
+                          fontSize: 12,
+                          color: COLORS.accent,
+                        }}
+                      >
+                        {index + 1}
+                      </span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div
+                          style={{
+                            fontFamily: FONTS.heading,
+                            fontWeight: 600,
+                            fontSize: 15,
+                            color: COLORS.text,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {day.title}
+                        </div>
+                        <div
+                          style={{
+                            fontFamily: FONTS.mono,
+                            fontSize: 9.5,
+                            color: COLORS.textMuted,
+                            marginTop: 3,
+                          }}
+                        >
+                          {dayStart.toLocaleDateString("it-IT", {
+                            day: "numeric",
+                            month: "short",
+                          })}
+                          {" · "}
+                          {day.type === "RADUNO" ? "SOSTA" : "TAPPA"}
+                        </div>
+                      </div>
+                      <span
+                        style={{
+                          fontFamily: FONTS.heading,
+                          color: COLORS.textFaint,
+                          fontSize: 18,
+                        }}
+                      >
+                        {">"}
+                      </span>
+                    </Link>
+                  )
+                })}
+              </div>
+            )}
+          </div>
         )}
 
         {participants && participants.length > 0 && (
@@ -571,169 +811,178 @@ function EventDetailPage() {
           </div>
         )}
 
-        {!event.organizer && event.status === "ACTIVE" && (
-          <div style={{ ...styles.card, padding: 18, marginBottom: 20 }}>
-            {event.myParticipationStatus === "ACCEPTED" && (
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
+        {isChild ? (
+          <div style={{ ...styles.emptyState, marginBottom: 20 }}>
+            Questo è un giorno del viaggio. La partecipazione si gestisce dalla
+            pagina del viaggio completo.
+          </div>
+        ) : (
+          !event.organizer &&
+          event.status === "ACTIVE" && (
+            <div style={{ ...styles.card, padding: 18, marginBottom: 20 }}>
+              {event.myParticipationStatus === "ACCEPTED" && (
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: FONTS.mono,
+                      fontSize: 11,
+                      color: "#4ADE80",
+                    }}
+                  >
+                    ✓ PARTECIPAZIONE CONFERMATA
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmType("cancelMe")}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: COLORS.danger,
+                      fontFamily: FONTS.mono,
+                      fontSize: 10,
+                      cursor: "pointer",
+                    }}
+                  >
+                    ANNULLA
+                  </button>
+                </div>
+              )}
+
+              {event.myParticipationStatus === "PENDING" && (
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: FONTS.mono,
+                      fontSize: 11,
+                      color: COLORS.accent,
+                    }}
+                  >
+                    RICHIESTA IN ATTESA
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmType("cancelMe")}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: COLORS.danger,
+                      fontFamily: FONTS.mono,
+                      fontSize: 10,
+                      cursor: "pointer",
+                    }}
+                  >
+                    ANNULLA RICHIESTA
+                  </button>
+                </div>
+              )}
+
+              {(event.myParticipationStatus === "REJECTED" ||
+                event.myParticipationStatus === "CANCELLED") && (
                 <span
                   style={{
                     fontFamily: FONTS.mono,
                     fontSize: 11,
-                    color: "#4ADE80",
+                    color: COLORS.textMuted,
                   }}
                 >
-                  ✓ PARTECIPAZIONE CONFERMATA
+                  {event.myParticipationStatus === "REJECTED"
+                    ? "RICHIESTA RIFIUTATA"
+                    : "PARTECIPAZIONE ANNULLATA"}
                 </span>
-                <button
-                  type="button"
-                  onClick={() => setConfirmType("cancelMe")}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: COLORS.danger,
-                    fontFamily: FONTS.mono,
-                    fontSize: 10,
-                    cursor: "pointer",
-                  }}
-                >
-                  ANNULLA
-                </button>
-              </div>
-            )}
+              )}
 
-            {event.myParticipationStatus === "PENDING" && (
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily: FONTS.mono,
-                    fontSize: 11,
-                    color: COLORS.accent,
-                  }}
-                >
-                  RICHIESTA IN ATTESA
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setConfirmType("cancelMe")}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: COLORS.danger,
-                    fontFamily: FONTS.mono,
-                    fontSize: 10,
-                    cursor: "pointer",
-                  }}
-                >
-                  ANNULLA RICHIESTA
-                </button>
-              </div>
-            )}
-
-            {(event.myParticipationStatus === "REJECTED" ||
-              event.myParticipationStatus === "CANCELLED") && (
-              <span
-                style={{
-                  fontFamily: FONTS.mono,
-                  fontSize: 11,
-                  color: COLORS.textMuted,
-                }}
-              >
-                {event.myParticipationStatus === "REJECTED"
-                  ? "RICHIESTA RIFIUTATA"
-                  : "PARTECIPAZIONE ANNULLATA"}
-              </span>
-            )}
-
-            {event.myParticipationStatus === null && (
-              <>
-                {event.visibility === "INVITE_ONLY" ? (
-                  <p
-                    style={{
-                      fontFamily: FONTS.body,
-                      fontSize: 13,
-                      color: COLORS.textFaint,
-                      margin: 0,
-                    }}
-                  >
-                    Questo evento richiede un invito dall'organizzatore.
-                  </p>
-                ) : isFull ? (
-                  <p
-                    style={{
-                      fontFamily: FONTS.body,
-                      fontSize: 13,
-                      color: COLORS.textFaint,
-                      margin: 0,
-                    }}
-                  >
-                    Numero massimo di partecipanti raggiunto.
-                  </p>
-                ) : (
-                  <>
-                    {event.visibility === "PRIVATE_CODE" && (
-                      <input
-                        type="text"
-                        placeholder="Codice di accesso"
-                        value={accessCode}
-                        onChange={(e) => setAccessCode(e.target.value)}
-                        style={{
-                          ...styles.input,
-                          height: 46,
-                          marginBottom: 12,
-                        }}
-                      />
-                    )}
-                    {joinError && (
-                      <div
-                        style={{
-                          fontFamily: FONTS.body,
-                          fontSize: 13,
-                          color: COLORS.danger,
-                          marginBottom: 10,
-                        }}
-                      >
-                        {joinError}
-                      </div>
-                    )}
-                    <button
-                      type="button"
-                      onClick={handleJoin}
-                      disabled={isJoining}
+              {event.myParticipationStatus === null && (
+                <>
+                  {event.visibility === "INVITE_ONLY" ? (
+                    <p
                       style={{
-                        ...styles.primaryButton,
-                        width: "100%",
-                        opacity: isJoining ? 0.6 : 1,
+                        fontFamily: FONTS.body,
+                        fontSize: 13,
+                        color: COLORS.textFaint,
+                        margin: 0,
                       }}
                     >
-                      {isJoining ? "..." : "PRENOTA IL TUO POSTO"}
-                    </button>
-                  </>
-                )}
-              </>
-            )}
-          </div>
+                      Questo evento richiede un invito dall'organizzatore.
+                    </p>
+                  ) : isFull ? (
+                    <p
+                      style={{
+                        fontFamily: FONTS.body,
+                        fontSize: 13,
+                        color: COLORS.textFaint,
+                        margin: 0,
+                      }}
+                    >
+                      Numero massimo di partecipanti raggiunto.
+                    </p>
+                  ) : (
+                    <>
+                      {event.visibility === "PRIVATE_CODE" && (
+                        <input
+                          type="text"
+                          placeholder="Codice di accesso"
+                          value={accessCode}
+                          onChange={(e) => setAccessCode(e.target.value)}
+                          style={{
+                            ...styles.input,
+                            height: 46,
+                            marginBottom: 12,
+                          }}
+                        />
+                      )}
+                      {joinError && (
+                        <div
+                          style={{
+                            fontFamily: FONTS.body,
+                            fontSize: 13,
+                            color: COLORS.danger,
+                            marginBottom: 10,
+                          }}
+                        >
+                          {joinError}
+                        </div>
+                      )}
+                      <button
+                        type="button"
+                        onClick={handleJoin}
+                        disabled={isJoining}
+                        style={{
+                          ...styles.primaryButton,
+                          width: "100%",
+                          opacity: isJoining ? 0.6 : 1,
+                        }}
+                      >
+                        {isJoining ? "..." : "PRENOTA IL TUO POSTO"}
+                      </button>
+                    </>
+                  )}
+                </>
+              )}
+            </div>
+          )
         )}
 
-        {event.organizer && event.visibility === "PRIVATE_CODE" && (
+        {!isChild && event.organizer && event.visibility === "PRIVATE_CODE" && (
           <AccessCodeCard eventId={eventId} />
         )}
 
-        {event.organizer && (
+        {!isChild && event.organizer && (
           <OrganizerPanel eventId={eventId} visibility={event.visibility} />
         )}
       </div>
+
       {confirmType && (
         <div
           style={{
