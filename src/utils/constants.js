@@ -46,3 +46,9 @@ export const PARTICIPATION_LABELS = {
   REJECTED: "Rifiutato",
   CANCELLED: "Annullato",
 }
+
+export const EVENT_TYPE_LABELS = {
+  STANDARD: "GIRO",
+  RADUNO: "RADUNO",
+  MULTI_DAY_TRIP: "VIAGGIO",
+}
