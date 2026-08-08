@@ -7,7 +7,7 @@ import {
   useGetOrganizedEventsQuery,
   useGetParticipatingEventsQuery,
 } from "../features/events/eventsApi"
-import { VISIBILITY_LABELS } from "../utils/constants"
+import { EVENT_TYPE_LABELS, VISIBILITY_LABELS } from "../utils/constants"
 import { COLORS, FONTS, styles } from "../styles/theme"
 import NotificationBell from "../features/notification/components/NotificationBell"
 
@@ -337,6 +337,21 @@ function EventsListPage() {
                   </div>
 
                   <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    {event.type !== "STANDARD" && (
+                      <span
+                        style={{
+                          padding: "3px 9px",
+                          borderRadius: 8,
+                          background: COLORS.cardAlt,
+                          border: `1px solid ${COLORS.borderSoft}`,
+                          fontFamily: FONTS.mono,
+                          fontSize: 9.5,
+                          color: COLORS.accent,
+                        }}
+                      >
+                        {EVENT_TYPE_LABELS[event.type]}
+                      </span>
+                    )}
                     <span
                       style={{
                         padding: "3px 9px",
