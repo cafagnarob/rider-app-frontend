@@ -28,6 +28,8 @@ import EventDetailPage from "../pages/EventDetailPage"
 import MyInvitesPage from "../pages/MyInvitesPage"
 import VehicleDetailPage from "../pages/VehicleDetailPage"
 import SearchPage from "../pages/SearchPage"
+import AddVehicleWizardPage from "../pages/AddVehicleWizardPage"
+import AddEventDayPage from "../pages/AddEventDayPage"
 
 function AppRoutes() {
   return (
@@ -63,6 +65,11 @@ function AppRoutes() {
           <Route path="/invites" element={<MyInvitesPage />} />
           <Route path="/garage/:vehicleId" element={<VehicleDetailPage />} />
           <Route path="/search" element={<SearchPage />} />
+          <Route path="/garage/new" element={<AddVehicleWizardPage />} />
+          <Route
+            path="/events/:tripId/days/new"
+            element={<AddEventDayPage />}
+          />
         </Route>
       </Route>
       <Route path="/login" element={<LoginPage />} />
