@@ -7,7 +7,11 @@ import { useGetModelsQuery } from "../features/catalog/catalogApi"
 import { useSearchEventsQuery } from "../features/events/eventsApi"
 import { searchPlaces } from "../utils/geocoding"
 import ModelDetailModal from "../features/catalog/components/ModelDetailModal"
-import { CATEGORY_LABELS, VISIBILITY_LABELS } from "../utils/constants"
+import {
+  CATEGORY_LABELS,
+  EVENT_TYPE_LABELS,
+  VISIBILITY_LABELS,
+} from "../utils/constants"
 import { COLORS, FONTS, styles } from "../styles/theme"
 
 const TABS = [
@@ -399,6 +403,11 @@ function SearchPage() {
                           marginTop: 3,
                         }}
                       >
+                        {event.type !== "STANDARD" && (
+                          <span style={{ color: COLORS.accent }}>
+                            {EVENT_TYPE_LABELS[event.type]} ·{" "}
+                          </span>
+                        )}
                         {VISIBILITY_LABELS[event.visibility]} ·{" "}
                         {event.currentParticipants}/{event.maxParticipants}
                       </div>
