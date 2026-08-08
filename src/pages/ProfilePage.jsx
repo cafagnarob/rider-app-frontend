@@ -11,6 +11,7 @@ import SecuritySection from "../features/users/components/SecuritySection"
 import { useGetMyInvitesQuery } from "../features/events/invitesApi"
 import { COLORS, FONTS, styles } from "../styles/theme"
 import { FaChevronRight } from "react-icons/fa"
+import { useGetFollowStatsQuery } from "../features/social/followApi"
 
 const MENU_ITEMS = [
   { to: "/garage", label: "Garage" },
@@ -25,6 +26,10 @@ function ProfilePage() {
     useUpdateProfilePictureMutation()
 
   const { data: myInvites } = useGetMyInvitesQuery()
+
+  const { data: stats } = useGetFollowStatsQuery(profile?.username, {
+    skip: !profile?.username,
+  })
 
   const [showEdit, setShowEdit] = useState(false)
   const [errorMsg, setErrorMsg] = useState("")
@@ -128,6 +133,54 @@ function ProfilePage() {
               }}
             >
               @{profile.username}
+            </div>
+            <div style={{ display: "flex", gap: 20, marginBottom: 14 }}>
+              <Link
+                to={`/users/${profile.username}/followers`}
+                style={{ textDecoration: "none", color: COLORS.text }}
+              >
+                <span
+                  style={{
+                    fontFamily: FONTS.heading,
+                    fontWeight: 700,
+                    fontSize: 15,
+                  }}
+                >
+                  {stats?.followersCount ?? 0}
+                </span>{" "}
+                <span
+                  style={{
+                    fontFamily: FONTS.mono,
+                    fontSize: 10.5,
+                    color: COLORS.textMuted,
+                  }}
+                >
+                  FOLLOWER
+                </span>
+              </Link>
+              <Link
+                to={`/users/${profile.username}/following`}
+                style={{ textDecoration: "none", color: COLORS.text }}
+              >
+                <span
+                  style={{
+                    fontFamily: FONTS.heading,
+                    fontWeight: 700,
+                    fontSize: 15,
+                  }}
+                >
+                  {stats?.followingCount ?? 0}
+                </span>{" "}
+                <span
+                  style={{
+                    fontFamily: FONTS.mono,
+                    fontSize: 10.5,
+                    color: COLORS.textMuted,
+                  }}
+                >
+                  SEGUITI
+                </span>
+              </Link>
             </div>
             <label
               style={{
