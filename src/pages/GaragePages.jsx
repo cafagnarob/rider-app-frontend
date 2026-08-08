@@ -59,7 +59,7 @@ function GaragePage() {
       >
         <div style={{ ...styles.pageTitle, fontSize: 28 }}>IL MIO GARAGE</div>
         <Link
-          to="/catalog"
+          to="/garage/new"
           style={{
             height: 40,
             padding: "0 15px",
