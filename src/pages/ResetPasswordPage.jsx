@@ -1,14 +1,14 @@
 import { useState } from "react"
 import { useNavigate, useSearchParams, Link } from "react-router-dom"
 import { useResetPasswordMutation } from "../features/auth/authApi"
-import { Button, Card, Form } from "react-bootstrap"
-import { FaEye, FaEyeSlash } from "react-icons/fa"
+
+import { COLORS, FONTS, styles } from "../styles/theme"
+import PasswordInput from "../components/PasswordInput"
 
 function ResetPasswordPage() {
   const [searchParams] = useSearchParams()
   const token = searchParams.get("token")
 
-  const [showPass, setShowPass] = useState(false)
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [validationError, setValidationError] = useState("")
@@ -34,93 +34,116 @@ function ResetPasswordPage() {
 
   if (!token) {
     return (
-      <Card className="min-vh-100 bg-black text-light p-3">
-        <Card.Body className="d-flex">
-          <div className="alert mt-5 text-center d-flex flex-column justify-content-center">
-            <p>
-              Link non valido o incompleto. Richiedi un nuovo link dalla
-              pagina{" "}
-            </p>
-            <br />
-            <p>
-              <Link to="/forgot-password">password dimenticata</Link>.
-            </p>
-          </div>
-        </Card.Body>
-      </Card>
+      <div
+        style={{
+          minHeight: "100vh",
+          background: COLORS.bg,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 24,
+        }}
+      >
+        <div
+          style={{ ...styles.emptyState, maxWidth: 360, textAlign: "center" }}
+        >
+          Link non valido o incompleto. Richiedi un nuovo link dalla pagina{" "}
+          <Link to="/forgot-password" style={{ color: COLORS.accent }}>
+            password dimenticata
+          </Link>
+          .
+        </div>
+      </div>
     )
   }
 
   return (
-    <Card className="min-vh-100 bg-black text-light p-3">
-      <Card.Body>
-        <Card.Title className="py-5 fs-1">Nuova password</Card.Title>
-        <Form onSubmit={handleSubmit}>
-          <Form.Group
-            className="mb-3 position-relative"
-            controlId="newPassword"
-            data-bs-theme="dark"
-          >
-            <Form.Label>Nuova password</Form.Label>
-            <Form.Control
-              type={showPass ? "text" : "password"}
-              value={newPassword}
-              placeholder="********"
-              className="bg-transparent"
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
-            />
-            <span
-              onClick={() => setShowPass(!showPass)}
-              style={{
-                cursor: "pointer",
-                position: "absolute",
-                right: "12px",
-                top: "38px",
-              }}
-            >
-              {showPass ? <FaEyeSlash /> : <FaEye />}
-            </span>
-          </Form.Group>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: COLORS.bg,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 24,
+      }}
+    >
+      <div
+        style={{
+          fontFamily: FONTS.heading,
+          fontWeight: 700,
+          fontSize: 30,
+          marginBottom: 30,
+        }}
+      >
+        NUOVA PASSWORD
+      </div>
 
-          <Form.Group
-            className="mb-3"
-            controlId="confirmPassword"
-            data-bs-theme="dark"
-          >
-            <Form.Label>Conferma password</Form.Label>
-            <Form.Control
-              type={showPass ? "text" : "password"}
-              value={confirmPassword}
-              placeholder="********"
-              className="bg-transparent"
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-            />
-          </Form.Group>
-
-          {validationError && (
-            <div className="alert alert-warning py-2">{validationError}</div>
-          )}
-          {error && (
-            <div className="alert alert-danger py-2">
-              Token non valido o scaduto. Richiedi un nuovo link.
-            </div>
-          )}
-
-          <div className="d-flex justify-content-center">
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="rounded-pill px-5 fw-bold my-3 border-0"
-              style={{ backgroundColor: "#FFBE5D", color: "#000" }}
-            >
-              {isLoading ? "Salvataggio..." : "Reimposta password"}
-            </Button>
+      <form
+        onSubmit={handleSubmit}
+        style={{
+          width: "100%",
+          maxWidth: 360,
+          display: "flex",
+          flexDirection: "column",
+          gap: 18,
+        }}
+      >
+        <div>
+          <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+            NUOVA PASSWORD
           </div>
-        </Form>
-      </Card.Body>
-    </Card>
+          <PasswordInput
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            required
+          />
+        </div>
+
+        <div>
+          <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+            CONFERMA PASSWORD
+          </div>
+          <PasswordInput
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+          />
+        </div>
+
+        {validationError && (
+          <div
+            style={{
+              fontFamily: FONTS.body,
+              fontSize: 13,
+              color: COLORS.accent,
+            }}
+          >
+            {validationError}
+          </div>
+        )}
+        {error && (
+          <div
+            style={{
+              fontFamily: FONTS.body,
+              fontSize: 13,
+              color: COLORS.danger,
+            }}
+          >
+            Token non valido o scaduto. Richiedi un nuovo link.
+          </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={isLoading}
+          style={{ ...styles.primaryButton, opacity: isLoading ? 0.6 : 1 }}
+        >
+          {isLoading ? "..." : "REIMPOSTA PASSWORD"}
+        </button>
+      </form>
+    </div>
   )
 }
 export default ResetPasswordPage
