@@ -1,11 +1,12 @@
 import { useState } from "react"
-import { Spinner, Button } from "react-bootstrap"
+import { Spinner } from "react-bootstrap"
 import { useParams, Link, useNavigate } from "react-router-dom"
 import { FaArrowLeft } from "react-icons/fa"
 import {
   useGetFollowersQuery,
   useGetFollowingQuery,
 } from "../features/social/followApi"
+import { COLORS, FONTS, styles } from "../styles/theme"
 
 function FollowListPage({ type }) {
   const { username } = useParams()
@@ -32,54 +33,111 @@ function FollowListPage({ type }) {
 
   if (isLoading) {
     return (
-      <div className="text-center py-5">
-        <Spinner animation="border" variant="light" />
+      <div style={{ textAlign: "center", padding: "60px 0" }}>
+        <Spinner animation="border" style={{ color: COLORS.accent }} />
       </div>
     )
   }
 
   if (isError) {
     return (
-      <div className="alert alert-danger">Impossibile caricare la lista.</div>
+      <div style={{ ...styles.emptyState, margin: 20 }}>
+        Impossibile caricare la lista.
+      </div>
     )
   }
 
   return (
-    <div style={{ maxWidth: "540px", margin: "0 auto" }}>
-      <div className="d-flex align-items-center gap-3 mb-4">
-        <Button variant="outline-light" size="sm" onClick={() => navigate(-1)}>
+    <div style={{ ...styles.pageBg, paddingTop: 20, paddingBottom: 40 }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          padding: "0 20px 18px",
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          style={styles.iconButton}
+        >
           <FaArrowLeft />
-        </Button>
+        </button>
         <div>
-          <h4 className="mb-0">{title}</h4>
-          <small className="text-secondary">@{username}</small>
+          <div style={{ ...styles.pageTitle, fontSize: 22 }}>{title}</div>
+          <div
+            style={{
+              fontFamily: FONTS.mono,
+              fontSize: 10,
+              color: COLORS.textMuted,
+              marginTop: 2,
+            }}
+          >
+            @{username}
+          </div>
         </div>
       </div>
 
       {data.content.length === 0 ? (
-        <p className="text-secondary text-center py-5">{emptyText}</p>
-      ) : (
-        <div
-          className="d-flex flex-column"
-          style={{ opacity: isFetching ? 0.6 : 1 }}
+        <p
+          style={{
+            fontFamily: FONTS.body,
+            fontSize: 13,
+            color: COLORS.textFaint,
+            textAlign: "center",
+            padding: "60px 20px",
+          }}
         >
+          {emptyText}
+        </p>
+      ) : (
+        <div style={{ opacity: isFetching ? 0.6 : 1 }}>
           {data.content.map((user) => (
             <Link
               key={user.id}
               to={`/profile/${user.username}`}
-              className="d-flex align-items-center gap-3 p-3 border-bottom border-secondary text-decoration-none text-light"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 13,
+                padding: "13px 20px",
+                borderBottom: `1px solid ${COLORS.borderSoft}`,
+                textDecoration: "none",
+              }}
             >
               <img
                 src={user.profilePicture}
                 alt={user.username}
-                className="rounded-circle"
-                style={{ width: "48px", height: "48px", objectFit: "cover" }}
+                style={{
+                  width: 46,
+                  height: 46,
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                  background: COLORS.surfaceRaised,
+                }}
               />
               <div>
-                <div className="fw-semibold">{user.username}</div>
-                <small className="text-secondary">
+                <div
+                  style={{
+                    fontFamily: FONTS.heading,
+                    fontWeight: 600,
+                    fontSize: 15,
+                    color: COLORS.text,
+                  }}
+                >
+                  {user.username}
+                </div>
+                <div
+                  style={{
+                    fontFamily: FONTS.mono,
+                    fontSize: 10,
+                    color: COLORS.textMuted,
+                    marginTop: 2,
+                  }}
+                >
                   {user.name} {user.surname}
-                </small>
+                </div>
               </div>
             </Link>
           ))}
@@ -87,26 +145,50 @@ function FollowListPage({ type }) {
       )}
 
       {data.totalPages > 1 && (
-        <div className="d-flex justify-content-center align-items-center gap-3 mt-4">
-          <Button
-            variant="outline-light"
-            size="sm"
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: 16,
+            padding: "24px 20px",
+          }}
+        >
+          <button
+            type="button"
             disabled={data.first || isFetching}
             onClick={() => setPage((p) => p - 1)}
+            style={{
+              ...styles.secondaryButton,
+              height: 40,
+              padding: "0 16px",
+              opacity: data.first ? 0.4 : 1,
+            }}
           >
-            Precedente
-          </Button>
-          <span className="text-secondary">
+            PRECEDENTE
+          </button>
+          <span
+            style={{
+              fontFamily: FONTS.mono,
+              fontSize: 11,
+              color: COLORS.textMuted,
+            }}
+          >
             {data.number + 1} / {data.totalPages}
           </span>
-          <Button
-            variant="outline-light"
-            size="sm"
+          <button
+            type="button"
             disabled={data.last || isFetching}
             onClick={() => setPage((p) => p + 1)}
+            style={{
+              ...styles.secondaryButton,
+              height: 40,
+              padding: "0 16px",
+              opacity: data.last ? 0.4 : 1,
+            }}
           >
-            Successiva
-          </Button>
+            SUCCESSIVA
+          </button>
         </div>
       )}
     </div>
