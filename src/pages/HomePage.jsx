@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo } from "react"
+import { useEffect, useRef, useMemo, useState } from "react"
 import { Map as MapLibreMap, Marker, FullscreenControl } from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
 import { useNavigate, Link } from "react-router-dom"
@@ -13,8 +13,11 @@ import { useGeolocation } from "../utils/useGeolocation"
 import { COLORS, FONTS, styles } from "../styles/theme"
 import NotificationBell from "../features/notification/components/NotificationBell"
 import { MAP_STYLE_URL } from "../utils/mapStyle"
+import { EVENT_TYPE_LABELS } from "../utils/constants"
 
 const RADIUS_KM = 40
+const INITIAL_CENTER = [12.4964, 41.9028] // Roma: vista di partenza, prima del flyTo
+const INITIAL_ZOOM = 5
 
 function HomePage() {
   const navigate = useNavigate()
@@ -62,32 +65,51 @@ function HomePage() {
   const containerRef = useRef(null)
   const mapRef = useRef(null)
   const markersRef = useRef([])
+  const hasFlownRef = useRef(false)
+  const [mapReady, setMapReady] = useState(false)
 
+  // creazione mappa — parte sempre da una vista ampia, così il flyTo ha un tragitto da percorrere
   useEffect(() => {
     if (!containerRef.current) return
-
-    const center = position
-      ? [position.longitude, position.latitude]
-      : events[0]?.meetingPointLng != null
-        ? [events[0].meetingPointLng, events[0].meetingPointLat]
-        : [12.4964, 41.9028] // fallback: Roma
 
     const map = new MapLibreMap({
       container: containerRef.current,
       style: MAP_STYLE_URL,
-      center,
-      zoom: 10,
+      center: INITIAL_CENTER,
+      zoom: INITIAL_ZOOM,
     })
     mapRef.current = map
 
     map.addControl(new FullscreenControl(), "top-right")
 
+    const handleLoad = () => {
+      map.resize()
+      setMapReady(true)
+    }
+    map.on("load", handleLoad)
+
     return () => {
+      map.off("load", handleLoad)
       map.remove()
       mapRef.current = null
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // volo verso la posizione del dispositivo, una sola volta, appena entrambe sono pronte
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !mapReady || !position || hasFlownRef.current) return
+
+    hasFlownRef.current = true
+    map.flyTo({
+      center: [position.longitude, position.latitude],
+      zoom: 12,
+      speed: 0.8,
+      curve: 1.4,
+      essential: true,
+    })
+  }, [mapReady, position])
 
   useEffect(() => {
     const map = mapRef.current
