@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState } from "react"
 import { Spinner } from "react-bootstrap"
 import { useParams, useNavigate, Link } from "react-router-dom"
-import { Map as MapLibreMap, Marker, Popup, LngLatBounds } from "maplibre-gl"
+import {
+  Map as MapLibreMap,
+  Marker,
+  Popup,
+  LngLatBounds,
+  FullscreenControl,
+} from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
 import { FaArrowLeft } from "react-icons/fa"
 import {
@@ -74,6 +80,8 @@ function EventDetailPage() {
       zoom: hasRoute ? 12 : 13,
     })
     mapRef.current = map
+
+    map.addControl(new FullscreenControl(), "bottom-left")
 
     const draw = () => {
       map.resize()
@@ -387,6 +395,11 @@ function EventDetailPage() {
   const isChild = !!event.parentEventId
   const isTrip = event.type === "MULTI_DAY_TRIP"
 
+  const meetingPointMapsUrl =
+    event.meetingPointLat != null && event.meetingPointLng != null
+      ? `https://www.google.com/maps/dir/?api=1&destination=${event.meetingPointLat},${event.meetingPointLng}&travelmode=driving`
+      : null
+
   return (
     <div style={{ ...styles.pageBg, paddingBottom: 100 }}>
       <div style={{ position: "relative", height: 250 }}>
@@ -588,19 +601,45 @@ function EventDetailPage() {
               marginBottom: 22,
             }}
           >
-            <div style={styles.statCell}>
-              <span style={styles.statLabel}>RITROVO</span>
-              <span
+            {meetingPointMapsUrl ? (
+              <a
+                href={meetingPointMapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
                 style={{
-                  fontFamily: FONTS.heading,
-                  fontWeight: 600,
-                  fontSize: 15,
-                  lineHeight: 1.2,
+                  ...styles.statCell,
+                  textDecoration: "none",
+                  display: "flex",
                 }}
               >
-                {event.meetingPointAddress || "—"}
-              </span>
-            </div>
+                <span style={styles.statLabel}>RITROVO ↗</span>
+                <span
+                  style={{
+                    fontFamily: FONTS.heading,
+                    fontWeight: 600,
+                    fontSize: 15,
+                    lineHeight: 1.2,
+                    color: COLORS.accent,
+                  }}
+                >
+                  {event.meetingPointAddress || "—"}
+                </span>
+              </a>
+            ) : (
+              <div style={styles.statCell}>
+                <span style={styles.statLabel}>RITROVO</span>
+                <span
+                  style={{
+                    fontFamily: FONTS.heading,
+                    fontWeight: 600,
+                    fontSize: 15,
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {event.meetingPointAddress || "—"}
+                </span>
+              </div>
+            )}
             <div style={styles.statCell}>
               <span style={styles.statLabel}>POSTI</span>
               <span style={styles.statValue}>
