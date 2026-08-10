@@ -5,10 +5,10 @@ import { useGetMyRoutesQuery } from "../features/routesMap/routesApi"
 import { useCreateEventMutation } from "../features/events/eventsApi"
 import { toLocalDateTimeString, addSecondsToLocalDateTime } from "../utils/geo"
 import { generateAccessCode } from "../utils/codeGenerator"
-import { COLORS, FONTS, styles } from "../styles/theme"
 import { useInviteUserMutation } from "../features/events/invitesApi"
 import InviteSelector from "../features/events/components/InviteSelector"
 import { searchPlaces } from "../utils/geocoding"
+import "./EventCreatePage.css"
 
 const DRAFT_KEY = "eventDraft"
 
@@ -104,10 +104,7 @@ function EventCreatePage() {
 
   const regenerateCode = () => {
     setForm((prev) => {
-      const next = {
-        ...prev,
-        accessCode: generateAccessCode(),
-      }
+      const next = { ...prev, accessCode: generateAccessCode() }
       try {
         localStorage.setItem(DRAFT_KEY, JSON.stringify(next))
       } catch {
@@ -294,59 +291,17 @@ function EventCreatePage() {
 
   if (inviteSummary) {
     return (
-      <div
-        style={{
-          ...styles.pageBg,
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: 24,
-          textAlign: "center",
-          gap: 16,
-        }}
-      >
-        <div
-          style={{ fontFamily: FONTS.heading, fontWeight: 700, fontSize: 28 }}
-        >
-          EVENTO CREATO
-        </div>
+      <div className="invite-summary">
+        <div className="invite-summary__title">EVENTO CREATO</div>
 
-        <div
-          style={{ ...styles.card, padding: 18, maxWidth: 360, width: "100%" }}
-        >
-          <div
-            style={{
-              fontFamily: FONTS.mono,
-              fontSize: 11,
-              color: COLORS.textSecondary,
-              marginBottom: 10,
-            }}
-          >
-            INVITI INVIATI
-          </div>
-          <div
-            style={{
-              fontFamily: FONTS.heading,
-              fontWeight: 700,
-              fontSize: 32,
-              color: COLORS.accent,
-            }}
-          >
+        <div className="card invite-summary__card">
+          <div className="invite-summary__label">INVITI INVIATI</div>
+          <div className="invite-summary__count">
             {inviteSummary.success}/{inviteSummary.total}
           </div>
 
           {inviteSummary.failed.length > 0 && (
-            <div
-              style={{
-                fontFamily: FONTS.body,
-                fontSize: 12,
-                color: COLORS.textFaint,
-                marginTop: 10,
-                lineHeight: 1.5,
-              }}
-            >
+            <div className="invite-summary__detail">
               Non è stato possibile invitare: {inviteSummary.failed.join(", ")}.
               Potrai riprovare dalla pagina dell'evento.
             </div>
@@ -355,8 +310,8 @@ function EventCreatePage() {
 
         <button
           type="button"
+          className="btn-primary invite-summary__button"
           onClick={() => navigate(`/events/${createdEventId}`)}
-          style={{ ...styles.primaryButton, maxWidth: 300, width: "100%" }}
         >
           VAI ALL'EVENTO
         </button>
@@ -365,61 +320,30 @@ function EventCreatePage() {
   }
 
   return (
-    <div style={{ ...styles.pageBg, paddingTop: 20, paddingBottom: 40 }}>
-      <div style={{ padding: "0 20px 20px" }}>
-        <div style={{ ...styles.pageTitle, fontSize: 28 }}>CREA UN EVENTO</div>
+    <div className="page">
+      <div className="px-20" style={{ paddingBottom: 20 }}>
+        <div className="page-title">CREA UN EVENTO</div>
       </div>
 
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          padding: "0 20px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 18,
-        }}
-      >
+      <form onSubmit={handleSubmit} className="form-stack px-20">
         <div>
-          <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
-            TIPO DI EVENTO
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <div className="field-label form-group__label">TIPO DI EVENTO</div>
+          <div className="options-stack">
             {EVENT_TYPE_OPTIONS.map((opt) => {
               const active = form.type === opt.value
               return (
                 <button
                   key={opt.value}
                   type="button"
+                  className={`option-card ${active ? "option-card--active" : ""}`}
                   onClick={() => handleTypeChange(opt.value)}
-                  style={{
-                    textAlign: "left",
-                    padding: "13px 15px",
-                    borderRadius: 13,
-                    background: active ? COLORS.accentSoftBg : COLORS.card,
-                    border: `1px solid ${active ? COLORS.accentSoftBorder : COLORS.borderStrong}`,
-                    cursor: "pointer",
-                  }}
                 >
                   <div
-                    style={{
-                      fontFamily: FONTS.heading,
-                      fontWeight: 700,
-                      fontSize: 15,
-                      color: active ? COLORS.accent : COLORS.text,
-                    }}
+                    className={`option-card__title ${active ? "option-card--active" : ""}`}
                   >
                     {opt.label}
                   </div>
-                  <div
-                    style={{
-                      fontFamily: FONTS.body,
-                      fontSize: 12,
-                      color: COLORS.textMuted,
-                      marginTop: 2,
-                    }}
-                  >
-                    {opt.hint}
-                  </div>
+                  <div className="option-card__hint">{opt.hint}</div>
                 </button>
               )
             })}
@@ -427,9 +351,10 @@ function EventCreatePage() {
         </div>
 
         <div>
-          <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>TITOLO</div>
+          <div className="field-label form-group__label">TITOLO</div>
           <input
             type="text"
+            className="input"
             placeholder={
               form.type === "MULTI_DAY_TRIP"
                 ? "Tour delle Dolomiti"
@@ -438,53 +363,37 @@ function EventCreatePage() {
             value={form.title}
             onChange={set("title")}
             required
-            style={styles.input}
           />
         </div>
 
         <div>
-          <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
-            DESCRIZIONE
-          </div>
+          <div className="field-label form-group__label">DESCRIZIONE</div>
           <textarea
+            className="textarea"
             value={form.description}
             onChange={set("description")}
             required
             rows={3}
-            style={{
-              width: "100%",
-              borderRadius: 14,
-              background: COLORS.card,
-              border: `1px solid ${COLORS.borderStrong}`,
-              color: COLORS.text,
-              fontFamily: FONTS.body,
-              fontSize: 15,
-              lineHeight: 1.5,
-              padding: 14,
-              outline: "none",
-              resize: "none",
-              boxSizing: "border-box",
-            }}
           />
         </div>
 
         {form.type !== "MULTI_DAY_TRIP" && (
           <div>
-            <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+            <div className="field-label form-group__label">
               PERCORSO {form.type === "RADUNO" ? "(OPZIONALE)" : ""}
             </div>
             {isLoadingRoutes ? (
               <Spinner
                 size="sm"
                 animation="border"
-                style={{ color: COLORS.accent }}
+                style={{ color: "#FF7A2F" }}
               />
             ) : (
               <>
                 <select
+                  className="select"
                   value={form.routeId}
                   onChange={set("routeId")}
-                  style={styles.input}
                 >
                   <option value="">
                     {form.type === "RADUNO"
@@ -499,20 +408,13 @@ function EventCreatePage() {
                     </option>
                   ))}
                 </select>
-                <div
-                  style={{
-                    fontFamily: FONTS.body,
-                    fontSize: 12,
-                    color: COLORS.textFaint,
-                    marginTop: 8,
-                  }}
-                >
+                <div className="helper-text">
                   Non trovi quello che cerchi?{" "}
                   <Link
                     to="/routes/new"
                     state={{ returnTo: "/events/new", resumeDraft: true }}
                     onClick={saveDraft}
-                    style={{ color: COLORS.accent }}
+                    className="helper-text__link"
                   >
                     Crea un nuovo percorso
                   </Link>
@@ -521,43 +423,20 @@ function EventCreatePage() {
             )}
 
             {form.type === "RADUNO" && !form.routeId && (
-              <div style={{ marginTop: 14, position: "relative" }}>
-                <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+              <div className="meeting-point">
+                <div className="field-label form-group__label">
                   PUNTO DI RITROVO
                 </div>
 
                 {form.meetingPointLabel ? (
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      padding: "11px 14px",
-                      borderRadius: 12,
-                      background: COLORS.accentSoftBg,
-                      border: `1px solid ${COLORS.accentSoftBorder}`,
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontFamily: FONTS.body,
-                        fontSize: 13,
-                        color: COLORS.accent,
-                      }}
-                    >
+                  <div className="meeting-point__chip">
+                    <span className="meeting-point__label">
                       {form.meetingPointLabel}
                     </span>
                     <button
                       type="button"
+                      className="meeting-point__change-btn"
                       onClick={clearMeetingPoint}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        color: COLORS.accent,
-                        cursor: "pointer",
-                        fontFamily: FONTS.mono,
-                        fontSize: 10,
-                      }}
                     >
                       CAMBIA
                     </button>
@@ -566,42 +445,19 @@ function EventCreatePage() {
                   <>
                     <input
                       type="text"
+                      className="input"
                       placeholder="Cerca una città o un luogo..."
                       value={placeSearch}
                       onChange={handlePlaceSearchChange}
-                      style={styles.input}
                     />
                     {placeResults.length > 0 && (
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: "100%",
-                          left: 0,
-                          right: 0,
-                          marginTop: 6,
-                          zIndex: 10,
-                          ...styles.card,
-                          overflow: "hidden",
-                        }}
-                      >
+                      <div className="card search-results">
                         {placeResults.map((r) => (
                           <button
                             key={r.id}
                             type="button"
+                            className="search-results__item"
                             onClick={() => handlePickPlace(r)}
-                            style={{
-                              display: "block",
-                              width: "100%",
-                              textAlign: "left",
-                              padding: "11px 13px",
-                              background: "none",
-                              border: "none",
-                              borderBottom: `1px solid ${COLORS.borderSoft}`,
-                              color: COLORS.text,
-                              fontFamily: FONTS.body,
-                              fontSize: 13,
-                              cursor: "pointer",
-                            }}
                           >
                             {r.name}
                           </button>
@@ -615,37 +471,30 @@ function EventCreatePage() {
           </div>
         )}
 
-        <div style={{ display: "flex", gap: 12 }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>INIZIO</div>
+        <div className="field-row">
+          <div className="field-col">
+            <div className="field-label form-group__label">INIZIO</div>
             <input
               type="datetime-local"
+              className="input"
               min={nowLocal}
               value={form.startDateTime}
               onChange={set("startDateTime")}
               required
-              style={{ ...styles.input, width: "100%" }}
             />
           </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>FINE</div>
+          <div className="field-col">
+            <div className="field-label form-group__label">FINE</div>
             <input
               type="datetime-local"
+              className="input"
               min={minEndDateTime}
               value={form.endDateTime}
               onChange={set("endDateTime")}
               required
-              style={{ ...styles.input, width: "100%" }}
             />
             {selectedRoute && (
-              <div
-                style={{
-                  fontFamily: FONTS.mono,
-                  fontSize: 10,
-                  color: COLORS.textFaint,
-                  marginTop: 6,
-                }}
-              >
+              <div className="duration-hint">
                 Durata stimata: {Math.ceil(selectedRoute.durationSeconds / 60)}{" "}
                 min
               </div>
@@ -655,33 +504,32 @@ function EventCreatePage() {
 
         {form.visibility !== "INVITE_ONLY" && (
           <div>
-            <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+            <div className="field-label form-group__label">
               {form.type === "MULTI_DAY_TRIP"
                 ? "NUMERO MASSIMO DI PARTECIPANTI AL VIAGGIO"
                 : "NUMERO MASSIMO DI PARTECIPANTI"}
             </div>
             <input
               type="number"
+              className="input"
               min={1}
               value={form.maxParticipants}
               onChange={set("maxParticipants")}
               required
-              style={styles.input}
             />
           </div>
         )}
 
         <div>
-          <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
-            VISIBILITÀ
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <div className="field-label form-group__label">VISIBILITÀ</div>
+          <div className="options-stack">
             {VISIBILITY_OPTIONS.map((opt) => {
               const active = form.visibility === opt.value
               return (
                 <button
                   key={opt.value}
                   type="button"
+                  className={`option-card ${active ? "option-card--active" : ""}`}
                   onClick={() => {
                     setForm((prev) => {
                       const next = {
@@ -696,35 +544,13 @@ function EventCreatePage() {
                       return next
                     })
                   }}
-                  style={{
-                    textAlign: "left",
-                    padding: "13px 15px",
-                    borderRadius: 13,
-                    background: active ? COLORS.accentSoftBg : COLORS.card,
-                    border: `1px solid ${active ? COLORS.accentSoftBorder : COLORS.borderStrong}`,
-                    cursor: "pointer",
-                  }}
                 >
                   <div
-                    style={{
-                      fontFamily: FONTS.heading,
-                      fontWeight: 700,
-                      fontSize: 15,
-                      color: active ? COLORS.accent : COLORS.text,
-                    }}
+                    className={`option-card__title ${active ? "option-card--active" : ""}`}
                   >
                     {opt.label}
                   </div>
-                  <div
-                    style={{
-                      fontFamily: FONTS.body,
-                      fontSize: 12,
-                      color: COLORS.textMuted,
-                      marginTop: 2,
-                    }}
-                  >
-                    {opt.hint}
-                  </div>
+                  <div className="option-card__hint">{opt.hint}</div>
                 </button>
               )
             })}
@@ -732,17 +558,7 @@ function EventCreatePage() {
         </div>
 
         {form.visibility === "PUBLIC" && (
-          <label
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              fontFamily: FONTS.body,
-              fontSize: 13,
-              color: COLORS.textSecondary,
-              cursor: "pointer",
-            }}
-          >
+          <label className="checkbox-label">
             <input
               type="checkbox"
               checked={form.autoApprove}
@@ -754,33 +570,16 @@ function EventCreatePage() {
 
         {form.visibility === "PRIVATE_CODE" && (
           <div>
-            <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+            <div className="field-label form-group__label">
               CODICE DI ACCESSO
             </div>
-            <div style={{ display: "flex", gap: 8 }}>
-              <div
-                style={{
-                  flex: 1,
-                  padding: "12px 14px",
-                  borderRadius: 12,
-                  background: COLORS.cardAlt,
-                  border: `1px solid ${COLORS.borderSoft}`,
-                  fontFamily: FONTS.mono,
-                  fontSize: 17,
-                  letterSpacing: ".12em",
-                  color: COLORS.accent,
-                }}
-              >
-                {form.accessCode}
-              </div>
+            <div className="access-code-box">
+              <div className="access-code-box__code">{form.accessCode}</div>
               <button
                 type="button"
+                className="btn-secondary"
+                style={{ height: "auto", padding: "0 16px" }}
                 onClick={regenerateCode}
-                style={{
-                  ...styles.secondaryButton,
-                  height: "auto",
-                  padding: "0 16px",
-                }}
               >
                 RIGENERA
               </button>
@@ -791,7 +590,7 @@ function EventCreatePage() {
         {form.visibility === "INVITE_ONLY" &&
           form.type !== "MULTI_DAY_TRIP" && (
             <div>
-              <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+              <div className="field-label form-group__label">
                 INVITA DAI TUOI CONTATTI
               </div>
               <InviteSelector
@@ -801,23 +600,9 @@ function EventCreatePage() {
             </div>
           )}
 
-        {errorMsg && (
-          <div
-            style={{
-              fontFamily: FONTS.body,
-              fontSize: 13,
-              color: COLORS.danger,
-            }}
-          >
-            {errorMsg}
-          </div>
-        )}
+        {errorMsg && <div className="error-text">{errorMsg}</div>}
 
-        <button
-          type="submit"
-          disabled={isLoading}
-          style={{ ...styles.primaryButton, opacity: isLoading ? 0.6 : 1 }}
-        >
+        <button type="submit" className="btn-primary" disabled={isLoading}>
           {isLoading
             ? "..."
             : form.type === "MULTI_DAY_TRIP"
