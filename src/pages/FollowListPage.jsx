@@ -1,12 +1,11 @@
 import { useState } from "react"
-import { Spinner } from "react-bootstrap"
 import { useParams, Link, useNavigate } from "react-router-dom"
+import { Spinner } from "react-bootstrap"
 import { FaArrowLeft } from "react-icons/fa"
 import {
   useGetFollowersQuery,
   useGetFollowingQuery,
 } from "../features/social/followApi"
-import { COLORS, FONTS, styles } from "../styles/theme"
 
 function FollowListPage({ type }) {
   const { username } = useParams()
@@ -33,109 +32,50 @@ function FollowListPage({ type }) {
 
   if (isLoading) {
     return (
-      <div style={{ textAlign: "center", padding: "60px 0" }}>
-        <Spinner animation="border" style={{ color: COLORS.accent }} />
+      <div className="centered-spinner">
+        <Spinner animation="border" style={{ color: "#FF7A2F" }} />
       </div>
     )
   }
 
   if (isError) {
     return (
-      <div style={{ ...styles.emptyState, margin: 20 }}>
+      <div className="empty-state" style={{ margin: 20 }}>
         Impossibile caricare la lista.
       </div>
     )
   }
 
   return (
-    <div style={{ ...styles.pageBg, paddingTop: 20, paddingBottom: 40 }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          padding: "0 20px 18px",
-        }}
-      >
-        <button
-          type="button"
-          onClick={() => navigate(-1)}
-          style={styles.iconButton}
-        >
+    <div className="page">
+      <div className="page-header">
+        <button type="button" className="btn-icon" onClick={() => navigate(-1)}>
           <FaArrowLeft />
         </button>
         <div>
-          <div style={{ ...styles.pageTitle, fontSize: 22 }}>{title}</div>
-          <div
-            style={{
-              fontFamily: FONTS.mono,
-              fontSize: 10,
-              color: COLORS.textMuted,
-              marginTop: 2,
-            }}
-          >
-            @{username}
-          </div>
+          <div className="page-header__title">{title}</div>
+          <div className="page-header__subtitle">@{username}</div>
         </div>
       </div>
 
       {data.content.length === 0 ? (
-        <p
-          style={{
-            fontFamily: FONTS.body,
-            fontSize: 13,
-            color: COLORS.textFaint,
-            textAlign: "center",
-            padding: "60px 20px",
-          }}
-        >
-          {emptyText}
-        </p>
+        <p className="empty-list-text">{emptyText}</p>
       ) : (
         <div style={{ opacity: isFetching ? 0.6 : 1 }}>
           {data.content.map((user) => (
             <Link
               key={user.id}
               to={`/profile/${user.username}`}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 13,
-                padding: "13px 20px",
-                borderBottom: `1px solid ${COLORS.borderSoft}`,
-                textDecoration: "none",
-              }}
+              className="user-row"
             >
               <img
                 src={user.profilePicture}
                 alt={user.username}
-                style={{
-                  width: 46,
-                  height: 46,
-                  borderRadius: "50%",
-                  objectFit: "cover",
-                  background: COLORS.surfaceRaised,
-                }}
+                className="user-row__avatar"
               />
               <div>
-                <div
-                  style={{
-                    fontFamily: FONTS.heading,
-                    fontWeight: 600,
-                    fontSize: 15,
-                    color: COLORS.text,
-                  }}
-                >
-                  {user.username}
-                </div>
-                <div
-                  style={{
-                    fontFamily: FONTS.mono,
-                    fontSize: 10,
-                    color: COLORS.textMuted,
-                    marginTop: 2,
-                  }}
-                >
+                <div className="user-row__username">{user.username}</div>
+                <div className="user-row__fullname">
                   {user.name} {user.surname}
                 </div>
               </div>
@@ -145,47 +85,33 @@ function FollowListPage({ type }) {
       )}
 
       {data.totalPages > 1 && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: 16,
-            padding: "24px 20px",
-          }}
-        >
+        <div className="pagination-row">
           <button
             type="button"
-            disabled={data.first || isFetching}
-            onClick={() => setPage((p) => p - 1)}
+            className="btn-secondary"
             style={{
-              ...styles.secondaryButton,
               height: 40,
               padding: "0 16px",
               opacity: data.first ? 0.4 : 1,
             }}
+            disabled={data.first || isFetching}
+            onClick={() => setPage((p) => p - 1)}
           >
             PRECEDENTE
           </button>
-          <span
-            style={{
-              fontFamily: FONTS.mono,
-              fontSize: 11,
-              color: COLORS.textMuted,
-            }}
-          >
+          <span className="pagination-row__label">
             {data.number + 1} / {data.totalPages}
           </span>
           <button
             type="button"
-            disabled={data.last || isFetching}
-            onClick={() => setPage((p) => p + 1)}
+            className="btn-secondary"
             style={{
-              ...styles.secondaryButton,
               height: 40,
               padding: "0 16px",
               opacity: data.last ? 0.4 : 1,
             }}
+            disabled={data.last || isFetching}
+            onClick={() => setPage((p) => p + 1)}
           >
             SUCCESSIVA
           </button>
