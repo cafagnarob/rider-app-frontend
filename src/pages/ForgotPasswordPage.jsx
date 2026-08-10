@@ -1,9 +1,70 @@
 import { useState } from "react"
-import { useForgotPasswordMutation } from "../features/auth/authApi"
-
 import { Link } from "react-router-dom"
-import { COLORS, FONTS, styles } from "../styles/theme"
+import styled from "styled-components"
 import { FaTimes } from "react-icons/fa"
+import { useForgotPasswordMutation } from "../features/auth/authApi"
+import { PrimaryButton, Input } from "../styles/primitives"
+
+const PageWrapper = styled.div`
+  min-height: 100vh;
+  background: ${(props) => props.theme.colors.bg};
+  display: flex;
+  flex-direction: column;
+`
+
+const TopBar = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  padding: 20px;
+`
+
+const CloseLink = styled(Link)`
+  color: ${(props) => props.theme.colors.textMuted};
+  display: flex;
+`
+
+const Content = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+`
+
+const Title = styled.div`
+  font-family: ${(props) => props.theme.fonts.heading};
+  font-weight: 700;
+  font-size: 30px;
+  margin-bottom: 30px;
+  text-align: center;
+`
+
+const SuccessBox = styled.div`
+  padding: 22px;
+  border-radius: ${(props) => props.theme.radius.lg};
+  background: ${(props) => props.theme.colors.card};
+  border: 1px solid ${(props) => props.theme.colors.accentSoftBorder};
+  font-size: 13px;
+  line-height: 1.5;
+  color: ${(props) => props.theme.colors.textSecondary};
+  max-width: 360px;
+  text-align: center;
+`
+
+const Form = styled.form`
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+`
+
+const ErrorText = styled.div`
+  font-family: ${(props) => props.theme.fonts.body};
+  font-size: 13px;
+  color: ${(props) => props.theme.colors.danger};
+`
 
 function ForgotPasswordPage() {
   const [email, setEmail] = useState("")
@@ -20,98 +81,44 @@ function ForgotPasswordPage() {
   }
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: COLORS.bg,
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      <div style={{ display: "flex", justifyContent: "flex-end", padding: 20 }}>
-        <Link to="/login" style={{ color: COLORS.textMuted, display: "flex" }}>
+    <PageWrapper>
+      <TopBar>
+        <CloseLink to="/login">
           <FaTimes size={22} />
-        </Link>
-      </div>
+        </CloseLink>
+      </TopBar>
 
-      <div
-        style={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: 24,
-        }}
-      >
-        <div
-          style={{
-            fontFamily: FONTS.heading,
-            fontWeight: 700,
-            fontSize: 30,
-            marginBottom: 30,
-            textAlign: "center",
-          }}
-        >
-          PASSWORD DIMENTICATA
-        </div>
+      <Content>
+        <Title>PASSWORD DIMENTICATA</Title>
 
         {isSuccess ? (
-          <div
-            style={{
-              ...styles.emptyState,
-              borderStyle: "solid",
-              borderColor: COLORS.accentSoftBorder,
-              maxWidth: 360,
-              textAlign: "center",
-            }}
-          >
+          <SuccessBox>
             Se l'indirizzo è registrato, riceverai a breve un link per
             reimpostare la password. Controlla la tua casella di posta.
-          </div>
+          </SuccessBox>
         ) : (
-          <form
-            onSubmit={handleSubmit}
-            style={{
-              width: "100%",
-              maxWidth: 360,
-              display: "flex",
-              flexDirection: "column",
-              gap: 20,
-            }}
-          >
-            <input
+          <Form onSubmit={handleSubmit}>
+            <Input
               type="email"
               placeholder="name@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              style={styles.input}
             />
 
             {error && (
-              <div
-                style={{
-                  fontFamily: FONTS.body,
-                  fontSize: 13,
-                  color: COLORS.danger,
-                }}
-              >
+              <ErrorText>
                 Si è verificato un errore. Riprova più tardi.
-              </div>
+              </ErrorText>
             )}
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              style={{ ...styles.primaryButton, opacity: isLoading ? 0.6 : 1 }}
-            >
+            <PrimaryButton type="submit" disabled={isLoading}>
               {isLoading ? "..." : "INVIA LINK"}
-            </button>
-          </form>
+            </PrimaryButton>
+          </Form>
         )}
-      </div>
-    </div>
+      </Content>
+    </PageWrapper>
   )
 }
 
