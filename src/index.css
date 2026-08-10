@@ -1,3 +1,47 @@
+:root {
+  /* sfondo e superfici */
+  --color-bg: #0b0b0c;
+  --color-card: #13141a;
+  --color-card-alt: #15161a;
+  --color-surface-raised: #1d1e23;
+  --color-surface-active: #1e2027;
+
+  /* bordi */
+  --color-border: rgba(255, 255, 255, 0.09);
+  --color-border-soft: rgba(255, 255, 255, 0.08);
+  --color-border-strong: rgba(255, 255, 255, 0.14);
+
+  /* testo */
+  --color-text: #f4f2f0;
+  --color-text-secondary: rgba(255, 255, 255, 0.55);
+  --color-text-muted: rgba(255, 255, 255, 0.42);
+  --color-text-faint: rgba(255, 255, 255, 0.35);
+
+  /* accento */
+  --color-accent: #ff7a2f;
+  --color-accent-hover: #ffa469;
+  --color-accent-soft-bg: #2a1508;
+  --color-accent-soft-border: rgba(255, 122, 47, 0.35);
+  --color-on-accent: #100c08;
+
+  /* stato negativo */
+  --color-danger: #e04a3a;
+  --color-danger-bg: #1b0f0d;
+  --color-danger-border: rgba(224, 74, 58, 0.35);
+
+  /* font */
+  --font-body: Archivo, system-ui, sans-serif;
+  --font-heading: "Barlow Condensed", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+
+  /* radius */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 16px;
+  --radius-xl: 18px;
+  --radius-xxl: 22px;
+}
+
 body {
   margin: 0;
   background: #0b0b0c;
