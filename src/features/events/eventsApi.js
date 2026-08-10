@@ -97,6 +97,39 @@ export const eventsApi = apiSlice.injectEndpoints({
         "Event",
       ],
     }),
+    requestAccessCode: builder.mutation({
+      query: (eventId) => ({
+        url: `/events/${eventId}/access-requests`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, eventId) => [
+        { type: "Event", id: eventId },
+      ],
+    }),
+    getAccessCodeRequests: builder.query({
+      query: (eventId) => `/events/${eventId}/access-requests`,
+      providesTags: (result, error, eventId) => [
+        { type: "AccessRequest", id: eventId },
+      ],
+    }),
+    approveAccessCodeRequest: builder.mutation({
+      query: ({ eventId, requestId }) => ({
+        url: `/events/${eventId}/access-requests/${requestId}/approve`,
+        method: "PATCH",
+      }),
+      invalidatesTags: (result, error, { eventId }) => [
+        { type: "AccessRequest", id: eventId },
+      ],
+    }),
+    rejectAccessCodeRequest: builder.mutation({
+      query: ({ eventId, requestId }) => ({
+        url: `/events/${eventId}/access-requests/${requestId}/reject`,
+        method: "PATCH",
+      }),
+      invalidatesTags: (result, error, { eventId }) => [
+        { type: "AccessRequest", id: eventId },
+      ],
+    }),
   }),
 })
 
@@ -111,4 +144,8 @@ export const {
   useGetAccessCodeQuery,
   useRegenerateAccessCodeMutation,
   useAddEventDayMutation,
+  useRequestAccessCodeMutation,
+  useGetAccessCodeRequestsQuery,
+  useApproveAccessCodeRequestMutation,
+  useRejectAccessCodeRequestMutation,
 } = eventsApi
