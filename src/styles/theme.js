@@ -1,31 +1,22 @@
 export const COLORS = {
-  // sfondo e superfici
   bg: "#0B0B0C",
   card: "#13141A",
   cardAlt: "#15161A",
   surfaceRaised: "#1D1E23",
   surfaceActive: "#1E2027",
   imagePlaceholder: "#191A20",
-
-  // bordi
   border: "rgba(255,255,255,.09)",
   borderSoft: "rgba(255,255,255,.08)",
   borderStrong: "rgba(255,255,255,.14)",
-
-  // testo
   text: "#F4F2F0",
   textSecondary: "rgba(255,255,255,.55)",
   textMuted: "rgba(255,255,255,.42)",
   textFaint: "rgba(255,255,255,.35)",
-
-  // accento
   accent: "#FF7A2F",
   accentHover: "#FFA469",
   accentSoftBg: "#2A1508",
   accentSoftBorder: "rgba(255,122,47,.35)",
   onAccent: "#100C08",
-
-  // stato negativo
   danger: "#E04A3A",
   dangerBg: "#1B0F0D",
   dangerBorder: "rgba(224,74,58,.35)",
@@ -37,15 +28,8 @@ export const FONTS = {
   mono: "'IBM Plex Mono', monospace",
 }
 
-export const RADIUS = {
-  sm: 10,
-  md: 14,
-  lg: 16,
-  xl: 18,
-  xxl: 22,
-}
+export const RADIUS = { sm: 10, md: 14, lg: 16, xl: 18, xxl: 22 }
 
-// blocchi di stile pronti per gli usi che si ripetono in ogni schermata
 export const styles = {
   pageBg: {
     background: COLORS.bg,
@@ -189,7 +173,41 @@ export const styles = {
   },
 }
 
-// per i numeri "alla italiana" (virgola come separatore decimale)
+// --- nuovo sistema, per i componenti styled-components ---
+export const theme = {
+  colors: {
+    bg: COLORS.bg,
+    card: COLORS.card,
+    cardAlt: COLORS.cardAlt,
+    surfaceRaised: COLORS.surfaceRaised,
+    surfaceActive: COLORS.surfaceActive,
+    imagePlaceholder: COLORS.imagePlaceholder,
+    border: COLORS.border,
+    borderSoft: COLORS.borderSoft,
+    borderStrong: COLORS.borderStrong,
+    text: COLORS.text,
+    textSecondary: COLORS.textSecondary,
+    textMuted: COLORS.textMuted,
+    textFaint: COLORS.textFaint,
+    accent: COLORS.accent,
+    accentHover: COLORS.accentHover,
+    accentSoftBg: COLORS.accentSoftBg,
+    accentSoftBorder: COLORS.accentSoftBorder,
+    onAccent: COLORS.onAccent,
+    danger: COLORS.danger,
+    dangerBg: COLORS.dangerBg,
+    dangerBorder: COLORS.dangerBorder,
+  },
+  fonts: { body: FONTS.body, heading: FONTS.heading, mono: FONTS.mono },
+  radius: {
+    sm: `${RADIUS.sm}px`,
+    md: `${RADIUS.md}px`,
+    lg: `${RADIUS.lg}px`,
+    xl: `${RADIUS.xl}px`,
+    xxl: `${RADIUS.xxl}px`,
+  },
+}
+
 export function formatNumberIT(value, decimals = 1) {
   return Number(value).toLocaleString("it-IT", {
     minimumFractionDigits: decimals,
