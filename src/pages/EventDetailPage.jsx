@@ -24,8 +24,9 @@ import OrganizerPanel from "../features/events/components/OrganizerPanel"
 import AccessCodeCard from "../features/events/components/AccessCodeCard"
 import { decodePolyline } from "../utils/polyline"
 import { MAP_STYLE_URL } from "../utils/mapStyle"
-import { EVENT_TYPE_LABELS, VISIBILITY_LABELS } from "../utils/constants"
-import { COLORS, FONTS, styles } from "../styles/theme"
+import { COLORS } from "../styles/theme" // solo per i marcatori MapLibre: sono DOM creati a mano, fuori dal render React, quindi non possono usare classi CSS — restano gli unici tre riferimenti diretti a COLORS in questo file
+import { VISIBILITY_LABELS, EVENT_TYPE_LABELS } from "../utils/constants"
+import "./EventDetailPage.css"
 
 function EventDetailPage() {
   const { eventId } = useParams()
@@ -230,15 +231,15 @@ function EventDetailPage() {
 
   if (isLoading) {
     return (
-      <div style={{ textAlign: "center", padding: "60px 0" }}>
-        <Spinner animation="border" style={{ color: COLORS.accent }} />
+      <div className="centered-spinner">
+        <Spinner animation="border" style={{ color: "#FF7A2F" }} />
       </div>
     )
   }
 
   if (isError || !event) {
     return (
-      <div style={{ ...styles.emptyState, margin: 20 }}>
+      <div className="empty-state empty-state-margin">
         Evento non trovato o accesso negato.
       </div>
     )
@@ -253,120 +254,64 @@ function EventDetailPage() {
       : null
 
     return (
-      <div style={{ ...styles.pageBg, minHeight: "100vh", paddingTop: 20 }}>
-        <div style={{ padding: "0 20px" }}>
+      <div className="page" style={{ minHeight: "100vh" }}>
+        <div className="px-20">
           <button
             type="button"
+            className="btn-icon mb-16"
             onClick={() => navigate(-1)}
-            style={{ ...styles.iconButton, marginBottom: 16 }}
           >
             <FaArrowLeft />
           </button>
 
-          <div style={{ ...styles.pageTitle, fontSize: 30, marginBottom: 8 }}>
+          <div
+            className="event-detail-page__title"
+            style={{ fontSize: 30, marginBottom: 8 }}
+          >
             {event.title}
           </div>
-          <div
-            style={{
-              fontFamily: FONTS.mono,
-              fontSize: 11,
-              color: COLORS.textMuted,
-              marginBottom: 16,
-            }}
-          >
+          <div className="event-detail-page__meta">
             Organizzato da {event.organizerUsername}
           </div>
 
           <span
-            style={{
-              display: "inline-block",
-              padding: "5px 11px",
-              borderRadius: 9,
-              marginBottom: 18,
-              background: COLORS.accentSoftBg,
-              border: `1px solid ${COLORS.accentSoftBorder}`,
-              fontFamily: FONTS.mono,
-              fontSize: 10,
-              color: COLORS.accent,
-            }}
+            className="pill pill--accent"
+            style={{ display: "inline-block", marginBottom: 18 }}
           >
             EVENTO CON CODICE
           </span>
 
-          <p
-            style={{
-              fontSize: 14.5,
-              lineHeight: 1.55,
-              color: "rgba(255,255,255,.85)",
-              marginBottom: 20,
-            }}
-          >
+          <p className="prose" style={{ marginBottom: 20 }}>
             {event.description}
           </p>
 
           {event.route && (
             <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
-              <span
-                style={{
-                  padding: "5px 11px",
-                  borderRadius: 8,
-                  background: COLORS.cardAlt,
-                  border: `1px solid ${COLORS.borderSoft}`,
-                  fontFamily: FONTS.mono,
-                  fontSize: 10,
-                  color: COLORS.textSecondary,
-                }}
-              >
-                {distanceKmLocked} KM
-              </span>
-              <span
-                style={{
-                  padding: "5px 11px",
-                  borderRadius: 8,
-                  background: COLORS.cardAlt,
-                  border: `1px solid ${COLORS.borderSoft}`,
-                  fontFamily: FONTS.mono,
-                  fontSize: 10,
-                  color: COLORS.textSecondary,
-                }}
-              >
+              <span className="pill pill--neutral">{distanceKmLocked} KM</span>
+              <span className="pill pill--neutral">
                 {durationMinLocked} MIN
               </span>
             </div>
           )}
 
-          <div style={{ ...styles.card, padding: 18 }}>
-            <div style={{ ...styles.fieldLabel, marginBottom: 10 }}>
+          <div className="card" style={{ padding: 18 }}>
+            <div className="field-label form-group__label">
               HAI IL CODICE DI ACCESSO?
             </div>
             <input
               type="text"
+              className="input mb-16"
               placeholder="Inserisci il codice"
               value={accessCode}
               onChange={(e) => setAccessCode(e.target.value)}
-              style={{ ...styles.input, height: 46, marginBottom: 12 }}
             />
-            {joinError && (
-              <div
-                style={{
-                  fontFamily: FONTS.body,
-                  fontSize: 13,
-                  color: COLORS.danger,
-                  marginBottom: 12,
-                }}
-              >
-                {joinError}
-              </div>
-            )}
+            {joinError && <div className="error-text mb-16">{joinError}</div>}
             <button
               type="button"
+              className="btn-primary"
+              style={{ width: "100%" }}
               onClick={handleJoin}
               disabled={isJoining || !accessCode.trim()}
-              style={{
-                ...styles.primaryButton,
-                width: "100%",
-                opacity: isJoining || !accessCode.trim() ? 0.6 : 1,
-              }}
             >
               {isJoining ? "..." : "SBLOCCA EVENTO"}
             </button>
@@ -374,10 +319,8 @@ function EventDetailPage() {
             <div style={{ marginTop: 16 }}>
               {event.myAccessRequestStatus === "PENDING" && (
                 <div
-                  style={{
-                    ...styles.emptyState,
-                    borderColor: COLORS.accentSoftBorder,
-                  }}
+                  className="empty-state"
+                  style={{ borderColor: "var(--color-accent-soft-border)" }}
                 >
                   Richiesta inviata. Riceverai una notifica quando
                   l'organizzatore risponde.
@@ -386,10 +329,10 @@ function EventDetailPage() {
 
               {event.myAccessRequestStatus === "APPROVED" && (
                 <div
+                  className="empty-state"
                   style={{
-                    ...styles.emptyState,
-                    borderColor: COLORS.accentSoftBorder,
-                    color: COLORS.accent,
+                    borderColor: "var(--color-accent-soft-border)",
+                    color: "var(--color-accent)",
                   }}
                 >
                   Richiesta approvata — controlla le tue notifiche per il
@@ -401,13 +344,10 @@ function EventDetailPage() {
                 event.myAccessRequestStatus == null) && (
                 <button
                   type="button"
+                  className="btn-secondary"
+                  style={{ width: "100%" }}
                   onClick={() => requestAccessCode(eventId)}
                   disabled={isRequestingCode}
-                  style={{
-                    ...styles.secondaryButton,
-                    width: "100%",
-                    opacity: isRequestingCode ? 0.6 : 1,
-                  }}
                 >
                   {isRequestingCode
                     ? "..."
@@ -432,7 +372,6 @@ function EventDetailPage() {
       month: "short",
     })
     .toUpperCase()
-
   const timeLabel = start.toLocaleTimeString("it-IT", {
     hour: "2-digit",
     minute: "2-digit",
@@ -452,44 +391,20 @@ function EventDetailPage() {
       : null
 
   return (
-    <div style={{ ...styles.pageBg, paddingBottom: 100 }}>
-      <div style={{ position: "relative", height: 250 }}>
+    <div className="page pb-100">
+      <div className="event-detail-page__map-wrapper">
         {showMap ? (
           <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
         ) : (
-          <div
-            style={{
-              width: "100%",
-              height: "100%",
-              background: COLORS.cardAlt,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <span
-              style={{
-                fontFamily: FONTS.mono,
-                fontSize: 11,
-                color: COLORS.textFaint,
-                letterSpacing: ".08em",
-              }}
-            >
-              VIAGGIO MULTIGIORNO
-            </span>
+          <div className="event-detail-page__map-placeholder">
+            <span className="screen-label">VIAGGIO MULTIGIORNO</span>
           </div>
         )}
 
         <button
           type="button"
+          className="btn-icon event-detail-page__map-back-btn"
           onClick={() => navigate(-1)}
-          style={{
-            ...styles.iconButton,
-            position: "absolute",
-            left: 16,
-            top: 16,
-            background: "rgba(10,10,12,.8)",
-          }}
         >
           <FaArrowLeft />
         </button>
@@ -497,92 +412,58 @@ function EventDetailPage() {
         {event.organizer && event.status === "ACTIVE" && (
           <button
             type="button"
+            className="event-detail-page__cancel-btn"
             onClick={() => setConfirmType("cancelEvent")}
-            style={{
-              position: "absolute",
-              right: 16,
-              top: 16,
-              height: 40,
-              padding: "0 14px",
-              borderRadius: 12,
-              background: "rgba(10,10,12,.8)",
-              border: `1px solid ${COLORS.dangerBorder}`,
-              color: COLORS.danger,
-              fontFamily: FONTS.mono,
-              fontSize: 10,
-              cursor: "pointer",
-            }}
           >
             ANNULLA EVENTO
           </button>
         )}
       </div>
 
-      <div style={{ padding: "22px 20px 0" }}>
+      <div className="event-detail-page__content">
         {isChild && (
           <Link
             to={`/events/${event.parentEventId}`}
-            style={{
-              display: "inline-block",
-              marginBottom: 14,
-              padding: "6px 12px",
-              borderRadius: 9,
-              background: COLORS.cardAlt,
-              border: `1px solid ${COLORS.borderSoft}`,
-              fontFamily: FONTS.mono,
-              fontSize: 10.5,
-              color: COLORS.textSecondary,
-              textDecoration: "none",
-            }}
+            className="event-detail-page__parent-link"
           >
             ← TORNA AL VIAGGIO "{event.parentEventTitle?.toUpperCase()}"
           </Link>
         )}
 
-        <div
-          style={{ display: "flex", alignItems: "center", marginBottom: 10 }}
-        >
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <span style={{ ...styles.screenLabel, color: COLORS.accent }}>
+        <div className="event-detail-page__status-row">
+          <div className="event-detail-page__status-group">
+            <span
+              className="screen-label"
+              style={{ color: "var(--color-accent)" }}
+            >
               {dayLabel} · {timeLabel}
             </span>
             {event.status === "CANCELLED" && (
-              <span style={{ ...styles.screenLabel, color: COLORS.danger }}>
+              <span
+                className="screen-label"
+                style={{ color: "var(--color-danger)" }}
+              >
                 ANNULLATO
               </span>
             )}
             {event.status === "FINISHED" && (
-              <span style={{ ...styles.screenLabel, color: COLORS.textMuted }}>
-                CONCLUSO
-              </span>
+              <span className="screen-label">CONCLUSO</span>
             )}
           </div>
 
           {event.type !== "STANDARD" && (
             <span
-              style={{
-                ...styles.screenLabel,
-                color: COLORS.accent,
-                marginLeft: "auto",
-              }}
+              className="screen-label event-detail-page__type-badge"
+              style={{ color: "var(--color-accent)" }}
             >
               {EVENT_TYPE_LABELS[event.type]}
             </span>
           )}
         </div>
 
-        <div style={{ ...styles.pageTitle, fontSize: 34, marginBottom: 10 }}>
-          {event.title}
-        </div>
+        <div className="event-detail-page__title">{event.title}</div>
 
-        <div
-          style={{
-            fontFamily: FONTS.mono,
-            fontSize: 11,
-            color: COLORS.textMuted,
-            marginBottom: 18,
-          }}
-        >
+        <div className="event-detail-page__meta">
           {isTrip
             ? `${event.children?.length || 0} GIORNI`
             : event.meetingPointAddress || "Ritrovo da definire"}
@@ -590,40 +471,25 @@ function EventDetailPage() {
           {` · ${event.currentParticipants}/${event.maxParticipants}`}
         </div>
 
-        <p
-          style={{
-            fontSize: 14.5,
-            lineHeight: 1.55,
-            color: "rgba(255,255,255,.85)",
-            marginBottom: 22,
-          }}
-        >
+        <p className="prose event-detail-page__description">
           {event.description}
         </p>
 
         {isTrip ? (
-          <div
-            style={{
-              ...styles.statGrid,
-              gridTemplateColumns: "1fr 1fr",
-              marginBottom: 22,
-            }}
-          >
-            <div style={styles.statCell}>
-              <span style={styles.statLabel}>GIORNI</span>
-              <span style={styles.statValue}>
-                {event.children?.length || 0}
-              </span>
+          <div className="stat-grid event-detail-page__stats">
+            <div className="stat-cell">
+              <span className="stat-label">GIORNI</span>
+              <span className="stat-value">{event.children?.length || 0}</span>
             </div>
-            <div style={styles.statCell}>
-              <span style={styles.statLabel}>POSTI</span>
-              <span style={styles.statValue}>
+            <div className="stat-cell">
+              <span className="stat-label">POSTI</span>
+              <span className="stat-value">
                 {event.currentParticipants}/{event.maxParticipants}
               </span>
             </div>
-            <div style={styles.statCell}>
-              <span style={styles.statLabel}>KM TOTALI</span>
-              <span style={styles.statValue}>
+            <div className="stat-cell">
+              <span className="stat-label">KM TOTALI</span>
+              <span className="stat-value">
                 {event.totalDistanceMeters
                   ? (event.totalDistanceMeters / 1000)
                       .toFixed(1)
@@ -631,11 +497,11 @@ function EventDetailPage() {
                   : "—"}
               </span>
             </div>
-            <div style={styles.statCell}>
-              <span style={styles.statLabel}>VISIBILITÀ</span>
+            <div className="stat-cell">
+              <span className="stat-label">VISIBILITÀ</span>
               <span
                 style={{
-                  fontFamily: FONTS.heading,
+                  fontFamily: "var(--font-heading)",
                   fontWeight: 700,
                   fontSize: 21,
                 }}
@@ -645,43 +511,33 @@ function EventDetailPage() {
             </div>
           </div>
         ) : (
-          <div
-            style={{
-              ...styles.statGrid,
-              gridTemplateColumns: "1fr 1fr",
-              marginBottom: 22,
-            }}
-          >
+          <div className="stat-grid event-detail-page__stats">
             {meetingPointMapsUrl ? (
               <a
                 href={meetingPointMapsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{
-                  ...styles.statCell,
-                  textDecoration: "none",
-                  display: "flex",
-                }}
+                className="stat-cell stat-cell--link"
               >
-                <span style={styles.statLabel}>RITROVO ↗</span>
+                <span className="stat-label">RITROVO ↗</span>
                 <span
                   style={{
-                    fontFamily: FONTS.heading,
+                    fontFamily: "var(--font-heading)",
                     fontWeight: 600,
                     fontSize: 15,
                     lineHeight: 1.2,
-                    color: COLORS.accent,
+                    color: "var(--color-accent)",
                   }}
                 >
                   {event.meetingPointAddress || "—"}
                 </span>
               </a>
             ) : (
-              <div style={styles.statCell}>
-                <span style={styles.statLabel}>RITROVO</span>
+              <div className="stat-cell">
+                <span className="stat-label">RITROVO</span>
                 <span
                   style={{
-                    fontFamily: FONTS.heading,
+                    fontFamily: "var(--font-heading)",
                     fontWeight: 600,
                     fontSize: 15,
                     lineHeight: 1.2,
@@ -691,23 +547,23 @@ function EventDetailPage() {
                 </span>
               </div>
             )}
-            <div style={styles.statCell}>
-              <span style={styles.statLabel}>POSTI</span>
-              <span style={styles.statValue}>
+            <div className="stat-cell">
+              <span className="stat-label">POSTI</span>
+              <span className="stat-value">
                 {event.currentParticipants}/{event.maxParticipants}
               </span>
             </div>
-            <div style={styles.statCell}>
-              <span style={styles.statLabel}>PERCORSO</span>
-              <span style={styles.statValue}>
+            <div className="stat-cell">
+              <span className="stat-label">PERCORSO</span>
+              <span className="stat-value">
                 {distanceKm ? `${distanceKm} KM` : "—"}
               </span>
             </div>
-            <div style={styles.statCell}>
-              <span style={styles.statLabel}>VISIBILITÀ</span>
+            <div className="stat-cell">
+              <span className="stat-label">VISIBILITÀ</span>
               <span
                 style={{
-                  fontFamily: FONTS.heading,
+                  fontFamily: "var(--font-heading)",
                   fontWeight: 700,
                   fontSize: 21,
                 }}
@@ -723,40 +579,20 @@ function EventDetailPage() {
             href={event.route.googleMapsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            style={{
-              ...styles.secondaryButton,
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "0 18px",
-              textDecoration: "none",
-              marginBottom: 22,
-            }}
+            className="btn-secondary btn-link-wrap event-detail-page__maps-link"
           >
             APRI IN GOOGLE MAPS
           </a>
         )}
 
         {isTrip && (
-          <div style={{ marginBottom: 22 }}>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "baseline",
-                marginBottom: 12,
-              }}
-            >
-              <div style={styles.sectionTitle}>GIORNI</div>
+          <div className="event-detail-page__days-section">
+            <div className="section-header event-detail-page__days-header">
+              <div className="section-title">GIORNI</div>
               {event.organizer && (
                 <Link
                   to={`/events/${eventId}/days/new`}
-                  style={{
-                    fontFamily: FONTS.mono,
-                    fontSize: 10.5,
-                    color: COLORS.accent,
-                    textDecoration: "none",
-                  }}
+                  className="text-btn text-btn--accent"
                 >
                   + AGGIUNGI
                 </Link>
@@ -764,13 +600,7 @@ function EventDetailPage() {
             </div>
 
             {!event.children || event.children.length === 0 ? (
-              <p
-                style={{
-                  fontFamily: FONTS.body,
-                  fontSize: 13,
-                  color: COLORS.textFaint,
-                }}
-              >
+              <p className="event-detail-page__no-days">
                 Nessun giorno ancora aggiunto a questo viaggio.
               </p>
             ) : (
@@ -781,54 +611,12 @@ function EventDetailPage() {
                     <Link
                       key={day.id}
                       to={`/events/${day.id}`}
-                      style={{
-                        ...styles.card,
-                        padding: 13,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 12,
-                        textDecoration: "none",
-                      }}
+                      className="card trip-day-row"
                     >
-                      <span
-                        style={{
-                          width: 30,
-                          height: 30,
-                          borderRadius: "50%",
-                          flexShrink: 0,
-                          background: COLORS.cardAlt,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontFamily: FONTS.mono,
-                          fontSize: 12,
-                          color: COLORS.accent,
-                        }}
-                      >
-                        {index + 1}
-                      </span>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div
-                          style={{
-                            fontFamily: FONTS.heading,
-                            fontWeight: 600,
-                            fontSize: 15,
-                            color: COLORS.text,
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {day.title}
-                        </div>
-                        <div
-                          style={{
-                            fontFamily: FONTS.mono,
-                            fontSize: 9.5,
-                            color: COLORS.textMuted,
-                            marginTop: 3,
-                          }}
-                        >
+                      <span className="trip-day-row__number">{index + 1}</span>
+                      <div className="trip-day-row__info">
+                        <div className="trip-day-row__title">{day.title}</div>
+                        <div className="trip-day-row__meta">
                           {dayStart.toLocaleDateString("it-IT", {
                             day: "numeric",
                             month: "short",
@@ -837,15 +625,7 @@ function EventDetailPage() {
                           {day.type === "RADUNO" ? "SOSTA" : "TAPPA"}
                         </div>
                       </div>
-                      <span
-                        style={{
-                          fontFamily: FONTS.heading,
-                          color: COLORS.textFaint,
-                          fontSize: 18,
-                        }}
-                      >
-                        {">"}
-                      </span>
+                      <span className="trip-day-row__chevron">{">"}</span>
                     </Link>
                   )
                 })}
@@ -855,45 +635,22 @@ function EventDetailPage() {
         )}
 
         {participants && participants.length > 0 && (
-          <div style={{ marginBottom: 22 }}>
-            <div style={{ ...styles.fieldLabel, marginBottom: 10 }}>
+          <div className="event-detail-page__participants">
+            <div className="field-label event-detail-page__participants-label">
               PARTECIPANTI
             </div>
-            <div style={{ display: "flex", alignItems: "center" }}>
-              {participants.slice(0, 3).map((p, i) => (
+            <div className="avatar-stack">
+              {participants.slice(0, 3).map((p) => (
                 <img
                   key={p.id}
                   src={p.profilePicture}
                   alt={p.username}
                   title={p.username}
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: "50%",
-                    objectFit: "cover",
-                    background: COLORS.surfaceRaised,
-                    border: `2px solid ${COLORS.bg}`,
-                    marginLeft: i === 0 ? 0 : -12,
-                  }}
+                  className="avatar-stack__item"
                 />
               ))}
               {participants.length > 3 && (
-                <div
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: "50%",
-                    marginLeft: -12,
-                    background: COLORS.card,
-                    border: `2px solid ${COLORS.bg}`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontFamily: FONTS.mono,
-                    fontSize: 11,
-                    color: COLORS.textSecondary,
-                  }}
-                >
+                <div className="avatar-stack__more">
                   +{participants.length - 3}
                 </div>
               )}
@@ -902,42 +659,23 @@ function EventDetailPage() {
         )}
 
         {isChild ? (
-          <div style={{ ...styles.emptyState, marginBottom: 20 }}>
+          <div className="empty-state event-detail-page__child-notice">
             Questo è un giorno del viaggio. La partecipazione si gestisce dalla
             pagina del viaggio completo.
           </div>
         ) : (
           !event.organizer &&
           event.status === "ACTIVE" && (
-            <div style={{ ...styles.card, padding: 18, marginBottom: 20 }}>
+            <div className="card participation-card">
               {event.myParticipationStatus === "ACCEPTED" && (
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: FONTS.mono,
-                      fontSize: 11,
-                      color: "#4ADE80",
-                    }}
-                  >
+                <div className="participation-card__row">
+                  <span className="participation-card__status--accepted">
                     ✓ PARTECIPAZIONE CONFERMATA
                   </span>
                   <button
                     type="button"
+                    className="text-btn text-btn--danger"
                     onClick={() => setConfirmType("cancelMe")}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      color: COLORS.danger,
-                      fontFamily: FONTS.mono,
-                      fontSize: 10,
-                      cursor: "pointer",
-                    }}
                   >
                     ANNULLA
                   </button>
@@ -945,33 +683,14 @@ function EventDetailPage() {
               )}
 
               {event.myParticipationStatus === "PENDING" && (
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: FONTS.mono,
-                      fontSize: 11,
-                      color: COLORS.accent,
-                    }}
-                  >
+                <div className="participation-card__row">
+                  <span className="participation-card__status--pending">
                     RICHIESTA IN ATTESA
                   </span>
                   <button
                     type="button"
+                    className="text-btn text-btn--danger"
                     onClick={() => setConfirmType("cancelMe")}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      color: COLORS.danger,
-                      fontFamily: FONTS.mono,
-                      fontSize: 10,
-                      cursor: "pointer",
-                    }}
                   >
                     ANNULLA RICHIESTA
                   </button>
@@ -980,13 +699,7 @@ function EventDetailPage() {
 
               {(event.myParticipationStatus === "REJECTED" ||
                 event.myParticipationStatus === "CANCELLED") && (
-                <span
-                  style={{
-                    fontFamily: FONTS.mono,
-                    fontSize: 11,
-                    color: COLORS.textMuted,
-                  }}
-                >
+                <span className="participation-card__status--neutral">
                   {event.myParticipationStatus === "REJECTED"
                     ? "RICHIESTA RIFIUTATA"
                     : "PARTECIPAZIONE ANNULLATA"}
@@ -996,25 +709,11 @@ function EventDetailPage() {
               {event.myParticipationStatus === null && (
                 <>
                   {event.visibility === "INVITE_ONLY" ? (
-                    <p
-                      style={{
-                        fontFamily: FONTS.body,
-                        fontSize: 13,
-                        color: COLORS.textFaint,
-                        margin: 0,
-                      }}
-                    >
+                    <p className="participation-card__info-text">
                       Questo evento richiede un invito dall'organizzatore.
                     </p>
                   ) : isFull ? (
-                    <p
-                      style={{
-                        fontFamily: FONTS.body,
-                        fontSize: 13,
-                        color: COLORS.textFaint,
-                        margin: 0,
-                      }}
-                    >
+                    <p className="participation-card__info-text">
                       Numero massimo di partecipanti raggiunto.
                     </p>
                   ) : (
@@ -1022,37 +721,26 @@ function EventDetailPage() {
                       {event.visibility === "PRIVATE_CODE" && (
                         <input
                           type="text"
+                          className="input mb-16"
                           placeholder="Codice di accesso"
                           value={accessCode}
                           onChange={(e) => setAccessCode(e.target.value)}
-                          style={{
-                            ...styles.input,
-                            height: 46,
-                            marginBottom: 12,
-                          }}
                         />
                       )}
                       {joinError && (
                         <div
-                          style={{
-                            fontFamily: FONTS.body,
-                            fontSize: 13,
-                            color: COLORS.danger,
-                            marginBottom: 10,
-                          }}
+                          className="error-text"
+                          style={{ marginBottom: 10 }}
                         >
                           {joinError}
                         </div>
                       )}
                       <button
                         type="button"
+                        className="btn-primary"
+                        style={{ width: "100%" }}
                         onClick={handleJoin}
                         disabled={isJoining}
-                        style={{
-                          ...styles.primaryButton,
-                          width: "100%",
-                          opacity: isJoining ? 0.6 : 1,
-                        }}
                       >
                         {isJoining ? "..." : "PRENOTA IL TUO POSTO"}
                       </button>
@@ -1067,88 +755,41 @@ function EventDetailPage() {
         {!isChild && event.organizer && event.visibility === "PRIVATE_CODE" && (
           <AccessCodeCard eventId={eventId} />
         )}
-
         {!isChild && event.organizer && (
           <OrganizerPanel eventId={eventId} visibility={event.visibility} />
         )}
       </div>
 
       {confirmType && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(6,6,7,.72)",
-            zIndex: 300,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 24,
-          }}
-          onClick={() => setConfirmType(null)}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              ...styles.card,
-              padding: 22,
-              width: "100%",
-              maxWidth: 340,
-            }}
-          >
-            <div
-              style={{
-                fontFamily: FONTS.heading,
-                fontWeight: 700,
-                fontSize: 20,
-                marginBottom: 10,
-              }}
-            >
+        <div className="modal-overlay" onClick={() => setConfirmType(null)}>
+          <div className="card modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-title">
               {confirmType === "cancelEvent"
                 ? "ANNULLARE L'EVENTO?"
                 : "ANNULLARE LA PARTECIPAZIONE?"}
             </div>
-            <p
-              style={{
-                fontFamily: FONTS.body,
-                fontSize: 13,
-                color: COLORS.textSecondary,
-                lineHeight: 1.5,
-                marginBottom: 18,
-              }}
-            >
+            <p className="modal-text">
               {confirmType === "cancelEvent"
                 ? "Tutti i partecipanti verranno informati. L'operazione non è reversibile."
                 : "Potrai richiedere di partecipare di nuovo solo se l'organizzatore te lo consente."}
             </p>
-            <div style={{ display: "flex", gap: 10 }}>
+            <div className="modal-actions">
               <button
                 type="button"
+                className="btn-secondary"
                 onClick={() => setConfirmType(null)}
-                style={{ ...styles.secondaryButton, flex: 1 }}
               >
                 INDIETRO
               </button>
               <button
                 type="button"
+                className="btn-danger"
                 onClick={
                   confirmType === "cancelEvent"
                     ? handleCancelEvent
                     : handleCancelParticipation
                 }
                 disabled={isCancelling}
-                style={{
-                  flex: 1,
-                  height: 48,
-                  borderRadius: 15,
-                  background: COLORS.danger,
-                  border: "none",
-                  color: "#fff",
-                  fontFamily: FONTS.heading,
-                  fontWeight: 700,
-                  fontSize: 15,
-                  cursor: "pointer",
-                }}
               >
                 CONFERMA
               </button>
