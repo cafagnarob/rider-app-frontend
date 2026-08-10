@@ -1,0 +1,777 @@
+.card {
+  border-radius: var(--radius-xl);
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+}
+
+.field-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+}
+
+.input {
+  width: 100%;
+  height: 52px;
+  border-radius: var(--radius-md);
+  background: var(--color-card);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  padding: 0 15px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.input:focus {
+  border-color: var(--color-accent);
+}
+
+.input::placeholder {
+  color: var(--color-text-faint);
+}
+
+.btn-primary {
+  height: 56px;
+  border-radius: 15px;
+  background: var(--color-accent);
+  border: none;
+  color: var(--color-on-accent);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 19px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: var(--color-card);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text);
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+}
+
+.btn-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: var(--color-card-alt);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.page {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  min-height: 100%;
+  padding-top: 20px;
+  padding-bottom: 40px;
+}
+
+.px-20 {
+  padding: 0 20px;
+}
+
+.form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field-row {
+  display: flex;
+  gap: 12px;
+}
+
+.field-col {
+  flex: 1;
+  min-width: 0;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.form-group__label {
+  margin-bottom: 8px;
+}
+
+.error-text {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-danger);
+}
+
+.form-group__label {
+  margin-bottom: 8px;
+}
+
+.error-text {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-danger);
+}
+
+.page-title {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.input--compact {
+  height: 46px;
+}
+
+.mb-16 {
+  margin-bottom: 16px;
+}
+
+.empty-state {
+  padding: 22px;
+  border-radius: var(--radius-lg);
+  background: var(--color-card);
+  border: 1px dashed var(--color-border-strong);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+}
+
+.no-results-text {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-faint);
+  text-align: center;
+  padding: 40px 20px;
+}
+
+/* promosse da AddVehicleWizardPage: ora condivise con BrandsPage */
+.brand-tile__image {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-card-alt);
+  padding: 14px;
+}
+
+.brand-tile__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.brand-tile__fallback {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 30px;
+  color: var(--color-text-faint);
+}
+
+.brand-tile__name {
+  padding: 9px 8px;
+  text-align: center;
+}
+
+.brand-tile__name span {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+/* --- selettore a card con stato attivo (usato due volte in questa pagina: tipo evento e visibilità) --- */
+
+.options-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.option-card {
+  text-align: left;
+  padding: 13px 15px;
+  border-radius: 13px;
+  cursor: pointer;
+  background: var(--color-card);
+  border: 1px solid var(--color-border-strong);
+}
+
+.option-card--active {
+  background: var(--color-accent-soft-bg);
+  border-color: var(--color-accent-soft-border);
+}
+
+.option-card__title {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--color-text);
+}
+
+.option-card--active .option-card__title {
+  color: var(--color-accent);
+}
+
+.option-card__hint {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+/* --- promosse da AddEventDayPage.css: ora servono anche qui, identiche --- */
+
+.textarea {
+  width: 100%;
+  border-radius: var(--radius-lg);
+  background: var(--color-card);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 12px;
+  outline: none;
+  resize: none;
+  box-sizing: border-box;
+}
+
+.duration-hint {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-text-faint);
+  margin-top: 6px;
+}
+
+.meeting-point {
+  margin-top: 12px;
+  position: relative;
+}
+
+.meeting-point__chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px;
+  border-radius: 12px;
+  background: var(--color-accent-soft-bg);
+  border: 1px solid var(--color-accent-soft-border);
+}
+
+.meeting-point__label {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-accent);
+}
+
+.meeting-point__change-btn {
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 6px;
+  z-index: 10;
+  overflow: hidden;
+}
+
+.search-results__item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 11px 13px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--color-border-soft);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* --- wrapper di pagina base  */
+.page {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  min-height: 100%;
+  padding-top: 20px;
+  padding-bottom: 40px;
+}
+
+.pb-100 {
+  padding-bottom: 100px;
+}
+
+.centered-spinner {
+  text-align: center;
+  padding: 60px 0;
+}
+
+/* --- testo ed etichette ricorrenti --- */
+.screen-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+}
+
+.section-title {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 21px;
+  letter-spacing: 0.02em;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.prose {
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* --- griglia statistiche (Ritrovo/Posti/Percorso/Visibilità e simili) --- */
+.stat-grid {
+  display: grid;
+  gap: 1px;
+  background: var(--color-border-soft);
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.stat-cell {
+  background: var(--color-card);
+  padding: 14px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.stat-cell--link {
+  text-decoration: none;
+}
+
+.stat-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+}
+
+.stat-value {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 21px;
+  line-height: 1;
+}
+
+/* --- pillole generiche (badge tipo, distanza/durata, ecc.) --- */
+.pill {
+  padding: 5px 11px;
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.pill--accent {
+  background: var(--color-accent-soft-bg);
+  border: 1px solid var(--color-accent-soft-border);
+  color: var(--color-accent);
+}
+
+.pill--neutral {
+  background: var(--color-card-alt);
+  border: 1px solid var(--color-border-soft);
+  color: var(--color-text-secondary);
+}
+
+/* --- pulsanti aggiuntivi --- */
+.btn-link-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  padding: 0 18px;
+}
+
+.btn-danger {
+  height: 48px;
+  border-radius: 15px;
+  background: var(--color-danger);
+  border: none;
+  color: #fff;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.text-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 0;
+}
+
+.text-btn--danger {
+  color: var(--color-danger);
+}
+.text-btn--accent {
+  color: var(--color-accent);
+}
+
+/* --- modale di conferma generico */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 6, 7, 0.72);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.modal-card {
+  padding: 22px;
+  width: 100%;
+  max-width: 340px;
+}
+
+.modal-title {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.modal-text {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin-bottom: 18px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.modal-actions > * {
+  flex: 1;
+}
+
+/* --- tab a pillola orizzontali (Feed, EventsList, Search...) --- */
+.tab-pills {
+  display: flex;
+  gap: 8px;
+}
+
+.tab-pill {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 11px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tab-pill--active {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+/* --- chip rimovibile (filtro attivo tipo "vicino a X") --- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 9px;
+  background: var(--color-accent-soft-bg);
+  border: 1px solid var(--color-accent-soft-border);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--color-accent);
+}
+
+.chip__remove-btn {
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+}
+
+/* --- pulsante piccolo accento (usato negli header: + CREA, + POST, ecc.) --- */
+.btn-accent-sm {
+  height: 40px;
+  padding: 0 15px;
+  border-radius: 12px;
+  background: var(--color-accent);
+  border: none;
+  color: var(--color-on-accent);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.04em;
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* --- riga evento in lista (data box + info + badge): Home, EventsList, Search --- */
+.event-row {
+  padding: 16px;
+  cursor: pointer;
+  display: flex;
+  gap: 13px;
+}
+
+.event-row__date-box {
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-soft);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  color: var(--color-accent);
+}
+
+.event-row__date-day {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.event-row__date-month {
+  font-size: 9px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+.event-row__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.event-row__title-line {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 4px;
+}
+
+.event-row__title {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 1.1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.event-row__lock-icon {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.event-row__meta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-text-muted);
+  margin-bottom: 8px;
+}
+
+.event-row__badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* --- badge piccoli generici --- */
+.badge-sm {
+  padding: 3px 9px;
+  border-radius: 8px;
+  background: var(--color-card-alt);
+  border: 1px solid var(--color-border-soft);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--color-text-secondary);
+}
+
+.badge-sm--accent {
+  color: var(--color-accent);
+}
+
+.badge-sm--own {
+  padding: 2px 8px;
+  border-radius: 7px;
+  background: var(--color-accent-soft-bg);
+  border: 1px solid var(--color-accent-soft-border);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.badge-sm--status-accepted {
+  padding: 3px 9px;
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  background: #173323;
+  border: 1px solid rgba(52, 199, 89, 0.35);
+  color: #4ade80;
+}
+
+.badge-sm--status-pending {
+  padding: 3px 9px;
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  background: var(--color-accent-soft-bg);
+  border: 1px solid var(--color-accent-soft-border);
+  color: var(--color-accent);
+}
+
+/* --- riga di paginazione --- */
+.pagination-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  padding: 24px 20px;
+}
+
+.pagination-row__label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+/* --- messaggio "lista vuota" (diverso da "nessun risultato per la ricerca") --- */
+.empty-list-text {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-faint);
+  text-align: center;
+  padding: 60px 20px;
+}
+
+/* --- header di pagina con pulsante indietro + titolo/sottotitolo --- */
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px 18px;
+}
+
+.page-header__title {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 22px;
+}
+
+.page-header__subtitle {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+/* --- riga utente in lista (follower/seguiti, ricerca motociclisti) --- */
+.user-row {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 13px 20px;
+  border-bottom: 1px solid var(--color-border-soft);
+  text-decoration: none;
+}
+
+.user-row__avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--color-surface-raised);
+  flex-shrink: 0;
+}
+
+.user-row__username {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--color-text);
+}
+
+.user-row__fullname {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
