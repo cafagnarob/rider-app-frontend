@@ -8,7 +8,7 @@ import {
 } from "../features/catalog/catalogApi"
 import { useAddVehicleMutation } from "../features/vehicles/vehiclesApi"
 import { CATEGORY_LABELS } from "../utils/constants"
-import { COLORS, FONTS, styles } from "../styles/theme"
+import "./AddVehicleWizardPage.css"
 
 const STEPS = ["MARCA", "MODELLO", "DETTAGLI"]
 
@@ -95,39 +95,22 @@ function AddVehicleWizardPage() {
   }
 
   return (
-    <div style={{ ...styles.pageBg, paddingTop: 20, paddingBottom: 40 }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          padding: "0 20px 8px",
-        }}
-      >
-        <button type="button" onClick={goBack} style={styles.iconButton}>
+    <div className="page">
+      <div className="wizard-header">
+        <button type="button" className="btn-icon" onClick={goBack}>
           <FaArrowLeft />
         </button>
-        <div style={{ ...styles.pageTitle, fontSize: 22 }}>AGGIUNGI MOTO</div>
+        <div className="wizard-header__title">AGGIUNGI MOTO</div>
       </div>
 
-      <div style={{ display: "flex", gap: 6, padding: "0 20px 20px" }}>
+      <div className="wizard-steps">
         {STEPS.map((label, i) => (
-          <div key={label} style={{ flex: 1 }}>
+          <div key={label} className="wizard-step">
             <div
-              style={{
-                height: 3,
-                borderRadius: 2,
-                background: i <= step ? COLORS.accent : COLORS.borderSoft,
-                marginBottom: 6,
-              }}
+              className={`wizard-step__bar ${i <= step ? "wizard-step__bar--done" : ""}`}
             />
             <div
-              style={{
-                fontFamily: FONTS.mono,
-                fontSize: 9,
-                letterSpacing: ".06em",
-                color: i === step ? COLORS.accent : COLORS.textFaint,
-              }}
+              className={`wizard-step__label ${i === step ? "wizard-step__label--current" : ""}`}
             >
               {i + 1}. {label}
             </div>
@@ -136,80 +119,39 @@ function AddVehicleWizardPage() {
       </div>
 
       {step === 0 && (
-        <div style={{ padding: "0 20px" }}>
+        <div className="px-20">
           <input
             type="search"
+            className="input search-input"
             placeholder="Cerca marca..."
             value={brandSearch}
             onChange={(e) => setBrandSearch(e.target.value)}
-            style={{ ...styles.input, height: 46, marginBottom: 16 }}
           />
 
           {isLoadingBrands ? (
             <div style={{ textAlign: "center", padding: 40 }}>
-              <Spinner animation="border" style={{ color: COLORS.accent }} />
+              <Spinner animation="border" style={{ color: "#FF7A2F" }} />
             </div>
           ) : (
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
-                gap: 10,
-              }}
-            >
+            <div className="grid-3">
               {filteredBrands?.map((brand) => (
                 <div
                   key={brand.id}
+                  className="card"
+                  style={{ cursor: "pointer", overflow: "hidden" }}
                   onClick={() => handlePickBrand(brand)}
-                  style={{
-                    ...styles.card,
-                    cursor: "pointer",
-                    overflow: "hidden",
-                  }}
                 >
-                  <div
-                    style={{
-                      aspectRatio: "1",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      background: COLORS.cardAlt,
-                      padding: 14,
-                    }}
-                  >
+                  <div className="brand-tile__image">
                     {brand.logoUrl ? (
-                      <img
-                        src={brand.logoUrl}
-                        alt={brand.name}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "contain",
-                        }}
-                      />
+                      <img src={brand.logoUrl} alt={brand.name} />
                     ) : (
-                      <span
-                        style={{
-                          fontFamily: FONTS.heading,
-                          fontWeight: 700,
-                          fontSize: 26,
-                          color: COLORS.textFaint,
-                        }}
-                      >
+                      <span className="brand-tile__fallback">
                         {brand.name.charAt(0)}
                       </span>
                     )}
                   </div>
-                  <div style={{ padding: "8px 6px", textAlign: "center" }}>
-                    <span
-                      style={{
-                        fontFamily: FONTS.heading,
-                        fontWeight: 600,
-                        fontSize: 12,
-                      }}
-                    >
-                      {brand.name}
-                    </span>
+                  <div className="brand-tile__name">
+                    <span>{brand.name}</span>
                   </div>
                 </div>
               ))}
@@ -219,35 +161,28 @@ function AddVehicleWizardPage() {
       )}
 
       {step === 1 && (
-        <div style={{ padding: "0 20px" }}>
-          <div
-            style={{
-              fontFamily: FONTS.mono,
-              fontSize: 10,
-              color: COLORS.textMuted,
-              marginBottom: 12,
-            }}
-          >
+        <div className="px-20">
+          <div className="field-label" style={{ marginBottom: 12 }}>
             {selectedBrand?.name.toUpperCase()}
           </div>
           <input
             type="search"
+            className="input search-input"
             placeholder="Cerca modello..."
             value={modelSearch}
             onChange={(e) => setModelSearch(e.target.value)}
-            style={{ ...styles.input, height: 46, marginBottom: 16 }}
           />
 
           {isLoadingModels ? (
             <div style={{ textAlign: "center", padding: 40 }}>
-              <Spinner animation="border" style={{ color: COLORS.accent }} />
+              <Spinner animation="border" style={{ color: "#FF7A2F" }} />
             </div>
           ) : modelsPage?.content.length === 0 ? (
             <p
               style={{
-                fontFamily: FONTS.body,
+                fontFamily: "var(--font-body)",
                 fontSize: 13,
-                color: COLORS.textFaint,
+                color: "var(--color-text-faint)",
                 textAlign: "center",
                 padding: 40,
               }}
@@ -255,56 +190,22 @@ function AddVehicleWizardPage() {
               Nessun modello trovato.
             </p>
           ) : (
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: 10,
-              }}
-            >
+            <div className="grid-2">
               {modelsPage?.content.map((model) => (
                 <div
                   key={model.id}
+                  className="card"
+                  style={{ cursor: "pointer", overflow: "hidden" }}
                   onClick={() => handlePickModel(model)}
-                  style={{
-                    ...styles.card,
-                    cursor: "pointer",
-                    overflow: "hidden",
-                  }}
                 >
-                  <div
-                    style={{ aspectRatio: "16/10", background: COLORS.cardAlt }}
-                  >
+                  <div className="model-tile__image">
                     {model.imageUrl && (
-                      <img
-                        src={model.imageUrl}
-                        alt={model.name}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                        }}
-                      />
+                      <img src={model.imageUrl} alt={model.name} />
                     )}
                   </div>
-                  <div style={{ padding: "10px 11px" }}>
-                    <div
-                      style={{
-                        fontFamily: FONTS.heading,
-                        fontWeight: 600,
-                        fontSize: 14,
-                      }}
-                    >
-                      {model.name}
-                    </div>
-                    <div
-                      style={{
-                        fontFamily: FONTS.mono,
-                        fontSize: 9,
-                        color: COLORS.textMuted,
-                        marginTop: 4,
-                      }}
-                    >
+                  <div className="model-tile__info">
+                    <div className="model-tile__name">{model.name}</div>
+                    <div className="model-tile__meta">
                       {model.engineCc} CC ·{" "}
                       {CATEGORY_LABELS[model.category] || model.category}
                     </div>
@@ -317,103 +218,32 @@ function AddVehicleWizardPage() {
       )}
 
       {step === 2 && selectedModel && (
-        <form
-          onSubmit={handleSubmit}
-          style={{
-            padding: "0 20px",
-            display: "flex",
-            flexDirection: "column",
-            gap: 16,
-          }}
-        >
-          <div
-            style={{
-              ...styles.card,
-              padding: 14,
-              display: "flex",
-              alignItems: "center",
-              gap: 12,
-            }}
-          >
-            <div
-              style={{
-                width: 56,
-                height: 56,
-                borderRadius: 12,
-                overflow: "hidden",
-                background: COLORS.cardAlt,
-                flexShrink: 0,
-              }}
-            >
+        <form onSubmit={handleSubmit} className="form-stack px-20">
+          <div className="card selected-model-summary">
+            <div className="selected-model-summary__thumb">
               {selectedModel.imageUrl && (
-                <img
-                  src={selectedModel.imageUrl}
-                  alt=""
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                />
+                <img src={selectedModel.imageUrl} alt="" />
               )}
             </div>
             <div>
-              <div
-                style={{
-                  fontFamily: FONTS.heading,
-                  fontWeight: 700,
-                  fontSize: 16,
-                }}
-              >
+              <div className="selected-model-summary__name">
                 {selectedBrand?.name} {selectedModel.name}
               </div>
-              <div
-                style={{
-                  fontFamily: FONTS.mono,
-                  fontSize: 9.5,
-                  color: COLORS.textMuted,
-                  marginTop: 3,
-                }}
-              >
+              <div className="selected-model-summary__meta">
                 {selectedModel.engineCc} CC
               </div>
             </div>
           </div>
 
           <div>
-            <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+            <div className="field-label form-group__label">
               FOTO (OPZIONALE)
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <div
-                style={{
-                  width: 74,
-                  height: 74,
-                  borderRadius: 14,
-                  overflow: "hidden",
-                  background: COLORS.cardAlt,
-                  flexShrink: 0,
-                }}
-              >
-                {photoPreview && (
-                  <img
-                    src={photoPreview}
-                    alt=""
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                  />
-                )}
+            <div className="photo-upload">
+              <div className="photo-upload__preview">
+                {photoPreview && <img src={photoPreview} alt="" />}
               </div>
-              <label
-                style={{
-                  ...styles.secondaryButton,
-                  height: 36,
-                  padding: "0 14px",
-                  fontSize: 12,
-                  display: "inline-flex",
-                  alignItems: "center",
-                  cursor: "pointer",
-                }}
-              >
+              <label className="btn-secondary photo-upload__label">
                 {photo ? "CAMBIA FOTO" : "AGGIUNGI FOTO"}
                 <input
                   type="file"
@@ -425,42 +255,41 @@ function AddVehicleWizardPage() {
             </div>
           </div>
 
-          <div style={{ display: "flex", gap: 12 }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>ANNO</div>
+          <div className="field-row">
+            <div className="field-col">
+              <div className="field-label form-group__label">ANNO</div>
               <input
                 type="number"
+                className="input"
                 value={form.year}
                 min={selectedModel.yearStart}
                 max={selectedModel.yearEnd || new Date().getFullYear()}
                 onChange={(e) => setForm({ ...form, year: e.target.value })}
                 required
-                style={{ ...styles.input, width: "100%" }}
               />
             </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
-                KM ATTUALI
-              </div>
+            <div className="field-col">
+              <div className="field-label form-group__label">KM ATTUALI</div>
               <input
                 type="number"
+                className="input"
                 min={0}
                 value={form.initialMileage}
                 onChange={(e) =>
                   setForm({ ...form, initialMileage: e.target.value })
                 }
                 required
-                style={{ ...styles.input, width: "100%" }}
               />
             </div>
           </div>
 
           <div>
-            <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+            <div className="field-label form-group__label">
               TARGA (OPZIONALE)
             </div>
             <input
               type="text"
+              className="input"
               placeholder="AB12345"
               value={form.licensePlate}
               pattern="[A-Za-z]{2}[0-9]{5}"
@@ -468,40 +297,26 @@ function AddVehicleWizardPage() {
               onChange={(e) =>
                 setForm({ ...form, licensePlate: e.target.value })
               }
-              style={{ ...styles.input, textTransform: "uppercase" }}
+              style={{ textTransform: "uppercase" }}
             />
           </div>
 
           <div>
-            <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+            <div className="field-label form-group__label">
               SOPRANNOME (OPZIONALE)
             </div>
             <input
               type="text"
+              className="input"
               placeholder="La Rossa"
               value={form.nickname}
               onChange={(e) => setForm({ ...form, nickname: e.target.value })}
-              style={styles.input}
             />
           </div>
 
-          {errorMsg && (
-            <div
-              style={{
-                fontFamily: FONTS.body,
-                fontSize: 13,
-                color: COLORS.danger,
-              }}
-            >
-              {errorMsg}
-            </div>
-          )}
+          {errorMsg && <div className="error-text">{errorMsg}</div>}
 
-          <button
-            type="submit"
-            disabled={isSaving}
-            style={{ ...styles.primaryButton, opacity: isSaving ? 0.6 : 1 }}
-          >
+          <button type="submit" className="btn-primary" disabled={isSaving}>
             {isSaving ? "..." : "AGGIUNGI AL GARAGE"}
           </button>
         </form>
