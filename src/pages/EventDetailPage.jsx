@@ -13,6 +13,7 @@ import { FaArrowLeft } from "react-icons/fa"
 import {
   useGetEventByIdQuery,
   useChangeEventStatusMutation,
+  useRequestAccessCodeMutation,
 } from "../features/events/eventsApi"
 import {
   useJoinEventMutation,
@@ -32,6 +33,9 @@ function EventDetailPage() {
   const { data: event, isLoading, isError } = useGetEventByIdQuery(eventId)
 
   const { data: participants } = useGetAcceptedParticipantsQuery(eventId)
+
+  const [requestAccessCode, { isLoading: isRequestingCode }] =
+    useRequestAccessCodeMutation()
 
   const [joinEvent, { isLoading: isJoining }] = useJoinEventMutation()
   const [cancelParticipation, { isLoading: isCancelling }] =
@@ -366,6 +370,53 @@ function EventDetailPage() {
             >
               {isJoining ? "..." : "SBLOCCA EVENTO"}
             </button>
+
+            <div style={{ marginTop: 16 }}>
+              {event.myAccessRequestStatus === "PENDING" && (
+                <div
+                  style={{
+                    ...styles.emptyState,
+                    borderColor: COLORS.accentSoftBorder,
+                  }}
+                >
+                  Richiesta inviata. Riceverai una notifica quando
+                  l'organizzatore risponde.
+                </div>
+              )}
+
+              {event.myAccessRequestStatus === "APPROVED" && (
+                <div
+                  style={{
+                    ...styles.emptyState,
+                    borderColor: COLORS.accentSoftBorder,
+                    color: COLORS.accent,
+                  }}
+                >
+                  Richiesta approvata — controlla le tue notifiche per il
+                  codice, poi inseriscilo qui sopra.
+                </div>
+              )}
+
+              {(event.myAccessRequestStatus === "REJECTED" ||
+                event.myAccessRequestStatus == null) && (
+                <button
+                  type="button"
+                  onClick={() => requestAccessCode(eventId)}
+                  disabled={isRequestingCode}
+                  style={{
+                    ...styles.secondaryButton,
+                    width: "100%",
+                    opacity: isRequestingCode ? 0.6 : 1,
+                  }}
+                >
+                  {isRequestingCode
+                    ? "..."
+                    : event.myAccessRequestStatus === "REJECTED"
+                      ? "RICHIEDI DI NUOVO IL CODICE"
+                      : "NON HAI IL CODICE? RICHIEDILO"}
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
