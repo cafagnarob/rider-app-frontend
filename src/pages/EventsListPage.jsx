@@ -1,15 +1,15 @@
 import { useRef, useState } from "react"
+import { useNavigate, Link, useLocation } from "react-router-dom"
 import { Spinner } from "react-bootstrap"
-import { Link, useLocation, useNavigate } from "react-router-dom"
 import { FaLock, FaTimes } from "react-icons/fa"
 import {
   useSearchEventsQuery,
   useGetOrganizedEventsQuery,
   useGetParticipatingEventsQuery,
 } from "../features/events/eventsApi"
-import { EVENT_TYPE_LABELS, VISIBILITY_LABELS } from "../utils/constants"
-import { COLORS, FONTS, styles } from "../styles/theme"
-import NotificationBell from "../features/notification/components/NotificationBell"
+import NotificationBell from "../features/notifications/components/NotificationBell"
+import { VISIBILITY_LABELS, EVENT_TYPE_LABELS } from "../utils/constants"
+import "./EventsListPage.css"
 
 const TABS = [
   { key: "search", label: "SCOPRI" },
@@ -40,7 +40,6 @@ function EventsListPage() {
   const handleSearchChange = (e) => {
     const value = e.target.value
     setTitleInput(value)
-
     clearTimeout(timerRef.current)
     timerRef.current = setTimeout(() => {
       setTitle(value)
@@ -80,62 +79,28 @@ function EventsListPage() {
   }
 
   return (
-    <div style={{ ...styles.pageBg, paddingTop: 20, paddingBottom: 20 }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "0 20px",
-        }}
-      >
-        <div style={{ ...styles.pageTitle, fontSize: 28 }}>EVENTI</div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+    <div className="page">
+      <div className="events-list-page__header">
+        <div className="page-title" style={{ fontSize: 28 }}>
+          EVENTI
+        </div>
+        <div className="events-list-page__header-actions">
           <NotificationBell />
-          <Link
-            to="/events/new"
-            style={{
-              height: 40,
-              padding: "0 15px",
-              borderRadius: 12,
-              background: COLORS.accent,
-              border: "none",
-              color: COLORS.onAccent,
-              fontFamily: FONTS.heading,
-              fontWeight: 700,
-              fontSize: 15,
-              letterSpacing: ".04em",
-              display: "inline-flex",
-              alignItems: "center",
-              textDecoration: "none",
-            }}
-          >
+          <Link to="/events/new" className="btn-accent-sm">
             + CREA
           </Link>
         </div>
       </div>
 
-      <div style={{ display: "flex", gap: 8, padding: "18px 20px 0" }}>
+      <div className="tab-pills events-list-page__tabs">
         {TABS.map((t) => {
           const active = tab === t.key
           return (
             <button
               key={t.key}
               type="button"
+              className={`tab-pill ${active ? "tab-pill--active" : ""}`}
               onClick={() => handleTab(t.key)}
-              style={{
-                height: 36,
-                padding: "0 14px",
-                borderRadius: 11,
-                background: active ? COLORS.accent : COLORS.card,
-                border: `1px solid ${COLORS.border}`,
-                color: active ? COLORS.onAccent : COLORS.textSecondary,
-                fontFamily: FONTS.mono,
-                fontSize: 10.5,
-                letterSpacing: ".06em",
-                cursor: "pointer",
-                whiteSpace: "nowrap",
-              }}
             >
               {t.label}
             </button>
@@ -144,45 +109,25 @@ function EventsListPage() {
       </div>
 
       {tab === "search" && (
-        <div style={{ padding: "16px 20px 0" }}>
+        <div className="events-list-page__search">
           <input
             type="search"
+            className="input input--compact"
             placeholder="Cerca per titolo..."
             value={titleInput}
             onChange={handleSearchChange}
-            style={{ ...styles.input, height: 46 }}
           />
         </div>
       )}
 
       {geoFilter && (
-        <div style={{ padding: "0 20px 12px" }}>
-          <span
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "6px 12px",
-              borderRadius: 9,
-              background: COLORS.accentSoftBg,
-              border: `1px solid ${COLORS.accentSoftBorder}`,
-              fontFamily: FONTS.mono,
-              fontSize: 10.5,
-              color: COLORS.accent,
-            }}
-          >
+        <div className="events-list-page__filter-chip-wrap">
+          <span className="chip">
             VICINO A {geoFilter.placeName?.toUpperCase()}
             <button
               type="button"
+              className="chip__remove-btn"
               onClick={() => setGeoFilter(null)}
-              style={{
-                background: "none",
-                border: "none",
-                color: COLORS.accent,
-                cursor: "pointer",
-                padding: 0,
-                display: "flex",
-              }}
             >
               <FaTimes size={10} />
             </button>
@@ -191,144 +136,57 @@ function EventsListPage() {
       )}
 
       {isLoading && (
-        <div style={{ textAlign: "center", padding: "60px 0" }}>
-          <Spinner animation="border" style={{ color: COLORS.accent }} />
+        <div className="centered-spinner">
+          <Spinner animation="border" style={{ color: "#FF7A2F" }} />
         </div>
       )}
 
       {isError && (
-        <div style={{ ...styles.emptyState, margin: "20px" }}>
+        <div className="empty-state" style={{ margin: 20 }}>
           Impossibile caricare gli eventi.
         </div>
       )}
 
       {data && data.content.length === 0 && (
-        <p
-          style={{
-            fontFamily: FONTS.body,
-            fontSize: 13,
-            color: COLORS.textFaint,
-            textAlign: "center",
-            padding: "60px 20px",
-          }}
-        >
-          Nessun evento trovato.
-        </p>
+        <p className="empty-list-text">Nessun evento trovato.</p>
       )}
 
       {data && data.content.length > 0 && (
         <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 12,
-            padding: "18px 20px 0",
-            opacity: isFetching ? 0.6 : 1,
-          }}
+          className="events-list-page__list"
+          style={{ opacity: isFetching ? 0.6 : 1 }}
         >
           {data.content.map((event) => {
             const start = new Date(event.startDateTime)
             return (
               <div
                 key={event.id}
+                className="card event-row"
                 onClick={() => navigate(`/events/${event.id}`)}
-                style={{
-                  ...styles.card,
-                  padding: 16,
-                  cursor: "pointer",
-                  display: "flex",
-                  gap: 13,
-                }}
               >
-                <div
-                  style={{
-                    width: 46,
-                    height: 46,
-                    flexShrink: 0,
-                    borderRadius: 12,
-                    background: COLORS.surfaceRaised,
-                    border: `1px solid ${COLORS.borderSoft}`,
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontFamily: FONTS.mono,
-                    color: COLORS.accent,
-                  }}
-                >
-                  <span style={{ fontSize: 15, lineHeight: 1 }}>
+                <div className="event-row__date-box">
+                  <span className="event-row__date-day">
                     {start.getDate().toString().padStart(2, "0")}
                   </span>
-                  <span
-                    style={{
-                      fontSize: 9,
-                      color: COLORS.textMuted,
-                      marginTop: 2,
-                    }}
-                  >
+                  <span className="event-row__date-month">
                     {start
                       .toLocaleDateString("it-IT", { month: "short" })
                       .toUpperCase()}
                   </span>
                 </div>
 
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 7,
-                      marginBottom: 4,
-                    }}
-                  >
+                <div className="event-row__info">
+                  <div className="event-row__title-line">
                     {event.locked && (
-                      <FaLock
-                        style={{
-                          fontSize: 11,
-                          color: COLORS.textMuted,
-                          flexShrink: 0,
-                        }}
-                      />
+                      <FaLock className="event-row__lock-icon" />
                     )}
-                    <span
-                      style={{
-                        fontFamily: FONTS.heading,
-                        fontWeight: 600,
-                        fontSize: 18,
-                        lineHeight: 1.1,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {event.title}
-                    </span>
+                    <span className="event-row__title">{event.title}</span>
                     {event.organizer && (
-                      <span
-                        style={{
-                          padding: "2px 8px",
-                          borderRadius: 7,
-                          background: COLORS.accentSoftBg,
-                          border: `1px solid ${COLORS.accentSoftBorder}`,
-                          fontFamily: FONTS.mono,
-                          fontSize: 9,
-                          color: COLORS.accent,
-                          flexShrink: 0,
-                        }}
-                      >
-                        TUO
-                      </span>
+                      <span className="badge-sm--own">TUO</span>
                     )}
                   </div>
 
-                  <div
-                    style={{
-                      fontFamily: FONTS.mono,
-                      fontSize: 10,
-                      color: COLORS.textMuted,
-                      marginBottom: 8,
-                    }}
-                  >
+                  <div className="event-row__meta">
                     {event.organizerUsername} ·{" "}
                     {start.toLocaleTimeString("it-IT", {
                       hour: "2-digit",
@@ -336,65 +194,25 @@ function EventsListPage() {
                     })}
                   </div>
 
-                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                  <div className="event-row__badges">
                     {event.type !== "STANDARD" && (
-                      <span
-                        style={{
-                          padding: "3px 9px",
-                          borderRadius: 8,
-                          background: COLORS.cardAlt,
-                          border: `1px solid ${COLORS.borderSoft}`,
-                          fontFamily: FONTS.mono,
-                          fontSize: 9.5,
-                          color: COLORS.accent,
-                        }}
-                      >
+                      <span className="badge-sm badge-sm--accent">
                         {EVENT_TYPE_LABELS[event.type]}
                       </span>
                     )}
-                    <span
-                      style={{
-                        padding: "3px 9px",
-                        borderRadius: 8,
-                        background: COLORS.cardAlt,
-                        border: `1px solid ${COLORS.borderSoft}`,
-                        fontFamily: FONTS.mono,
-                        fontSize: 9.5,
-                        color: COLORS.textSecondary,
-                      }}
-                    >
+                    <span className="badge-sm">
                       {VISIBILITY_LABELS[event.visibility]}
                     </span>
-                    <span
-                      style={{
-                        padding: "3px 9px",
-                        borderRadius: 8,
-                        background: COLORS.cardAlt,
-                        border: `1px solid ${COLORS.borderSoft}`,
-                        fontFamily: FONTS.mono,
-                        fontSize: 9.5,
-                        color: COLORS.textSecondary,
-                      }}
-                    >
+                    <span className="badge-sm">
                       {event.currentParticipants}/{event.maxParticipants}
                     </span>
                     {event.myParticipationStatus && (
                       <span
-                        style={{
-                          padding: "3px 9px",
-                          borderRadius: 8,
-                          fontFamily: FONTS.mono,
-                          fontSize: 9.5,
-                          background:
-                            event.myParticipationStatus === "ACCEPTED"
-                              ? "#173323"
-                              : COLORS.accentSoftBg,
-                          border: `1px solid ${event.myParticipationStatus === "ACCEPTED" ? "rgba(52,199,89,.35)" : COLORS.accentSoftBorder}`,
-                          color:
-                            event.myParticipationStatus === "ACCEPTED"
-                              ? "#4ADE80"
-                              : COLORS.accent,
-                        }}
+                        className={
+                          event.myParticipationStatus === "ACCEPTED"
+                            ? "badge-sm--status-accepted"
+                            : "badge-sm--status-pending"
+                        }
                       >
                         {event.myParticipationStatus === "ACCEPTED"
                           ? "CONFERMATO"
@@ -410,47 +228,33 @@ function EventsListPage() {
       )}
 
       {data && data.totalPages > 1 && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: 16,
-            padding: "24px 20px",
-          }}
-        >
+        <div className="pagination-row">
           <button
             type="button"
-            disabled={data.first || isFetching}
-            onClick={() => setPage((p) => p - 1)}
+            className="btn-secondary"
             style={{
-              ...styles.secondaryButton,
               height: 40,
               padding: "0 16px",
               opacity: data.first ? 0.4 : 1,
             }}
+            disabled={data.first || isFetching}
+            onClick={() => setPage((p) => p - 1)}
           >
             PRECEDENTE
           </button>
-          <span
-            style={{
-              fontFamily: FONTS.mono,
-              fontSize: 11,
-              color: COLORS.textMuted,
-            }}
-          >
+          <span className="pagination-row__label">
             {data.number + 1} / {data.totalPages}
           </span>
           <button
             type="button"
-            disabled={data.last || isFetching}
-            onClick={() => setPage((p) => p + 1)}
+            className="btn-secondary"
             style={{
-              ...styles.secondaryButton,
               height: 40,
               padding: "0 16px",
               opacity: data.last ? 0.4 : 1,
             }}
+            disabled={data.last || isFetching}
+            onClick={() => setPage((p) => p + 1)}
           >
             SUCCESSIVA
           </button>
