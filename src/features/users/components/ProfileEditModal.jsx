@@ -2,6 +2,7 @@ import { useUpdateProfileMutation } from "../usersApi"
 import { useState } from "react"
 import { COLORS, FONTS, styles } from "../../../styles/theme"
 import { FaTimes } from "react-icons/fa"
+import PlaceSearchInput from "../../../components/PlaceSearchInput"
 
 function ProfileEditModal({ profile, onClose }) {
   const [updateProfile, { isLoading }] = useUpdateProfileMutation()
@@ -14,6 +15,15 @@ function ProfileEditModal({ profile, onClose }) {
     location: profile?.location || "",
     birthDate: profile?.birthDate || "",
   })
+  const [locationValue, setLocationValue] = useState(
+    profile?.location ? { label: profile.location } : null,
+  )
+  const [locationChanged, setLocationChanged] = useState(false)
+
+  const handleLocationChange = (place) => {
+    setLocationValue(place)
+    setLocationChanged(true)
+  }
 
   const set = (field) => (e) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }))
@@ -22,13 +32,18 @@ function ProfileEditModal({ profile, onClose }) {
     e.preventDefault()
     setErrorMsg("")
     try {
-      await updateProfile({
+      const payload = {
         name: form.name || null,
         surname: form.surname || null,
         description: form.description || null,
-        location: form.location || null,
         birthDate: form.birthDate || null,
-      }).unwrap()
+      }
+      if (locationChanged) {
+        payload.location = locationValue?.label || null
+        payload.locationLat = locationValue?.lat ?? null
+        payload.locationLng = locationValue?.lng ?? null
+      }
+      await updateProfile(payload).unwrap()
       onClose()
     } catch (err) {
       setErrorMsg(err.data?.message || "Errore durante il salvataggio.")
@@ -162,16 +177,15 @@ function ProfileEditModal({ profile, onClose }) {
             </div>
 
             <div>
-              <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
-                LOCALITÀ
+              <div>
+                <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+                  LOCALITÀ
+                </div>
+                <PlaceSearchInput
+                  value={locationValue}
+                  onChange={handleLocationChange}
+                />
               </div>
-              <input
-                type="text"
-                placeholder="Latina, Italia"
-                value={form.location}
-                onChange={set("location")}
-                style={styles.input}
-              />
             </div>
 
             <div>
