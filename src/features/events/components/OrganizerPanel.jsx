@@ -7,6 +7,11 @@ import {
 import { useGetEventInvitesQuery } from "../invitesApi"
 import { COLORS, FONTS, styles } from "../../../styles/theme"
 import InvitePeoplePicker from "./InvitePeoplePicker"
+import {
+  useApproveAccessCodeRequestMutation,
+  useGetAccessCodeRequestsQuery,
+  useRejectAccessCodeRequestMutation,
+} from "../eventsApi"
 
 function OrganizerPanel({ eventId, visibility }) {
   const { data: pending } = useGetPendingParticipantsQuery(eventId)
@@ -17,6 +22,12 @@ function OrganizerPanel({ eventId, visibility }) {
   const { data: invites } = useGetEventInvitesQuery(eventId, {
     skip: visibility !== "INVITE_ONLY",
   })
+
+  const { data: accessRequests } = useGetAccessCodeRequestsQuery(eventId, {
+    skip: visibility !== "PRIVATE_CODE",
+  })
+  const [approveAccessCodeRequest] = useApproveAccessCodeRequestMutation()
+  const [rejectAccessCodeRequest] = useRejectAccessCodeRequestMutation()
 
   return (
     <div style={{ ...styles.card, padding: 18, marginTop: 20 }}>
@@ -47,6 +58,163 @@ function OrganizerPanel({ eventId, visibility }) {
         >
           Nessuna richiesta in attesa.
         </p>
+      )}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 8,
+          marginBottom: 18,
+        }}
+      >
+        {pending?.map((p) => (
+          <div
+            key={p.id}
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              padding: "10px 12px",
+              borderRadius: 12,
+              background: COLORS.cardAlt,
+              border: `1px solid ${COLORS.borderSoft}`,
+            }}
+          >
+            <span style={{ fontFamily: FONTS.body, fontSize: 14 }}>
+              {p.username}
+            </span>
+            <div style={{ display: "flex", gap: 6 }}>
+              <button
+                type="button"
+                onClick={() => approve({ eventId, participationId: p.id })}
+                style={{
+                  height: 32,
+                  padding: "0 12px",
+                  borderRadius: 9,
+                  background: "#173323",
+                  border: "1px solid rgba(52,199,89,.35)",
+                  color: "#4ADE80",
+                  fontFamily: FONTS.mono,
+                  fontSize: 10,
+                  cursor: "pointer",
+                }}
+              >
+                ACCETTA
+              </button>
+              <button
+                type="button"
+                onClick={() => reject({ eventId, participationId: p.id })}
+                style={{
+                  height: 32,
+                  padding: "0 12px",
+                  borderRadius: 9,
+                  background: COLORS.dangerBg,
+                  border: `1px solid ${COLORS.dangerBorder}`,
+                  color: COLORS.danger,
+                  fontFamily: FONTS.mono,
+                  fontSize: 10,
+                  cursor: "pointer",
+                }}
+              >
+                RIFIUTA
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {visibility === "PRIVATE_CODE" && (
+        <div style={{ marginBottom: 18 }}>
+          <div style={{ ...styles.fieldLabel, marginBottom: 9 }}>
+            RICHIESTE CODICE{" "}
+            {accessRequests ? `(${accessRequests.length})` : ""}
+          </div>
+          {accessRequests?.length === 0 && (
+            <p
+              style={{
+                fontFamily: FONTS.body,
+                fontSize: 13,
+                color: COLORS.textFaint,
+                margin: 0,
+              }}
+            >
+              Nessuna richiesta di codice in attesa.
+            </p>
+          )}
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {accessRequests?.map((req) => (
+              <div
+                key={req.id}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "10px 12px",
+                  borderRadius: 12,
+                  background: COLORS.cardAlt,
+                  border: `1px solid ${COLORS.borderSoft}`,
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+                  <img
+                    src={req.requesterProfilePicture}
+                    alt={req.requesterUsername}
+                    style={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                      background: COLORS.surfaceRaised,
+                    }}
+                  />
+                  <span style={{ fontFamily: FONTS.body, fontSize: 14 }}>
+                    {req.requesterUsername}
+                  </span>
+                </div>
+                <div style={{ display: "flex", gap: 6 }}>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      approveAccessCodeRequest({ eventId, requestId: req.id })
+                    }
+                    style={{
+                      height: 32,
+                      padding: "0 12px",
+                      borderRadius: 9,
+                      background: "#173323",
+                      border: "1px solid rgba(52,199,89,.35)",
+                      color: "#4ADE80",
+                      fontFamily: FONTS.mono,
+                      fontSize: 10,
+                      cursor: "pointer",
+                    }}
+                  >
+                    INVIA CODICE
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      rejectAccessCodeRequest({ eventId, requestId: req.id })
+                    }
+                    style={{
+                      height: 32,
+                      padding: "0 12px",
+                      borderRadius: 9,
+                      background: COLORS.dangerBg,
+                      border: `1px solid ${COLORS.dangerBorder}`,
+                      color: COLORS.danger,
+                      fontFamily: FONTS.mono,
+                      fontSize: 10,
+                      cursor: "pointer",
+                    }}
+                  >
+                    RIFIUTA
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
       <div
         style={{
