@@ -8,7 +8,7 @@ import {
 } from "../features/events/eventsApi"
 import { useGetMyRoutesQuery } from "../features/routesMap/routesApi"
 import { searchPlaces } from "../utils/geocoding"
-import { COLORS, FONTS, styles } from "../styles/theme"
+import "./AddEventDayPage.css"
 
 const DAY_DRAFT_KEY = "eventDayDraft"
 
@@ -98,10 +98,7 @@ function AddEventDayPage() {
 
   const handleTypeChange = (value) => {
     setDayForm((prev) => {
-      const next = {
-        ...prev,
-        type: value,
-      }
+      const next = { ...prev, type: value }
       persistDraft(next)
       return next
     })
@@ -207,108 +204,48 @@ function AddEventDayPage() {
 
   if (isLoadingTrip) {
     return (
-      <div style={{ textAlign: "center", padding: "60px 0" }}>
-        <Spinner animation="border" style={{ color: COLORS.accent }} />
+      <div className="centered-spinner">
+        <Spinner animation="border" style={{ color: "#FF7A2F" }} />
       </div>
     )
   }
 
   if (!trip || trip.type !== "MULTI_DAY_TRIP") {
-    return (
-      <div style={{ ...styles.emptyState, margin: 20 }}>
-        Viaggio non trovato.
-      </div>
-    )
+    return <div className="card empty-state-margin">Viaggio non trovato.</div>
   }
 
   const dayNumber = (trip.children?.length || 0) + 1
 
   return (
-    <div style={{ ...styles.pageBg, paddingTop: 20, paddingBottom: 40 }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          padding: "0 20px 6px",
-        }}
-      >
+    <div className="add-day-page">
+      <div className="add-day-page__header">
         <button
           type="button"
+          className="btn-icon"
           onClick={() => navigate(`/events/${tripId}`)}
-          style={styles.iconButton}
         >
           <FaArrowLeft />
         </button>
         <div>
-          <div style={{ ...styles.pageTitle, fontSize: 22, lineHeight: 1.15 }}>
-            {trip.title}
-          </div>
-          <div
-            style={{
-              fontFamily: FONTS.mono,
-              fontSize: 10,
-              color: COLORS.textMuted,
-              marginTop: 2,
-            }}
-          >
+          <div className="add-day-page__trip-title">{trip.title}</div>
+          <div className="add-day-page__header-subtitle">
             AGGIUNGI I GIORNI DEL VIAGGIO
           </div>
         </div>
       </div>
 
       {trip.children?.length > 0 && (
-        <div style={{ padding: "18px 20px 0" }}>
-          <div style={{ ...styles.fieldLabel, marginBottom: 10 }}>
+        <div className="add-day-page__days-section">
+          <div className="field-label form-group__label">
             GIORNI GIÀ AGGIUNTI
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <div className="add-day-page__days-list">
             {trip.children.map((day, index) => (
-              <div
-                key={day.id}
-                style={{
-                  ...styles.card,
-                  padding: "11px 13px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 11,
-                }}
-              >
-                <span
-                  style={{
-                    width: 26,
-                    height: 26,
-                    borderRadius: "50%",
-                    flexShrink: 0,
-                    background: COLORS.cardAlt,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontFamily: FONTS.mono,
-                    fontSize: 11,
-                    color: COLORS.accent,
-                  }}
-                >
-                  {index + 1}
-                </span>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div
-                    style={{
-                      fontFamily: FONTS.heading,
-                      fontWeight: 600,
-                      fontSize: 14,
-                    }}
-                  >
-                    {day.title}
-                  </div>
-                  <div
-                    style={{
-                      fontFamily: FONTS.mono,
-                      fontSize: 9,
-                      color: COLORS.textMuted,
-                      marginTop: 2,
-                    }}
-                  >
+              <div key={day.id} className="card day-item">
+                <span className="day-item__badge">{index + 1}</span>
+                <div className="day-item__info">
+                  <div className="day-item__title">{day.title}</div>
+                  <div className="day-item__meta">
                     {new Date(day.startDateTime).toLocaleDateString("it-IT", {
                       day: "numeric",
                       month: "short",
@@ -323,56 +260,22 @@ function AddEventDayPage() {
         </div>
       )}
 
-      <form
-        onSubmit={handleAddDay}
-        style={{
-          padding: "20px 20px 0",
-          display: "flex",
-          flexDirection: "column",
-          gap: 16,
-        }}
-      >
-        <div style={{ ...styles.fieldLabel }}>GIORNO {dayNumber}</div>
+      <form className="add-day-page__form" onSubmit={handleAddDay}>
+        <div className="field-label">GIORNO {dayNumber}</div>
 
         <div>
-          <div style={{ display: "flex", gap: 8 }}>
+          <div className="type-options">
             {DAY_TYPE_OPTIONS.map((opt) => {
               const active = dayForm.type === opt.value
               return (
                 <button
                   key={opt.value}
                   type="button"
+                  className={`type-option ${active ? "type-option--active" : ""}`}
                   onClick={() => handleTypeChange(opt.value)}
-                  style={{
-                    flex: 1,
-                    textAlign: "left",
-                    padding: "11px 13px",
-                    borderRadius: 12,
-                    background: active ? COLORS.accentSoftBg : COLORS.card,
-                    border: `1px solid ${active ? COLORS.accentSoftBorder : COLORS.borderStrong}`,
-                    cursor: "pointer",
-                  }}
                 >
-                  <div
-                    style={{
-                      fontFamily: FONTS.heading,
-                      fontWeight: 700,
-                      fontSize: 13,
-                      color: active ? COLORS.accent : COLORS.text,
-                    }}
-                  >
-                    {opt.label}
-                  </div>
-                  <div
-                    style={{
-                      fontFamily: FONTS.body,
-                      fontSize: 10.5,
-                      color: COLORS.textMuted,
-                      marginTop: 2,
-                    }}
-                  >
-                    {opt.hint}
-                  </div>
+                  <div className="type-option__label">{opt.label}</div>
+                  <div className="type-option__hint">{opt.hint}</div>
                 </button>
               )
             })}
@@ -380,11 +283,10 @@ function AddEventDayPage() {
         </div>
 
         <div>
-          <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
-            TITOLO DEL GIORNO
-          </div>
+          <div className="field-label form-group__label">TITOLO DEL GIORNO</div>
           <input
             type="text"
+            className="input"
             placeholder={
               dayForm.type === "RADUNO"
                 ? "Sosta ad Assisi"
@@ -393,52 +295,36 @@ function AddEventDayPage() {
             value={dayForm.title}
             onChange={set("title")}
             required
-            style={styles.input}
           />
         </div>
 
         <div>
-          <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
-            DESCRIZIONE
-          </div>
+          <div className="field-label form-group__label">DESCRIZIONE</div>
           <textarea
+            className="textarea"
             value={dayForm.description}
             onChange={set("description")}
             required
             rows={2}
-            style={{
-              width: "100%",
-              borderRadius: 14,
-              background: COLORS.card,
-              border: `1px solid ${COLORS.borderStrong}`,
-              color: COLORS.text,
-              fontFamily: FONTS.body,
-              fontSize: 14,
-              lineHeight: 1.5,
-              padding: 12,
-              outline: "none",
-              resize: "none",
-              boxSizing: "border-box",
-            }}
           />
         </div>
 
         <div>
-          <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+          <div className="field-label form-group__label">
             PERCORSO {dayForm.type === "RADUNO" ? "(OPZIONALE)" : ""}
           </div>
           {isLoadingRoutes ? (
             <Spinner
               size="sm"
               animation="border"
-              style={{ color: COLORS.accent }}
+              style={{ color: "#FF7A2F" }}
             />
           ) : (
             <>
               <select
+                className="select"
                 value={dayForm.routeId}
                 onChange={set("routeId")}
-                style={styles.input}
               >
                 <option value="">
                   {dayForm.type === "RADUNO"
@@ -452,14 +338,7 @@ function AddEventDayPage() {
                   </option>
                 ))}
               </select>
-              <div
-                style={{
-                  fontFamily: FONTS.body,
-                  fontSize: 12,
-                  color: COLORS.textFaint,
-                  marginTop: 8,
-                }}
-              >
+              <div className="helper-text">
                 Non trovi quello che cerchi?{" "}
                 <Link
                   to="/routes/new"
@@ -468,7 +347,7 @@ function AddEventDayPage() {
                     resumeDraft: true,
                   }}
                   onClick={saveDraft}
-                  style={{ color: COLORS.accent }}
+                  className="helper-text__link"
                 >
                   Crea un nuovo percorso
                 </Link>
@@ -477,39 +356,16 @@ function AddEventDayPage() {
           )}
 
           {dayForm.type === "RADUNO" && !dayForm.routeId && (
-            <div style={{ marginTop: 12, position: "relative" }}>
+            <div className="meeting-point">
               {dayForm.meetingPointLabel ? (
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    padding: "11px 14px",
-                    borderRadius: 12,
-                    background: COLORS.accentSoftBg,
-                    border: `1px solid ${COLORS.accentSoftBorder}`,
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: FONTS.body,
-                      fontSize: 13,
-                      color: COLORS.accent,
-                    }}
-                  >
+                <div className="meeting-point__chip">
+                  <span className="meeting-point__label">
                     {dayForm.meetingPointLabel}
                   </span>
                   <button
                     type="button"
+                    className="meeting-point__change-btn"
                     onClick={clearMeetingPoint}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      color: COLORS.accent,
-                      cursor: "pointer",
-                      fontFamily: FONTS.mono,
-                      fontSize: 10,
-                    }}
                   >
                     CAMBIA
                   </button>
@@ -518,42 +374,19 @@ function AddEventDayPage() {
                 <>
                   <input
                     type="text"
+                    className="input"
                     placeholder="Cerca una città o un luogo..."
                     value={placeSearch}
                     onChange={handlePlaceSearchChange}
-                    style={styles.input}
                   />
                   {placeResults.length > 0 && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: "100%",
-                        left: 0,
-                        right: 0,
-                        marginTop: 6,
-                        zIndex: 10,
-                        ...styles.card,
-                        overflow: "hidden",
-                      }}
-                    >
+                    <div className="card search-results">
                       {placeResults.map((r) => (
                         <button
                           key={r.id}
                           type="button"
+                          className="search-results__item"
                           onClick={() => handlePickPlace(r)}
-                          style={{
-                            display: "block",
-                            width: "100%",
-                            textAlign: "left",
-                            padding: "11px 13px",
-                            background: "none",
-                            border: "none",
-                            borderBottom: `1px solid ${COLORS.borderSoft}`,
-                            color: COLORS.text,
-                            fontFamily: FONTS.body,
-                            fontSize: 13,
-                            cursor: "pointer",
-                          }}
                         >
                           {r.name}
                         </button>
@@ -566,35 +399,28 @@ function AddEventDayPage() {
           )}
         </div>
 
-        <div style={{ display: "flex", gap: 12 }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>INIZIO</div>
+        <div className="date-row">
+          <div className="date-group">
+            <div className="field-label form-group__label">INIZIO</div>
             <input
               type="datetime-local"
+              className="input"
               value={dayForm.startDateTime}
               onChange={set("startDateTime")}
               required
-              style={{ ...styles.input, width: "100%" }}
             />
           </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>FINE</div>
+          <div className="date-group">
+            <div className="field-label form-group__label">FINE</div>
             <input
               type="datetime-local"
+              className="input"
               value={dayForm.endDateTime}
               onChange={set("endDateTime")}
               required
-              style={{ ...styles.input, width: "100%" }}
             />
             {selectedRoute && (
-              <div
-                style={{
-                  fontFamily: FONTS.mono,
-                  fontSize: 10,
-                  color: COLORS.textFaint,
-                  marginTop: 6,
-                }}
-              >
+              <div className="duration-hint">
                 Durata stimata: {Math.ceil(selectedRoute.durationSeconds / 60)}{" "}
                 min
               </div>
@@ -602,36 +428,13 @@ function AddEventDayPage() {
           </div>
         </div>
 
-        {errorMsg && (
-          <div
-            style={{
-              fontFamily: FONTS.body,
-              fontSize: 13,
-              color: COLORS.danger,
-            }}
-          >
-            {errorMsg}
-          </div>
-        )}
+        {errorMsg && <div className="error-text">{errorMsg}</div>}
 
-        <button
-          type="submit"
-          disabled={isSaving}
-          style={{ ...styles.secondaryButton, opacity: isSaving ? 0.6 : 1 }}
-        >
+        <button type="submit" className="btn-secondary" disabled={isSaving}>
           {isSaving ? "..." : `AGGIUNGI GIORNO ${dayNumber}`}
         </button>
 
-        <Link
-          to={`/events/${tripId}`}
-          style={{
-            ...styles.primaryButton,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            textDecoration: "none",
-          }}
-        >
+        <Link to={`/events/${tripId}`} className="finish-link">
           HO FINITO · VAI AL VIAGGIO
         </Link>
       </form>
