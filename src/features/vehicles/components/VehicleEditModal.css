@@ -1,0 +1,68 @@
+.photo-field__preview {
+  height: 160px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--color-card-alt);
+  margin-bottom: 10px;
+}
+
+.photo-field__preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.photo-field__placeholder {
+  height: 100px;
+  border-radius: 14px;
+  background: var(--color-card);
+  border: 1px dashed var(--color-border-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.photo-field__placeholder-text {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-faint);
+}
+
+.photo-field__actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.photo-field__change-label {
+  height: 36px;
+  padding: 0 14px;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.photo-field__remove-btn {
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 10px;
+  background: var(--color-danger-bg);
+  border: 1px solid var(--color-danger-border);
+  color: var(--color-danger);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.photo-field__hint {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--color-accent);
+  margin-top: 8px;
+}
