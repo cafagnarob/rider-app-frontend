@@ -8,14 +8,12 @@ import {
   useUpdateUsernameMutation,
 } from "../usersApi"
 import { logout } from "../../auth/authSlice"
-
-import { COLORS, FONTS, styles } from "../../../styles/theme"
 import PasswordInput from "../../../components/PasswordInput"
 
 const feedbackColor = {
   success: "#4ADE80",
-  danger: COLORS.danger,
-  warning: COLORS.accent,
+  danger: "var(--color-danger)",
+  warning: "var(--color-accent)",
 }
 
 function SecuritySection({ profile }) {
@@ -128,23 +126,17 @@ function SecuritySection({ profile }) {
     navigate("/login")
   }
 
-  const rowStyle = {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-  }
-
   return (
     <>
-      <div style={{ ...styles.card, padding: 18, marginBottom: 16 }}>
-        <div style={{ ...styles.fieldLabel, marginBottom: 14 }}>
+      <div className="card section-card">
+        <div className="field-label section-card__label">
           ACCOUNT E SICUREZZA
         </div>
 
         {feedback && (
           <div
             style={{
-              fontFamily: FONTS.body,
+              fontFamily: "var(--font-body)",
               fontSize: 13,
               color: feedbackColor[feedback.type],
               marginBottom: 14,
@@ -155,63 +147,40 @@ function SecuritySection({ profile }) {
         )}
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <div style={rowStyle}>
+          <div className="settings-row">
             <div>
-              <div style={{ fontFamily: FONTS.body, fontSize: 14 }}>
-                Username
-              </div>
-              <div
-                style={{
-                  fontFamily: FONTS.mono,
-                  fontSize: 10,
-                  color: COLORS.textMuted,
-                  marginTop: 2,
-                }}
-              >
-                @{profile.username}
-              </div>
+              <div className="settings-row__label">Username</div>
+              <div className="settings-row__value">@{profile.username}</div>
             </div>
             <button
               type="button"
+              className="btn-secondary"
+              style={{ height: 34, padding: "0 13px", fontSize: 10 }}
               onClick={() => toggle("username")}
-              style={{
-                ...styles.secondaryButton,
-                height: 34,
-                padding: "0 13px",
-                fontSize: 10,
-              }}
             >
               MODIFICA
             </button>
           </div>
 
           {activeForm === "username" && (
-            <form
-              onSubmit={handleUsername}
-              style={{
-                paddingTop: 14,
-                borderTop: `1px solid ${COLORS.borderSoft}`,
-                display: "flex",
-                flexDirection: "column",
-                gap: 12,
-              }}
-            >
+            <form className="inline-edit-form" onSubmit={handleUsername}>
               <div>
-                <div style={{ ...styles.fieldLabel, marginBottom: 6 }}>
+                <div className="field-label" style={{ marginBottom: 6 }}>
                   NUOVO USERNAME
                 </div>
                 <input
                   type="text"
+                  className="input"
+                  style={{ height: 42 }}
                   value={userForm.newUsername}
                   onChange={(e) =>
                     setUserForm({ ...userForm, newUsername: e.target.value })
                   }
                   required
-                  style={{ ...styles.input, height: 42 }}
                 />
               </div>
               <div>
-                <div style={{ ...styles.fieldLabel, marginBottom: 6 }}>
+                <div className="field-label" style={{ marginBottom: 6 }}>
                   PASSWORD ATTUALE
                 </div>
                 <PasswordInput
@@ -228,74 +197,48 @@ function SecuritySection({ profile }) {
               </div>
               <button
                 type="submit"
+                className="btn-accent-secondary"
                 disabled={isChangingUser}
-                style={{
-                  ...styles.secondaryButton,
-                  background: COLORS.accent,
-                  color: COLORS.onAccent,
-                  border: "none",
-                }}
               >
                 {isChangingUser ? "..." : "CONFERMA"}
               </button>
             </form>
           )}
 
-          <div style={rowStyle}>
+          <div className="settings-row">
             <div>
-              <div style={{ fontFamily: FONTS.body, fontSize: 14 }}>Email</div>
-              <div
-                style={{
-                  fontFamily: FONTS.mono,
-                  fontSize: 10,
-                  color: COLORS.textMuted,
-                  marginTop: 2,
-                }}
-              >
-                {profile.email}
-              </div>
+              <div className="settings-row__label">Email</div>
+              <div className="settings-row__value">{profile.email}</div>
             </div>
             <button
               type="button"
+              className="btn-secondary"
+              style={{ height: 34, padding: "0 13px", fontSize: 10 }}
               onClick={() => toggle("email")}
-              style={{
-                ...styles.secondaryButton,
-                height: 34,
-                padding: "0 13px",
-                fontSize: 10,
-              }}
             >
               MODIFICA
             </button>
           </div>
 
           {activeForm === "email" && (
-            <form
-              onSubmit={handleEmail}
-              style={{
-                paddingTop: 14,
-                borderTop: `1px solid ${COLORS.borderSoft}`,
-                display: "flex",
-                flexDirection: "column",
-                gap: 12,
-              }}
-            >
+            <form className="inline-edit-form" onSubmit={handleEmail}>
               <div>
-                <div style={{ ...styles.fieldLabel, marginBottom: 6 }}>
+                <div className="field-label" style={{ marginBottom: 6 }}>
                   NUOVA EMAIL
                 </div>
                 <input
                   type="email"
+                  className="input"
+                  style={{ height: 42 }}
                   value={mailForm.newEmail}
                   onChange={(e) =>
                     setMailForm({ ...mailForm, newEmail: e.target.value })
                   }
                   required
-                  style={{ ...styles.input, height: 42 }}
                 />
               </div>
               <div>
-                <div style={{ ...styles.fieldLabel, marginBottom: 6 }}>
+                <div className="field-label" style={{ marginBottom: 6 }}>
                   PASSWORD ATTUALE
                 </div>
                 <PasswordInput
@@ -312,62 +255,33 @@ function SecuritySection({ profile }) {
               </div>
               <button
                 type="submit"
+                className="btn-accent-secondary"
                 disabled={isChangingMail}
-                style={{
-                  ...styles.secondaryButton,
-                  background: COLORS.accent,
-                  color: COLORS.onAccent,
-                  border: "none",
-                }}
               >
                 {isChangingMail ? "..." : "CONFERMA"}
               </button>
             </form>
           )}
 
-          <div style={rowStyle}>
+          <div className="settings-row">
             <div>
-              <div style={{ fontFamily: FONTS.body, fontSize: 14 }}>
-                Password
-              </div>
-              <div
-                style={{
-                  fontFamily: FONTS.mono,
-                  fontSize: 10,
-                  color: COLORS.textMuted,
-                  marginTop: 2,
-                }}
-              >
-                ••••••••
-              </div>
+              <div className="settings-row__label">Password</div>
+              <div className="settings-row__value">••••••••</div>
             </div>
             <button
               type="button"
+              className="btn-secondary"
+              style={{ height: 34, padding: "0 13px", fontSize: 10 }}
               onClick={() => toggle("password")}
-              style={{
-                ...styles.secondaryButton,
-                height: 34,
-                padding: "0 13px",
-                fontSize: 10,
-              }}
             >
               MODIFICA
             </button>
           </div>
 
           {activeForm === "password" && (
-            <form
-              onSubmit={handlePassword}
-              style={{
-                paddingTop: 14,
-                borderTop: `1px solid ${COLORS.borderSoft}`,
-                display: "flex",
-                flexDirection: "column",
-                gap: 12,
-              }}
-            >
+            <form className="inline-edit-form" onSubmit={handlePassword}>
               <div>
-                <div style={{ ...styles.fieldLabel, marginBottom: 6 }}>
+                <div className="field-label" style={{ marginBottom: 6 }}>
                   PASSWORD ATTUALE
                 </div>
                 <PasswordInput
@@ -380,7 +294,7 @@ function SecuritySection({ profile }) {
                 />
               </div>
               <div>
-                <div style={{ ...styles.fieldLabel, marginBottom: 6 }}>
+                <div className="field-label" style={{ marginBottom: 6 }}>
                   NUOVA PASSWORD
                 </div>
                 <PasswordInput
@@ -394,7 +308,7 @@ function SecuritySection({ profile }) {
                 />
               </div>
               <div>
-                <div style={{ ...styles.fieldLabel, marginBottom: 6 }}>
+                <div className="field-label" style={{ marginBottom: 6 }}>
                   CONFERMA NUOVA PASSWORD
                 </div>
                 <PasswordInput
@@ -408,13 +322,8 @@ function SecuritySection({ profile }) {
               </div>
               <button
                 type="submit"
+                className="btn-accent-secondary"
                 disabled={isChangingPw}
-                style={{
-                  ...styles.secondaryButton,
-                  background: COLORS.accent,
-                  color: COLORS.onAccent,
-                  border: "none",
-                }}
               >
                 {isChangingPw ? "..." : "CONFERMA"}
               </button>
@@ -423,142 +332,54 @@ function SecuritySection({ profile }) {
 
           <button
             type="button"
+            className="text-btn text-btn--secondary"
+            style={{ fontSize: 11, textAlign: "left", marginTop: 4 }}
             onClick={handleLogout}
-            style={{
-              background: "none",
-              border: "none",
-              color: COLORS.textSecondary,
-              fontFamily: FONTS.mono,
-              fontSize: 11,
-              cursor: "pointer",
-              textAlign: "left",
-              padding: 0,
-              marginTop: 4,
-            }}
           >
             ESCI DALL'ACCOUNT
           </button>
         </div>
       </div>
 
-      <div
-        style={{
-          ...styles.card,
-          padding: 18,
-          marginBottom: 16,
-          borderColor: COLORS.dangerBorder,
-        }}
-      >
-        <div
-          style={{
-            ...styles.fieldLabel,
-            color: COLORS.danger,
-            marginBottom: 8,
-          }}
-        >
+      <div className="card section-card section-card--danger">
+        <div className="field-label section-card__label section-card__label--danger">
           ZONA PERICOLOSA
         </div>
-        <p
-          style={{
-            fontFamily: FONTS.body,
-            fontSize: 12.5,
-            color: COLORS.textSecondary,
-            lineHeight: 1.5,
-            marginBottom: 14,
-          }}
-        >
+        <p className="section-card__text">
           Disattivando l'account non potrai più accedere finché non verrà
           riattivato da un amministratore. I tuoi contenuti non vengono
           eliminati.
         </p>
         <button
           type="button"
+          className="btn-danger-sm"
           onClick={() => setShowDeactivate(true)}
-          style={{
-            height: 36,
-            padding: "0 14px",
-            borderRadius: 11,
-            background: COLORS.dangerBg,
-            border: `1px solid ${COLORS.dangerBorder}`,
-            color: COLORS.danger,
-            fontFamily: FONTS.mono,
-            fontSize: 10.5,
-            cursor: "pointer",
-          }}
         >
           DISATTIVA ACCOUNT
         </button>
       </div>
 
       {showDeactivate && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(6,6,7,.72)",
-            zIndex: 300,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 24,
-          }}
-          onClick={() => setShowDeactivate(false)}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              ...styles.card,
-              padding: 22,
-              width: "100%",
-              maxWidth: 340,
-            }}
-          >
-            <div
-              style={{
-                fontFamily: FONTS.heading,
-                fontWeight: 700,
-                fontSize: 20,
-                marginBottom: 10,
-              }}
-            >
-              DISATTIVARE L'ACCOUNT?
-            </div>
-            <p
-              style={{
-                fontFamily: FONTS.body,
-                fontSize: 13,
-                color: COLORS.textSecondary,
-                lineHeight: 1.5,
-                marginBottom: 18,
-              }}
-            >
+        <div className="modal-overlay" onClick={() => setShowDeactivate(false)}>
+          <div className="card modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-title">DISATTIVARE L'ACCOUNT?</div>
+            <p className="modal-text">
               Verrai disconnesso immediatamente e non potrai più accedere con
               queste credenziali. Sei sicuro di voler procedere?
             </p>
-            <div style={{ display: "flex", gap: 10 }}>
+            <div className="modal-actions">
               <button
                 type="button"
+                className="btn-secondary"
                 onClick={() => setShowDeactivate(false)}
-                style={{ ...styles.secondaryButton, flex: 1 }}
               >
                 ANNULLA
               </button>
               <button
                 type="button"
-                onClick={handleDeactivate}
+                className="btn-danger"
                 disabled={isDeactivating}
-                style={{
-                  flex: 1,
-                  height: 48,
-                  borderRadius: 15,
-                  background: COLORS.danger,
-                  border: "none",
-                  color: "#fff",
-                  fontFamily: FONTS.heading,
-                  fontWeight: 700,
-                  fontSize: 15,
-                  cursor: "pointer",
-                }}
+                onClick={handleDeactivate}
               >
                 {isDeactivating ? "..." : "DISATTIVA"}
               </button>
