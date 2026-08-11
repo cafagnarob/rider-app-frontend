@@ -1,15 +1,15 @@
 import { useRef, useState } from "react"
-import { Spinner } from "react-bootstrap"
 import { useNavigate, useParams } from "react-router-dom"
+import { Spinner } from "react-bootstrap"
+import { FaArrowLeft, FaFilter, FaSortAmountDown } from "react-icons/fa"
 import ModelDetailModal from "../features/catalog/components/ModelDetailModal"
 import {
   useGetBrandsQuery,
   useGetModelsQuery,
 } from "../features/catalog/catalogApi"
-import { CATEGORY_LABELS, CC_RANGES } from "../utils/constants"
-import { COLORS, FONTS, styles } from "../styles/theme"
 import { useGetMyVehiclesQuery } from "../features/vehicles/vehiclesApi"
-import { FaArrowLeft, FaFilter, FaSortAmountDown } from "react-icons/fa"
+import { CATEGORY_LABELS, CC_RANGES } from "../utils/constants"
+import "./ModelsPage.css"
 
 const ORDER_OPTIONS = [
   { value: "name", label: "Nome" },
@@ -56,7 +56,6 @@ function ModelsPage() {
   })
 
   const { data: brands } = useGetBrandsQuery()
-
   const { data: vehicles } = useGetMyVehiclesQuery()
 
   const ownedModelIds = new Set((vehicles || []).map((v) => v.model.id))
@@ -97,118 +96,73 @@ function ModelsPage() {
 
   if (isLoading) {
     return (
-      <div style={{ textAlign: "center", padding: "60px 0" }}>
-        <Spinner animation="border" style={{ color: COLORS.accent }} />
+      <div className="centered-spinner">
+        <Spinner animation="border" style={{ color: "#FF7A2F" }} />
       </div>
     )
   }
 
   if (isError) {
     return (
-      <div style={{ ...styles.emptyState, margin: 20 }}>
+      <div className="empty-state" style={{ margin: 20 }}>
         Impossibile caricare i modelli.
       </div>
     )
   }
 
   return (
-    <div style={{ ...styles.pageBg, paddingTop: 20, paddingBottom: 40 }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          padding: "0 20px 16px",
-        }}
-      >
+    <div className="page">
+      <div className="page-header models-page__header">
         <button
           type="button"
+          className="btn-icon"
           onClick={() => navigate("/catalog")}
-          style={styles.iconButton}
         >
           <FaArrowLeft />
         </button>
-        <div style={{ ...styles.pageTitle, fontSize: 24 }}>
-          {brand?.name || "Modelli"}
-        </div>
+        <div className="page-header__title">{brand?.name || "Modelli"}</div>
       </div>
 
-      <div
-        style={{ padding: "0 20px", display: "flex", gap: 8, marginBottom: 16 }}
-      >
+      <div className="models-page__toolbar">
         <input
           type="search"
+          className="input models-page__search-input"
+          style={{ height: 44 }}
           placeholder="Cerca modello..."
           value={searchInput}
           onChange={handleSearchChange}
-          style={{ ...styles.input, height: 44, flex: 1, minWidth: 0 }}
         />
 
         <div style={{ position: "relative" }}>
           <button
             type="button"
+            className={`btn-icon ${hasActiveFilters ? "btn-icon--active" : ""}`}
+            style={{ position: "relative" }}
             onClick={() => {
               setShowFilters((v) => !v)
               setShowSort(false)
             }}
-            style={{
-              ...styles.iconButton,
-              position: "relative",
-              borderColor: hasActiveFilters
-                ? COLORS.accentSoftBorder
-                : COLORS.borderStrong,
-              color: hasActiveFilters ? COLORS.accent : COLORS.text,
-            }}
           >
             <FaFilter size={15} />
-            {hasActiveFilters && (
-              <span
-                style={{
-                  position: "absolute",
-                  top: 6,
-                  right: 6,
-                  width: 7,
-                  height: 7,
-                  borderRadius: "50%",
-                  background: COLORS.accent,
-                }}
-              />
-            )}
+            {hasActiveFilters && <span className="btn-icon__dot" />}
           </button>
 
           {showFilters && (
             <>
               <div
-                style={{ position: "fixed", inset: 0, zIndex: 19 }}
+                className="popover-overlay"
                 onClick={() => setShowFilters(false)}
               />
-              <div
-                style={{
-                  position: "absolute",
-                  top: "calc(100% + 8px)",
-                  right: 0,
-                  zIndex: 20,
-                  width: 230,
-                  ...styles.card,
-                  padding: 16,
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 14,
-                }}
-              >
+              <div className="card popover-panel filter-panel">
                 <div>
-                  <div style={{ ...styles.fieldLabel, marginBottom: 7 }}>
+                  <div className="field-label filter-panel__field-label">
                     CILINDRATA
                   </div>
                   <select
+                    className="select select--compact"
+                    style={{ width: "100%" }}
                     value={ccRange}
                     onChange={handleCcChange}
-                    style={{
-                      ...styles.input,
-                      height: 40,
-                      fontSize: 13,
-                      width: "100%",
-                    }}
                   >
                     {CC_RANGES.map((r) => (
                       <option key={r.value} value={r.value}>
@@ -218,18 +172,14 @@ function ModelsPage() {
                   </select>
                 </div>
                 <div>
-                  <div style={{ ...styles.fieldLabel, marginBottom: 7 }}>
+                  <div className="field-label filter-panel__field-label">
                     CATEGORIA
                   </div>
                   <select
+                    className="select select--compact"
+                    style={{ width: "100%" }}
                     value={category}
                     onChange={handleCategoryChange}
-                    style={{
-                      ...styles.input,
-                      height: 40,
-                      fontSize: 13,
-                      width: "100%",
-                    }}
                   >
                     <option value="">Tutte</option>
                     {Object.entries(CATEGORY_LABELS).map(([value, label]) => (
@@ -242,17 +192,8 @@ function ModelsPage() {
                 {hasActiveFilters && (
                   <button
                     type="button"
+                    className="filter-panel__clear-btn"
                     onClick={clearFilters}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      color: COLORS.danger,
-                      fontFamily: FONTS.mono,
-                      fontSize: 10,
-                      cursor: "pointer",
-                      textAlign: "left",
-                      padding: 0,
-                    }}
                   >
                     RIMUOVI FILTRI
                   </button>
@@ -265,11 +206,11 @@ function ModelsPage() {
         <div style={{ position: "relative" }}>
           <button
             type="button"
+            className="btn-icon"
             onClick={() => {
               setShowSort((v) => !v)
               setShowFilters(false)
             }}
-            style={styles.iconButton}
           >
             <FaSortAmountDown size={15} />
           </button>
@@ -277,43 +218,16 @@ function ModelsPage() {
           {showSort && (
             <>
               <div
-                style={{ position: "fixed", inset: 0, zIndex: 19 }}
+                className="popover-overlay"
                 onClick={() => setShowSort(false)}
               />
-              <div
-                style={{
-                  position: "absolute",
-                  top: "calc(100% + 8px)",
-                  right: 0,
-                  zIndex: 20,
-                  width: 170,
-                  ...styles.card,
-                  padding: 6,
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 2,
-                }}
-              >
+              <div className="card popover-panel sort-panel">
                 {ORDER_OPTIONS.map((opt) => (
                   <button
                     key={opt.value}
                     type="button"
+                    className={`dropdown-option ${orderBy === opt.value ? "dropdown-option--active" : ""}`}
                     onClick={() => selectOrder(opt.value)}
-                    style={{
-                      textAlign: "left",
-                      padding: "9px 10px",
-                      borderRadius: 9,
-                      border: "none",
-                      cursor: "pointer",
-                      background:
-                        orderBy === opt.value
-                          ? COLORS.accentSoftBg
-                          : "transparent",
-                      color:
-                        orderBy === opt.value ? COLORS.accent : COLORS.text,
-                      fontFamily: FONTS.body,
-                      fontSize: 13,
-                    }}
                   >
                     {opt.label}
                   </button>
@@ -325,111 +239,34 @@ function ModelsPage() {
       </div>
 
       {pageData.content.length === 0 ? (
-        <p
-          style={{
-            fontFamily: FONTS.body,
-            fontSize: 13,
-            color: COLORS.textFaint,
-            textAlign: "center",
-            padding: "40px 20px",
-          }}
-        >
+        <p className="no-results-text">
           Nessun modello corrisponde ai criteri di ricerca.
         </p>
       ) : (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 10,
-            padding: "0 20px",
-            opacity: isFetching ? 0.6 : 1,
-          }}
-        >
+        <div className="model-grid" style={{ opacity: isFetching ? 0.6 : 1 }}>
           {pageData.content.map((model) => {
             const isOwned = ownedModelIds.has(model.id)
             return (
               <div
                 key={model.id}
+                className="card model-card"
                 onClick={() => setSelectedModel(model)}
-                style={{
-                  ...styles.card,
-                  cursor: "pointer",
-                  overflow: "hidden",
-                  position: "relative",
-                }}
               >
                 {isOwned && (
-                  <span
-                    style={{
-                      position: "absolute",
-                      top: 8,
-                      left: 8,
-                      zIndex: 1,
-                      padding: "3px 8px",
-                      borderRadius: 7,
-                      background: "rgba(10,10,12,.85)",
-                      border: `1px solid ${COLORS.accentSoftBorder}`,
-                      fontFamily: FONTS.mono,
-                      fontSize: 8.5,
-                      color: COLORS.accent,
-                    }}
-                  >
-                    IN GARAGE
-                  </span>
+                  <span className="model-card__owned-badge">IN GARAGE</span>
                 )}
-                <div
-                  style={{ aspectRatio: "16/10", background: COLORS.cardAlt }}
-                >
+                <div className="model-card__image">
                   {model.imageUrl && (
-                    <img
-                      src={model.imageUrl}
-                      alt={model.name}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                      }}
-                    />
+                    <img src={model.imageUrl} alt={model.name} />
                   )}
                 </div>
-                <div style={{ padding: "10px 11px" }}>
-                  <div
-                    style={{
-                      fontFamily: FONTS.heading,
-                      fontWeight: 600,
-                      fontSize: 14,
-                      lineHeight: 1.2,
-                      marginBottom: 6,
-                    }}
-                  >
-                    {model.name}
-                  </div>
-                  <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
-                    <span
-                      style={{
-                        padding: "2px 7px",
-                        borderRadius: 6,
-                        background: COLORS.cardAlt,
-                        border: `1px solid ${COLORS.borderSoft}`,
-                        fontFamily: FONTS.mono,
-                        fontSize: 8.5,
-                        color: COLORS.textSecondary,
-                      }}
-                    >
+                <div className="model-card__info">
+                  <div className="model-card__name">{model.name}</div>
+                  <div className="model-card__badges">
+                    <span className="model-card__badge">
                       {model.engineCc} CC
                     </span>
-                    <span
-                      style={{
-                        padding: "2px 7px",
-                        borderRadius: 6,
-                        background: COLORS.cardAlt,
-                        border: `1px solid ${COLORS.borderSoft}`,
-                        fontFamily: FONTS.mono,
-                        fontSize: 8.5,
-                        color: COLORS.textSecondary,
-                      }}
-                    >
+                    <span className="model-card__badge">
                       {CATEGORY_LABELS[model.category] || model.category}
                     </span>
                   </div>
@@ -441,47 +278,33 @@ function ModelsPage() {
       )}
 
       {pageData.totalPages > 1 && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: 16,
-            padding: "24px 20px",
-          }}
-        >
+        <div className="pagination-row">
           <button
             type="button"
-            disabled={pageData.first || isFetching}
-            onClick={() => setPage((p) => p - 1)}
+            className="btn-secondary"
             style={{
-              ...styles.secondaryButton,
               height: 40,
               padding: "0 16px",
               opacity: pageData.first ? 0.4 : 1,
             }}
+            disabled={pageData.first || isFetching}
+            onClick={() => setPage((p) => p - 1)}
           >
             PRECEDENTE
           </button>
-          <span
-            style={{
-              fontFamily: FONTS.mono,
-              fontSize: 11,
-              color: COLORS.textMuted,
-            }}
-          >
+          <span className="pagination-row__label">
             {pageData.number + 1} / {pageData.totalPages}
           </span>
           <button
             type="button"
-            disabled={pageData.last || isFetching}
-            onClick={() => setPage((p) => p + 1)}
+            className="btn-secondary"
             style={{
-              ...styles.secondaryButton,
               height: 40,
               padding: "0 16px",
               opacity: pageData.last ? 0.4 : 1,
             }}
+            disabled={pageData.last || isFetching}
+            onClick={() => setPage((p) => p + 1)}
           >
             SUCCESSIVA
           </button>
@@ -495,4 +318,5 @@ function ModelsPage() {
     </div>
   )
 }
+
 export default ModelsPage
