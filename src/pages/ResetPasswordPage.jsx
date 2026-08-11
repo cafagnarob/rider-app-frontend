@@ -1,8 +1,6 @@
 import { useState } from "react"
 import { useNavigate, useSearchParams, Link } from "react-router-dom"
 import { useResetPasswordMutation } from "../features/auth/authApi"
-
-import { COLORS, FONTS, styles } from "../styles/theme"
 import PasswordInput from "../components/PasswordInput"
 
 function ResetPasswordPage() {
@@ -34,21 +32,10 @@ function ResetPasswordPage() {
 
   if (!token) {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          background: COLORS.bg,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: 24,
-        }}
-      >
-        <div
-          style={{ ...styles.emptyState, maxWidth: 360, textAlign: "center" }}
-        >
+      <div className="centered-page">
+        <div className="empty-state empty-state--narrow">
           Link non valido o incompleto. Richiedi un nuovo link dalla pagina{" "}
-          <Link to="/forgot-password" style={{ color: COLORS.accent }}>
+          <Link to="/forgot-password" className="link-accent">
             password dimenticata
           </Link>
           .
@@ -58,42 +45,16 @@ function ResetPasswordPage() {
   }
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: COLORS.bg,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 24,
-      }}
-    >
-      <div
-        style={{
-          fontFamily: FONTS.heading,
-          fontWeight: 700,
-          fontSize: 30,
-          marginBottom: 30,
-        }}
-      >
-        NUOVA PASSWORD
-      </div>
+    <div className="centered-page">
+      <div className="page-heading">NUOVA PASSWORD</div>
 
       <form
+        className="form-stack"
+        style={{ width: "100%", maxWidth: 360 }}
         onSubmit={handleSubmit}
-        style={{
-          width: "100%",
-          maxWidth: 360,
-          display: "flex",
-          flexDirection: "column",
-          gap: 18,
-        }}
       >
         <div>
-          <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
-            NUOVA PASSWORD
-          </div>
+          <div className="field-label form-group__label">NUOVA PASSWORD</div>
           <PasswordInput
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
@@ -102,9 +63,7 @@ function ResetPasswordPage() {
         </div>
 
         <div>
-          <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
-            CONFERMA PASSWORD
-          </div>
+          <div className="field-label form-group__label">CONFERMA PASSWORD</div>
           <PasswordInput
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
@@ -113,32 +72,19 @@ function ResetPasswordPage() {
         </div>
 
         {validationError && (
-          <div
-            style={{
-              fontFamily: FONTS.body,
-              fontSize: 13,
-              color: COLORS.accent,
-            }}
-          >
-            {validationError}
-          </div>
+          <div className="warning-text">{validationError}</div>
         )}
         {error && (
-          <div
-            style={{
-              fontFamily: FONTS.body,
-              fontSize: 13,
-              color: COLORS.danger,
-            }}
-          >
+          <div className="error-text">
             Token non valido o scaduto. Richiedi un nuovo link.
           </div>
         )}
 
         <button
           type="submit"
+          className="btn-primary"
           disabled={isLoading}
-          style={{ ...styles.primaryButton, opacity: isLoading ? 0.6 : 1 }}
+          style={{ opacity: isLoading ? 0.6 : 1 }}
         >
           {isLoading ? "..." : "REIMPOSTA PASSWORD"}
         </button>
@@ -146,4 +92,5 @@ function ResetPasswordPage() {
     </div>
   )
 }
+
 export default ResetPasswordPage
