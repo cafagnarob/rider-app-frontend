@@ -48,34 +48,6 @@
   margin-bottom: 16px;
 }
 
-.model-tile__image {
-  aspect-ratio: 16/10;
-  background: var(--color-card-alt);
-}
-
-.model-tile__image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.model-tile__info {
-  padding: 10px 11px;
-}
-
-.model-tile__name {
-  font-family: var(--font-heading);
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.model-tile__meta {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  color: var(--color-text-muted);
-  margin-top: 4px;
-}
-
 .selected-model-summary {
   padding: 14px;
   display: flex;
