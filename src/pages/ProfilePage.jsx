@@ -1,17 +1,17 @@
 import { useState } from "react"
+import { Link } from "react-router-dom"
+import { Spinner } from "react-bootstrap"
+import { FaChevronRight } from "react-icons/fa"
 import {
   useGetCurrentUserQuery,
   useUpdateProfilePictureMutation,
 } from "../features/users/usersApi"
-import { Spinner } from "react-bootstrap"
-import { Link } from "react-router-dom"
+import { useGetMyInvitesQuery } from "../features/events/invitesApi"
+import { useGetFollowStatsQuery } from "../features/social/followApi"
 import ProfileEditModal from "../features/users/components/ProfileEditModal"
 import ProfileLinksSection from "../features/users/components/ProfileLinksSection"
 import SecuritySection from "../features/users/components/SecuritySection"
-import { useGetMyInvitesQuery } from "../features/events/invitesApi"
-import { COLORS, FONTS, styles } from "../styles/theme"
-import { FaChevronRight } from "react-icons/fa"
-import { useGetFollowStatsQuery } from "../features/social/followApi"
+import "./ProfilePage.css"
 
 const MENU_ITEMS = [
   { to: "/garage", label: "Garage" },
@@ -26,7 +26,6 @@ function ProfilePage() {
     useUpdateProfilePictureMutation()
 
   const { data: myInvites } = useGetMyInvitesQuery()
-
   const { data: stats } = useGetFollowStatsQuery(profile?.username, {
     skip: !profile?.username,
   })
@@ -55,144 +54,65 @@ function ProfilePage() {
 
   if (isLoading) {
     return (
-      <div style={{ textAlign: "center", padding: "60px 0" }}>
-        <Spinner animation="border" style={{ color: COLORS.accent }} />
+      <div className="centered-spinner">
+        <Spinner animation="border" style={{ color: "#FF7A2F" }} />
       </div>
     )
   }
 
   if (isError) {
     return (
-      <div style={{ ...styles.emptyState, margin: 20 }}>
+      <div className="empty-state" style={{ margin: 20 }}>
         Impossibile caricare il profilo.
       </div>
     )
   }
 
   return (
-    <div style={{ ...styles.pageBg, paddingTop: 20, paddingBottom: 40 }}>
-      <div style={{ padding: "0 20px" }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 16,
-            marginBottom: 18,
-          }}
-        >
-          <div style={{ position: "relative", flexShrink: 0 }}>
+    <div className="page">
+      <div className="px-20">
+        <div className="profile-page__header-row">
+          <div className="profile-page__avatar-wrap">
             <img
               src={profile.profilePicture}
               alt={profile.username}
-              style={{
-                width: 90,
-                height: 90,
-                borderRadius: "50%",
-                objectFit: "cover",
-                background: COLORS.surfaceRaised,
-              }}
+              className="profile-page__avatar"
             />
             {isUploading && (
-              <div
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  borderRadius: "50%",
-                  background: "rgba(6,6,7,.65)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
+              <div className="profile-page__avatar-overlay">
                 <Spinner
                   size="sm"
                   animation="border"
-                  style={{ color: COLORS.accent }}
+                  style={{ color: "#FF7A2F" }}
                 />
               </div>
             )}
           </div>
 
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div
-              style={{
-                fontFamily: FONTS.heading,
-                fontWeight: 700,
-                fontSize: 22,
-                lineHeight: 1.15,
-              }}
-            >
+          <div className="profile-page__info">
+            <div className="profile-page__fullname">
               {profile.name} {profile.surname}
             </div>
-            <div
-              style={{
-                fontFamily: FONTS.mono,
-                fontSize: 11,
-                color: COLORS.textMuted,
-                marginBottom: 10,
-              }}
-            >
-              @{profile.username}
-            </div>
-            <div style={{ display: "flex", gap: 20, marginBottom: 14 }}>
+            <div className="profile-page__username">@{profile.username}</div>
+
+            <div className="stats-row profile-page__stats">
               <Link
                 to={`/users/${profile.username}/followers`}
-                style={{ textDecoration: "none", color: COLORS.text }}
+                className="stat-link"
               >
-                <span
-                  style={{
-                    fontFamily: FONTS.heading,
-                    fontWeight: 700,
-                    fontSize: 15,
-                  }}
-                >
-                  {stats?.followersCount ?? 0}
-                </span>{" "}
-                <span
-                  style={{
-                    fontFamily: FONTS.mono,
-                    fontSize: 10.5,
-                    color: COLORS.textMuted,
-                  }}
-                >
-                  FOLLOWER
-                </span>
+                <span className="stat-count">{stats?.followersCount ?? 0}</span>{" "}
+                <span className="stat-label">FOLLOWER</span>
               </Link>
               <Link
                 to={`/users/${profile.username}/following`}
-                style={{ textDecoration: "none", color: COLORS.text }}
+                className="stat-link"
               >
-                <span
-                  style={{
-                    fontFamily: FONTS.heading,
-                    fontWeight: 700,
-                    fontSize: 15,
-                  }}
-                >
-                  {stats?.followingCount ?? 0}
-                </span>{" "}
-                <span
-                  style={{
-                    fontFamily: FONTS.mono,
-                    fontSize: 10.5,
-                    color: COLORS.textMuted,
-                  }}
-                >
-                  SEGUITI
-                </span>
+                <span className="stat-count">{stats?.followingCount ?? 0}</span>{" "}
+                <span className="stat-label">SEGUITI</span>
               </Link>
             </div>
-            <label
-              style={{
-                ...styles.secondaryButton,
-                height: 32,
-                padding: "0 12px",
-                fontSize: 11,
-                display: "inline-flex",
-                alignItems: "center",
-                cursor: "pointer",
-              }}
-            >
+
+            <label className="btn-secondary profile-page__change-photo-btn">
               CAMBIA FOTO
               <input
                 type="file"
@@ -206,76 +126,32 @@ function ProfilePage() {
         </div>
 
         {errorMsg && (
-          <div
-            style={{
-              fontFamily: FONTS.body,
-              fontSize: 13,
-              color: COLORS.danger,
-              marginBottom: 14,
-            }}
-          >
+          <div className="error-text" style={{ marginBottom: 14 }}>
             {errorMsg}
           </div>
         )}
 
         {profile.description && (
-          <p
-            style={{
-              fontSize: 14,
-              lineHeight: 1.5,
-              color: "rgba(255,255,255,.85)",
-              marginBottom: 16,
-            }}
-          >
-            {profile.description}
-          </p>
+          <p className="profile-page__description">{profile.description}</p>
         )}
 
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 8,
-            marginBottom: 18,
-          }}
-        >
+        <div className="info-rows profile-page__info-rows">
           {profile.location && (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                fontFamily: FONTS.body,
-                fontSize: 13,
-              }}
-            >
-              <span style={{ color: COLORS.textMuted }}>Località</span>
+            <div className="info-row">
+              <span className="info-row__label">Località</span>
               <span>{profile.location}</span>
             </div>
           )}
           {profile.birthDate && (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                fontFamily: FONTS.body,
-                fontSize: 13,
-              }}
-            >
-              <span style={{ color: COLORS.textMuted }}>Data di nascita</span>
+            <div className="info-row">
+              <span className="info-row__label">Data di nascita</span>
               <span>
                 {new Date(profile.birthDate).toLocaleDateString("it-IT")}
               </span>
             </div>
           )}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              fontFamily: FONTS.body,
-              fontSize: 13,
-            }}
-          >
-            <span style={{ color: COLORS.textMuted }}>Iscritto dal</span>
+          <div className="info-row">
+            <span className="info-row__label">Iscritto dal</span>
             <span>
               {new Date(profile.createdAt).toLocaleDateString("it-IT")}
             </span>
@@ -283,25 +159,8 @@ function ProfilePage() {
         </div>
 
         {profile.currentVehicle && (
-          <Link
-            to="/garage"
-            style={{
-              display: "inline-block",
-              marginBottom: 18,
-              textDecoration: "none",
-            }}
-          >
-            <span
-              style={{
-                padding: "6px 12px",
-                borderRadius: 9,
-                background: COLORS.accentSoftBg,
-                border: `1px solid ${COLORS.accentSoftBorder}`,
-                fontFamily: FONTS.mono,
-                fontSize: 11,
-                color: COLORS.accent,
-              }}
-            >
+          <Link to="/garage" className="profile-page__vehicle-link">
+            <span className="pill pill--accent">
               MOTO ATTIVA ·{" "}
               {profile.currentVehicle.nickname ||
                 `${profile.currentVehicle.brandName} ${profile.currentVehicle.modelName}`}
@@ -311,85 +170,31 @@ function ProfilePage() {
 
         <button
           type="button"
+          className="btn-primary btn-block"
+          style={{ marginBottom: 28 }}
           onClick={() => setShowEdit(true)}
-          style={{ ...styles.primaryButton, width: "100%", marginBottom: 28 }}
         >
           MODIFICA PROFILO
         </button>
 
-        <div style={{ ...styles.fieldLabel, marginBottom: 10 }}>
+        <div className="field-label profile-page__account-label">
           IL MIO ACCOUNT
         </div>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 8,
-            marginBottom: 28,
-          }}
-        >
+        <div className="menu-list profile-page__menu">
           {MENU_ITEMS.map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "13px 15px",
-                borderRadius: 13,
-                background: COLORS.card,
-                border: `1px solid ${COLORS.border}`,
-                textDecoration: "none",
-                color: COLORS.text,
-                fontFamily: FONTS.body,
-                fontSize: 14,
-              }}
-            >
+            <Link key={item.to} to={item.to} className="menu-list-item">
               {item.label}
-              <FaChevronRight size={11} color={COLORS.textFaint} />
+              <FaChevronRight size={11} color="var(--color-text-faint)" />
             </Link>
           ))}
 
-          <Link
-            to="/invites"
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "13px 15px",
-              borderRadius: 13,
-              background: COLORS.card,
-              border: `1px solid ${COLORS.border}`,
-              textDecoration: "none",
-              color: COLORS.text,
-              fontFamily: FONTS.body,
-              fontSize: 14,
-            }}
-          >
+          <Link to="/invites" className="menu-list-item">
             <span>Inviti ricevuti</span>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div className="flex-gap-10" style={{ gap: 8 }}>
               {myInvites?.length > 0 && (
-                <span
-                  style={{
-                    minWidth: 20,
-                    height: 20,
-                    borderRadius: 10,
-                    background: COLORS.accent,
-                    color: COLORS.onAccent,
-                    fontFamily: FONTS.mono,
-                    fontSize: 11,
-                    fontWeight: 700,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: "0 6px",
-                  }}
-                >
-                  {myInvites.length}
-                </span>
+                <span className="count-badge">{myInvites.length}</span>
               )}
-              <FaChevronRight size={11} color={COLORS.textFaint} />
+              <FaChevronRight size={11} color="var(--color-text-faint)" />
             </div>
           </Link>
         </div>
