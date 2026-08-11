@@ -902,3 +902,252 @@
   line-height: 1.5;
   color: var(--color-text-faint);
 }
+
+/* --- popover a icona: pulsante che apre un pannello posizionato, chiudibile cliccando fuori --- */
+.popover-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 19;
+}
+
+.popover-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 20;
+}
+
+.btn-icon--active {
+  border-color: var(--color-accent-soft-border);
+  color: var(--color-accent);
+}
+
+.btn-icon__dot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+
+/* --- lista opzioni cliccabili dentro un popover  --- */
+.dropdown-option {
+  text-align: left;
+  padding: 9px 10px;
+  border-radius: 9px;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 13px;
+}
+
+.dropdown-option--active {
+  background: var(--color-accent-soft-bg);
+  color: var(--color-accent);
+}
+
+.select--compact {
+  height: 40px;
+  font-size: 13px;
+}
+
+/* --- pulsanti di azione compatti: accetta/rifiuta (inviti, richieste) --- */
+.btn-success {
+  height: 36px;
+  padding: 0 15px;
+  border-radius: 11px;
+  background: #173323;
+  border: 1px solid rgba(52, 199, 89, 0.35);
+  color: #4ade80;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  cursor: pointer;
+}
+
+.btn-danger-sm {
+  height: 36px;
+  padding: 0 15px;
+  border-radius: 11px;
+  background: var(--color-danger-bg);
+  border: 1px solid var(--color-danger-border);
+  color: var(--color-danger);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  cursor: pointer;
+}
+
+/* --- header minimale: solo pulsante indietro, azione opzionale a destra --- */
+.icon-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px 16px;
+}
+
+.ml-auto {
+  margin-left: auto;
+}
+
+.icon-btn--danger {
+  color: var(--color-danger);
+}
+
+/* --- riga contatori follower/seguiti: la ritroverai identica in PublicProfilePage --- */
+.stats-row {
+  display: flex;
+  gap: 20px;
+}
+
+.stat-link {
+  text-decoration: none;
+  color: var(--color-text);
+}
+
+.stat-count {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.stat-label {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--color-text-muted);
+}
+
+/* --- righe informative chiave/valore: Località, Data di nascita, Iscritto dal --- */
+.info-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-body);
+  font-size: 13px;
+}
+
+.info-row__label {
+  color: var(--color-text-muted);
+}
+
+/* --- menu voce con freccia (liste di navigazione tipo "Il mio account") --- */
+.menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.menu-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 13px 15px;
+  border-radius: 13px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  text-decoration: none;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+/* --- badge numerico circolare (conteggio inviti/notifiche) --- */
+.count-badge {
+  min-width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+/* --- griglia post a 3 colonne, senza gap visibile (stile Instagram) --- */
+.post-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 3px;
+  padding: 0 3px;
+}
+
+.post-grid__item {
+  aspect-ratio: 1;
+  background: var(--color-card-alt);
+  display: block;
+}
+
+.post-grid__item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* --- pulsante segui/smetti di seguire --- */
+.follow-btn {
+  height: 34px;
+  padding: 0 16px;
+  border-radius: 11px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.follow-btn--follow {
+  background: var(--color-accent);
+  border: 1px solid var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.follow-btn--unfollow {
+  background: var(--color-card);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text-secondary);
+}
+
+/* --- riga icone social --- */
+.social-links-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.social-links-row a {
+  color: var(--color-text-secondary);
+}
+
+/* --- box di conferma positiva: registrazione avvenuta, richiesta reset inviata --- */
+.success-box {
+  padding: 22px;
+  border-radius: var(--radius-lg);
+  background: var(--color-card);
+  border: 1px solid var(--color-accent-soft-border);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+}
+
+.success-box--narrow {
+  max-width: 360px;
+  text-align: center;
+}
+
+.link-accent {
+  color: var(--color-accent);
+}
