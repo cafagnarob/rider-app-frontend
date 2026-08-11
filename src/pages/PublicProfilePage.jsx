@@ -1,5 +1,7 @@
+import { useParams, Link, Navigate } from "react-router-dom"
+import { Spinner } from "react-bootstrap"
 import { FaFacebook, FaGlobe, FaTiktok, FaYoutube } from "react-icons/fa"
-import { Link, Navigate, useParams } from "react-router-dom"
+import { FaInstagram } from "react-icons/fa6"
 import {
   useGetCurrentUserQuery,
   useGetPublicProfileQuery,
@@ -9,9 +11,7 @@ import {
   useToggleFollowMutation,
 } from "../features/social/followApi"
 import { useGetUserPostsQuery } from "../features/social/postsApi"
-import { Spinner } from "react-bootstrap"
-import { FaInstagram } from "react-icons/fa6"
-import { COLORS, FONTS, styles } from "../styles/theme"
+import "./PublicProfilePage.css"
 
 const PLATFORM_ICONS = {
   INSTAGRAM: FaInstagram,
@@ -44,15 +44,15 @@ function PublicProfilePage() {
 
   if (isLoading) {
     return (
-      <div style={{ textAlign: "center", padding: "60px 0" }}>
-        <Spinner animation="border" style={{ color: COLORS.accent }} />
+      <div className="centered-spinner">
+        <Spinner animation="border" style={{ color: "#FF7A2F" }} />
       </div>
     )
   }
 
   if (isError) {
     return (
-      <div style={{ ...styles.emptyState, margin: 20 }}>
+      <div className="empty-state" style={{ margin: 20 }}>
         Utente non trovato.
       </div>
     )
@@ -61,186 +61,65 @@ function PublicProfilePage() {
   const isFollowing = stats?.isFollowedByCurrentUser
 
   return (
-    <div style={{ ...styles.pageBg, paddingTop: 20, paddingBottom: 40 }}>
-      <div style={{ padding: "0 20px" }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 16,
-            marginBottom: 16,
-          }}
-        >
+    <div className="page">
+      <div className="px-20">
+        <div className="public-profile-page__header-row">
           <img
             src={profile.profilePicture}
             alt={profile.username}
-            style={{
-              width: 84,
-              height: 84,
-              borderRadius: "50%",
-              objectFit: "cover",
-              background: COLORS.surfaceRaised,
-              flexShrink: 0,
-            }}
+            className="public-profile-page__avatar"
           />
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div
-              style={{
-                fontFamily: FONTS.heading,
-                fontWeight: 700,
-                fontSize: 20,
-                lineHeight: 1.15,
-              }}
-            >
+          <div className="public-profile-page__info">
+            <div className="public-profile-page__fullname">
               {profile.name} {profile.surname}
             </div>
-            <div
-              style={{
-                fontFamily: FONTS.mono,
-                fontSize: 11,
-                color: COLORS.textMuted,
-                marginBottom: 10,
-              }}
-            >
+            <div className="public-profile-page__username">
               @{profile.username}
             </div>
             <button
               type="button"
+              className={`follow-btn ${isFollowing ? "follow-btn--unfollow" : "follow-btn--follow"}`}
               disabled={isToggling}
               onClick={() => toggleFollow({ username, isFollowing })}
-              style={{
-                height: 34,
-                padding: "0 16px",
-                borderRadius: 11,
-                background: isFollowing ? COLORS.card : COLORS.accent,
-                border: `1px solid ${isFollowing ? COLORS.borderStrong : COLORS.accent}`,
-                color: isFollowing ? COLORS.textSecondary : COLORS.onAccent,
-                fontFamily: FONTS.heading,
-                fontWeight: 700,
-                fontSize: 12.5,
-                cursor: "pointer",
-              }}
             >
               {isFollowing ? "SMETTI DI SEGUIRE" : "SEGUI"}
             </button>
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: 22, marginBottom: 16 }}>
-          <Link
-            to={`/users/${username}/followers`}
-            style={{ textDecoration: "none", color: COLORS.text }}
-          >
-            <span
-              style={{
-                fontFamily: FONTS.heading,
-                fontWeight: 700,
-                fontSize: 15,
-              }}
-            >
-              {stats?.followersCount ?? 0}
-            </span>{" "}
-            <span
-              style={{
-                fontFamily: FONTS.mono,
-                fontSize: 10.5,
-                color: COLORS.textMuted,
-              }}
-            >
-              FOLLOWER
-            </span>
+        <div className="stats-row public-profile-page__stats">
+          <Link to={`/users/${username}/followers`} className="stat-link">
+            <span className="stat-count">{stats?.followersCount ?? 0}</span>{" "}
+            <span className="stat-label">FOLLOWER</span>
           </Link>
-          <Link
-            to={`/users/${username}/following`}
-            style={{ textDecoration: "none", color: COLORS.text }}
-          >
-            <span
-              style={{
-                fontFamily: FONTS.heading,
-                fontWeight: 700,
-                fontSize: 15,
-              }}
-            >
-              {stats?.followingCount ?? 0}
-            </span>{" "}
-            <span
-              style={{
-                fontFamily: FONTS.mono,
-                fontSize: 10.5,
-                color: COLORS.textMuted,
-              }}
-            >
-              SEGUITI
-            </span>
+          <Link to={`/users/${username}/following`} className="stat-link">
+            <span className="stat-count">{stats?.followingCount ?? 0}</span>{" "}
+            <span className="stat-label">SEGUITI</span>
           </Link>
           <span>
-            <span
-              style={{
-                fontFamily: FONTS.heading,
-                fontWeight: 700,
-                fontSize: 15,
-              }}
-            >
-              {posts?.totalElements ?? 0}
-            </span>{" "}
-            <span
-              style={{
-                fontFamily: FONTS.mono,
-                fontSize: 10.5,
-                color: COLORS.textMuted,
-              }}
-            >
-              POST
-            </span>
+            <span className="stat-count">{posts?.totalElements ?? 0}</span>{" "}
+            <span className="stat-label">POST</span>
           </span>
         </div>
 
         {profile.description && (
-          <p
-            style={{
-              fontSize: 14,
-              lineHeight: 1.5,
-              color: "rgba(255,255,255,.85)",
-              marginBottom: 8,
-            }}
-          >
+          <p className="public-profile-page__description">
             {profile.description}
           </p>
         )}
         {profile.location && (
-          <p
-            style={{
-              fontFamily: FONTS.mono,
-              fontSize: 11,
-              color: COLORS.textMuted,
-              marginBottom: 12,
-            }}
-          >
-            {profile.location}
-          </p>
+          <p className="public-profile-page__location">{profile.location}</p>
         )}
 
         {profile.currentVehicle && (
-          <span
-            style={{
-              display: "inline-block",
-              marginBottom: 14,
-              padding: "5px 11px",
-              borderRadius: 9,
-              background: COLORS.accentSoftBg,
-              border: `1px solid ${COLORS.accentSoftBorder}`,
-              fontFamily: FONTS.mono,
-              fontSize: 10.5,
-              color: COLORS.accent,
-            }}
-          >
+          <span className="pill pill--accent public-profile-page__vehicle-badge">
             {profile.currentVehicle.nickname ||
               `${profile.currentVehicle.brandName} ${profile.currentVehicle.modelName}`}
           </span>
         )}
 
         {profile.links?.length > 0 && (
-          <div style={{ display: "flex", gap: 16, marginBottom: 8 }}>
+          <div className="social-links-row">
             {profile.links.map((link) => {
               const Icon = PLATFORM_ICONS[link.platform] || FaGlobe
               return (
@@ -249,7 +128,6 @@ function PublicProfilePage() {
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ color: COLORS.textSecondary }}
                 >
                   <Icon size={19} />
                 </a>
@@ -259,46 +137,23 @@ function PublicProfilePage() {
         )}
       </div>
 
-      <div style={{ padding: "20px 20px 10px" }}>
-        <div style={styles.sectionTitle}>POST</div>
+      <div className="public-profile-page__posts-header">
+        <div className="section-title">POST</div>
       </div>
 
       {posts?.content.length === 0 ? (
-        <p
-          style={{
-            fontFamily: FONTS.body,
-            fontSize: 13,
-            color: COLORS.textFaint,
-            textAlign: "center",
-            padding: "40px 20px",
-          }}
-        >
+        <p className="no-results-text">
           Questo utente non ha ancora pubblicato nulla.
         </p>
       ) : (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr 1fr",
-            gap: 3,
-            padding: "0 3px",
-          }}
-        >
+        <div className="post-grid">
           {posts?.content.map((post) => (
-            <Link key={post.id} to={`/posts/${post.id}`}>
-              <div style={{ aspectRatio: "1", background: COLORS.cardAlt }}>
-                {post.media?.[0] && (
-                  <img
-                    src={post.media[0].mediaUrl}
-                    alt=""
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                  />
-                )}
-              </div>
+            <Link
+              key={post.id}
+              to={`/posts/${post.id}`}
+              className="post-grid__item"
+            >
+              {post.media?.[0] && <img src={post.media[0].mediaUrl} alt="" />}
             </Link>
           ))}
         </div>
