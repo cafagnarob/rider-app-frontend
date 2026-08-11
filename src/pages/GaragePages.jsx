@@ -1,12 +1,12 @@
 import { useGetCurrentUserQuery } from "../features/users/usersApi"
-import {
-  useSelectVehicleMutation,
-  useClearVehicleMutation,
-} from "../features/vehicles/vehiclesApi"
 import { useGetMyVehiclesQuery } from "../features/vehicles/vehiclesApi"
 import { useNavigate, Link } from "react-router-dom"
 import { Spinner } from "react-bootstrap"
 import "./GaragePage.css"
+import {
+  useSelectVehicleMutation,
+  useClearVehicleMutation,
+} from "../features/users/usersApi"
 
 function GaragePage() {
   const { data: profile } = useGetCurrentUserQuery()
