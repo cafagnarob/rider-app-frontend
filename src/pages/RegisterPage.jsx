@@ -1,7 +1,6 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
 import { useRegisterMutation } from "../features/auth/authApi"
-import { COLORS, FONTS, styles } from "../styles/theme"
 import PasswordInput from "../components/PasswordInput"
 
 function RegisterPage() {
@@ -46,122 +45,58 @@ function RegisterPage() {
   }
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: COLORS.bg,
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      <div
-        style={{
-          position: "relative",
-          height: 250,
-          flexShrink: 0,
-          backgroundColor: "#0E0F12",
-          backgroundImage:
-            "repeating-linear-gradient(135deg, rgba(255,255,255,.045) 0 8px, transparent 8px 16px)",
-          borderBottom: `1px solid ${COLORS.borderSoft}`,
-        }}
-      >
-        <span
-          style={{
-            position: "absolute",
-            left: 20,
-            bottom: 16,
-            fontFamily: FONTS.mono,
-            fontSize: 10,
-            letterSpacing: ".1em",
-            color: COLORS.textMuted,
-          }}
-        >
+    <div className="auth-page">
+      <div className="auth-page__hero">
+        <span className="auth-page__hero-caption">
           FOTO · MOTO IN CURVA, PASSO ALPINO
         </span>
       </div>
 
-      <div
-        style={{
-          padding: "26px 20px 30px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 20,
-          flex: 1,
-        }}
-      >
+      <div className="auth-page__body">
         <div>
-          <div
-            style={{
-              fontFamily: FONTS.heading,
-              fontWeight: 700,
-              fontSize: 42,
-              lineHeight: 0.95,
-              letterSpacing: ".01em",
-            }}
-          >
-            QJ RIDERS
-          </div>
-          <div
-            style={{
-              fontFamily: FONTS.mono,
-              fontSize: 11,
-              letterSpacing: ".14em",
-              color: COLORS.accent,
-              marginTop: 9,
-            }}
-          >
-            CREA IL TUO PROFILO
-          </div>
+          <div className="auth-page__brand-title">QJ RIDERS</div>
+          <div className="auth-page__brand-subtitle">CREA IL TUO PROFILO</div>
         </div>
 
         {successMsg ? (
-          <div
-            style={{
-              ...styles.emptyState,
-              borderStyle: "solid",
-              borderColor: COLORS.accentSoftBorder,
-            }}
-          >
+          <div className="success-box">
             {successMsg}{" "}
-            <Link to="/login" style={{ color: COLORS.accent }}>
+            <Link to="/login" className="link-accent">
               Vai al login
             </Link>
           </div>
         ) : (
-          <form
-            onSubmit={handleSubmit}
-            style={{ display: "flex", flexDirection: "column", gap: 16 }}
-          >
+          <form className="auth-page__form" onSubmit={handleSubmit}>
             <input
               type="text"
+              className="input"
               placeholder="Nome in sella (username)"
               value={form.username}
               onChange={set("username")}
-              style={styles.input}
               required
             />
             <input
               type="text"
+              className="input"
               placeholder="Nome"
               value={form.name}
               onChange={set("name")}
-              style={styles.input}
               required
             />
             <input
               type="text"
+              className="input"
               placeholder="Cognome"
               value={form.surname}
               onChange={set("surname")}
-              style={styles.input}
               required
             />
             <input
               type="email"
+              className="input"
               placeholder="Email"
               value={form.email}
               onChange={set("email")}
-              style={styles.input}
               required
             />
             <PasswordInput
@@ -171,7 +106,6 @@ function RegisterPage() {
               minLength={8}
               required
             />
-
             <PasswordInput
               placeholder="Ripeti la password"
               value={form.confirmPassword}
@@ -179,49 +113,19 @@ function RegisterPage() {
               required
             />
 
-            {errorMsg && (
-              <div
-                style={{
-                  fontFamily: FONTS.body,
-                  fontSize: 13,
-                  color: COLORS.danger,
-                }}
-              >
-                {errorMsg}
-              </div>
-            )}
+            {errorMsg && <div className="error-text">{errorMsg}</div>}
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              style={styles.primaryButton}
-            >
+            <button type="submit" className="btn-primary" disabled={isLoading}>
               {isLoading ? "..." : "REGISTRATI"}
             </button>
           </form>
         )}
 
-        <Link
-          to="/login"
-          style={{
-            textAlign: "center",
-            fontFamily: FONTS.mono,
-            fontSize: 11,
-            letterSpacing: ".06em",
-            color: COLORS.textSecondary,
-          }}
-        >
+        <Link to="/login" className="auth-page__link">
           HAI GIÀ UN ACCOUNT? ACCEDI
         </Link>
 
-        <div
-          style={{
-            marginTop: "auto",
-            fontSize: 12,
-            lineHeight: 1.5,
-            color: COLORS.textFaint,
-          }}
-        >
+        <div className="auth-page__footer-note">
           Sessione protetta con token JWT. Il profilo e le moto si completano
           dopo il primo accesso.
         </div>
@@ -229,4 +133,5 @@ function RegisterPage() {
     </div>
   )
 }
+
 export default RegisterPage
