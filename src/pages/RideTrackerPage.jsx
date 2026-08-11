@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
-import { Spinner } from "react-bootstrap"
 import { useSelector, useDispatch } from "react-redux"
 import { useNavigate } from "react-router-dom"
+import { Spinner } from "react-bootstrap"
 import { useGetMyVehiclesQuery } from "../features/vehicles/vehiclesApi"
 import {
   useStartRideMutation,
@@ -12,7 +12,7 @@ import { rideStarted, rideCleared } from "../features/rides/rideSlice"
 import { startTracking, stopTracking } from "../features/rides/trackingService"
 import { formatDuration, toLocalDateTimeString } from "../utils/geo"
 import { RIDE_TYPE_LABELS } from "../utils/constants"
-import { COLORS, FONTS, styles } from "../styles/theme"
+import "./RideTrackerPage.css"
 
 function RideTrackerPage() {
   const dispatch = useDispatch()
@@ -106,7 +106,6 @@ function RideTrackerPage() {
     }
   }
 
-  // --- giro in corso ---
   if (ride.rideId) {
     const lastPoint = ride.points[ride.points.length - 1]
     const elapsed = ride.startedAt
@@ -114,235 +113,69 @@ function RideTrackerPage() {
       : 0
 
     return (
-      <div style={{ ...styles.pageBg, paddingTop: 20, paddingBottom: 40 }}>
-        <div style={{ padding: "0 20px" }}>
-          <div
-            style={{
-              ...styles.card,
-              borderColor: COLORS.accentSoftBorder,
-              padding: 22,
-              textAlign: "center",
-              marginBottom: 20,
-            }}
-          >
-            <span
-              style={{
-                display: "inline-block",
-                padding: "5px 12px",
-                borderRadius: 9,
-                marginBottom: 16,
-                background: COLORS.dangerBg,
-                border: `1px solid ${COLORS.dangerBorder}`,
-                fontFamily: FONTS.mono,
-                fontSize: 10,
-                color: COLORS.danger,
-              }}
-            >
-              ● REGISTRAZIONE IN CORSO
-            </span>
+      <div className="page">
+        <div className="px-20">
+          <div className="card tracker-card">
+            <span className="tracker-badge">● REGISTRAZIONE IN CORSO</span>
 
-            <div
-              style={{
-                fontFamily: FONTS.heading,
-                fontWeight: 700,
-                fontSize: 52,
-                lineHeight: 1,
-              }}
-            >
+            <div className="tracker-hero-value">
               {ride.distanceKm.toFixed(2).replace(".", ",")}
             </div>
-            <div
-              style={{
-                fontFamily: FONTS.mono,
-                fontSize: 11,
-                color: COLORS.textMuted,
-                marginBottom: 26,
-              }}
-            >
-              KM PERCORSI
-            </div>
+            <div className="tracker-hero-label">KM PERCORSI</div>
 
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-around",
-                marginBottom: 20,
-              }}
-            >
+            <div className="tracker-stat-row">
               <div>
-                <div
-                  style={{
-                    fontFamily: FONTS.heading,
-                    fontWeight: 700,
-                    fontSize: 22,
-                  }}
-                >
+                <div className="tracker-stat-value">
                   {lastPoint ? lastPoint.speedKmh.toFixed(0) : "0"}
                 </div>
-                <div
-                  style={{
-                    fontFamily: FONTS.mono,
-                    fontSize: 9,
-                    color: COLORS.textMuted,
-                    marginTop: 3,
-                  }}
-                >
-                  KM/H ATTUALI
-                </div>
+                <div className="tracker-stat-label">KM/H ATTUALI</div>
               </div>
               <div>
-                <div
-                  style={{
-                    fontFamily: FONTS.heading,
-                    fontWeight: 700,
-                    fontSize: 22,
-                  }}
-                >
+                <div className="tracker-stat-value">
                   {ride.maxSpeedKmH.toFixed(0)}
                 </div>
-                <div
-                  style={{
-                    fontFamily: FONTS.mono,
-                    fontSize: 9,
-                    color: COLORS.textMuted,
-                    marginTop: 3,
-                  }}
-                >
-                  KM/H MAX
-                </div>
+                <div className="tracker-stat-label">KM/H MAX</div>
               </div>
               <div>
-                <div
-                  style={{
-                    fontFamily: FONTS.heading,
-                    fontWeight: 700,
-                    fontSize: 22,
-                  }}
-                >
+                <div className="tracker-stat-value">
                   {formatDuration(elapsed)}
                 </div>
-                <div
-                  style={{
-                    fontFamily: FONTS.mono,
-                    fontSize: 9,
-                    color: COLORS.textMuted,
-                    marginTop: 3,
-                  }}
-                >
-                  DURATA
-                </div>
+                <div className="tracker-stat-label">DURATA</div>
               </div>
             </div>
 
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-around",
-                paddingTop: 18,
-                borderTop: `1px solid ${COLORS.borderSoft}`,
-              }}
-            >
+            <div className="tracker-stat-row tracker-stat-row--divider">
               <div>
-                <div
-                  style={{
-                    fontFamily: FONTS.heading,
-                    fontWeight: 600,
-                    fontSize: 16,
-                  }}
-                >
+                <div className="tracker-stat-value tracker-stat-value--sm">
                   {ride.points.length}
                 </div>
-                <div
-                  style={{
-                    fontFamily: FONTS.mono,
-                    fontSize: 9,
-                    color: COLORS.textMuted,
-                    marginTop: 3,
-                  }}
-                >
-                  PUNTI GPS
-                </div>
+                <div className="tracker-stat-label">PUNTI GPS</div>
               </div>
               <div>
-                <div
-                  style={{
-                    fontFamily: FONTS.heading,
-                    fontWeight: 600,
-                    fontSize: 16,
-                  }}
-                >
+                <div className="tracker-stat-value tracker-stat-value--sm">
                   {ride.stopsCount}
                 </div>
-                <div
-                  style={{
-                    fontFamily: FONTS.mono,
-                    fontSize: 9,
-                    color: COLORS.textMuted,
-                    marginTop: 3,
-                  }}
-                >
-                  SOSTE
-                </div>
+                <div className="tracker-stat-label">SOSTE</div>
               </div>
             </div>
           </div>
 
           <textarea
+            className="textarea ride-tracker-page__notes"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={2}
             maxLength={1000}
             placeholder="Note sul giro (opzionale)"
-            style={{
-              width: "100%",
-              borderRadius: 14,
-              background: COLORS.card,
-              border: `1px solid ${COLORS.borderStrong}`,
-              color: COLORS.text,
-              fontFamily: FONTS.body,
-              fontSize: 14,
-              lineHeight: 1.5,
-              padding: 14,
-              outline: "none",
-              resize: "none",
-              boxSizing: "border-box",
-              marginBottom: 16,
-            }}
           />
 
-          {errorMsg && (
-            <div
-              style={{
-                fontFamily: FONTS.body,
-                fontSize: 13,
-                color: COLORS.danger,
-                marginBottom: 14,
-              }}
-            >
-              {errorMsg}
-            </div>
-          )}
+          {errorMsg && <div className="error-text mb-16">{errorMsg}</div>}
 
           <button
             type="button"
+            className="btn-danger-block"
             disabled={isFinishing}
             onClick={handleFinish}
-            style={{
-              width: "100%",
-              height: 56,
-              borderRadius: 15,
-              background: COLORS.danger,
-              border: "none",
-              color: "#fff",
-              fontFamily: FONTS.heading,
-              fontWeight: 700,
-              fontSize: 17,
-              letterSpacing: ".05em",
-              textTransform: "uppercase",
-              cursor: "pointer",
-              marginBottom: 10,
-              opacity: isFinishing ? 0.6 : 1,
-            }}
           >
             {isFinishing ? (
               <Spinner size="sm" animation="border" />
@@ -352,19 +185,10 @@ function RideTrackerPage() {
           </button>
           <button
             type="button"
-            onClick={handleDiscard}
+            className="btn-text-block"
             disabled={isDiscarding}
-            style={{
-              width: "100%",
-              background: "none",
-              border: "none",
-              color: COLORS.textMuted,
-              fontFamily: FONTS.mono,
-              fontSize: 11,
-              cursor: "pointer",
-              padding: 8,
-              opacity: isDiscarding ? 0.5 : 1,
-            }}
+            style={{ opacity: isDiscarding ? 0.5 : 1 }}
+            onClick={handleDiscard}
           >
             {isDiscarding ? "ELIMINAZIONE..." : "SCARTA SENZA SALVARE"}
           </button>
@@ -374,22 +198,17 @@ function RideTrackerPage() {
   }
 
   return (
-    <div style={{ ...styles.pageBg, paddingTop: 20, paddingBottom: 40 }}>
-      <div style={{ padding: "0 20px" }}>
-        <div style={{ ...styles.pageTitle, fontSize: 26, marginBottom: 20 }}>
-          REGISTRA UN'USCITA
-        </div>
+    <div className="page">
+      <div className="px-20">
+        <div className="page-title mb-20">REGISTRA UN'USCITA</div>
 
-        <form
-          onSubmit={handleStart}
-          style={{ display: "flex", flexDirection: "column", gap: 16 }}
-        >
+        <form className="form-stack" onSubmit={handleStart}>
           <div>
-            <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>MOTO</div>
+            <div className="field-label form-group__label">MOTO</div>
             <select
+              className="select"
               value={form.vehicleId}
               onChange={(e) => setForm({ ...form, vehicleId: e.target.value })}
-              style={styles.input}
             >
               <option value="">Nessuna moto</option>
               {vehicles?.map((v) => (
@@ -401,23 +220,23 @@ function RideTrackerPage() {
           </div>
 
           <div>
-            <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>TITOLO</div>
+            <div className="field-label form-group__label">TITOLO</div>
             <input
               type="text"
+              className="input"
               maxLength={100}
               placeholder="Giro al Passo dello Stelvio"
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
-              style={styles.input}
             />
           </div>
 
           <div>
-            <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>TIPO</div>
+            <div className="field-label form-group__label">TIPO</div>
             <select
+              className="select"
               value={form.type}
               onChange={(e) => setForm({ ...form, type: e.target.value })}
-              style={styles.input}
             >
               {Object.entries(RIDE_TYPE_LABELS).map(([value, label]) => (
                 <option key={value} value={value}>
@@ -427,22 +246,13 @@ function RideTrackerPage() {
             </select>
           </div>
 
-          {errorMsg && (
-            <div
-              style={{
-                fontFamily: FONTS.body,
-                fontSize: 13,
-                color: COLORS.danger,
-              }}
-            >
-              {errorMsg}
-            </div>
-          )}
+          {errorMsg && <div className="error-text">{errorMsg}</div>}
 
           <button
             type="submit"
+            className="btn-primary"
             disabled={isStarting}
-            style={{ ...styles.primaryButton, opacity: isStarting ? 0.6 : 1 }}
+            style={{ opacity: isStarting ? 0.6 : 1 }}
           >
             {isStarting ? "..." : "INIZIA"}
           </button>
