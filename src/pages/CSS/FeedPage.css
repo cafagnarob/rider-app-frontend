@@ -13,6 +13,7 @@
 
 .feed-page__tabs {
   padding: 18px 20px 0;
+  padding-bottom: 18px;
 }
 
 .feed-page__empty-text {
