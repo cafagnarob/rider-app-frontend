@@ -30,7 +30,7 @@ function ForgotPasswordPage() {
         <div className="forgot-password-page__title">PASSWORD DIMENTICATA</div>
 
         {isSuccess ? (
-          <div className="forgot-password-page__success">
+          <div className="success-box success-box--narrow">
             Se l'indirizzo è registrato, riceverai a breve un link per
             reimpostare la password. Controlla la tua casella di posta.
           </div>
