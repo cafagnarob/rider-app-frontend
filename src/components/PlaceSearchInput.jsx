@@ -1,6 +1,5 @@
 import { useRef, useState } from "react"
 import { searchPlaces } from "../utils/geocoding"
-import { COLORS, FONTS, styles } from "../styles/theme"
 
 function PlaceSearchInput({
   value,
@@ -36,33 +35,12 @@ function PlaceSearchInput({
 
   if (value?.label) {
     return (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "11px 14px",
-          borderRadius: 12,
-          background: COLORS.accentSoftBg,
-          border: `1px solid ${COLORS.accentSoftBorder}`,
-        }}
-      >
-        <span
-          style={{ fontFamily: FONTS.body, fontSize: 13, color: COLORS.accent }}
-        >
-          {value.label}
-        </span>
+      <div className="meeting-point__chip">
+        <span className="meeting-point__label">{value.label}</span>
         <button
           type="button"
+          className="meeting-point__change-btn"
           onClick={() => onChange(null)}
-          style={{
-            background: "none",
-            border: "none",
-            color: COLORS.accent,
-            cursor: "pointer",
-            fontFamily: FONTS.mono,
-            fontSize: 10,
-          }}
         >
           CAMBIA
         </button>
@@ -74,42 +52,19 @@ function PlaceSearchInput({
     <div style={{ position: "relative" }}>
       <input
         type="text"
+        className="input"
         placeholder={placeholder}
         value={search}
         onChange={handleChange}
-        style={styles.input}
       />
       {results.length > 0 && (
-        <div
-          style={{
-            position: "absolute",
-            top: "100%",
-            left: 0,
-            right: 0,
-            marginTop: 6,
-            zIndex: 10,
-            ...styles.card,
-            overflow: "hidden",
-          }}
-        >
+        <div className="card search-results">
           {results.map((r) => (
             <button
               key={r.id}
               type="button"
+              className="search-results__item"
               onClick={() => handlePick(r)}
-              style={{
-                display: "block",
-                width: "100%",
-                textAlign: "left",
-                padding: "11px 13px",
-                background: "none",
-                border: "none",
-                borderBottom: `1px solid ${COLORS.borderSoft}`,
-                color: COLORS.text,
-                fontFamily: FONTS.body,
-                fontSize: 13,
-                cursor: "pointer",
-              }}
             >
               {r.name}
             </button>
