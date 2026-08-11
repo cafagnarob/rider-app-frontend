@@ -1,3 +1,4 @@
+import { useState } from "react"
 import {
   FaFacebook,
   FaGlobe,
@@ -10,9 +11,7 @@ import {
   useAddProfileLinkMutation,
   useDeleteProfileLinkMutation,
 } from "../usersApi"
-import { useState } from "react"
 import { PLATFORM_LABELS } from "../../../utils/constants"
-import { COLORS, FONTS, styles } from "../../../styles/theme"
 
 const PLATFORM_ICONS = {
   INSTAGRAM: FaInstagram,
@@ -57,15 +56,15 @@ function ProfileLinksSection({ links }) {
   }
 
   return (
-    <div style={{ ...styles.card, padding: 18, marginBottom: 16 }}>
-      <div style={{ ...styles.fieldLabel, marginBottom: 14 }}>LINK SOCIAL</div>
+    <div className="card section-card">
+      <div className="field-label section-card__label">LINK SOCIAL</div>
 
       {links.length === 0 ? (
         <p
           style={{
-            fontFamily: FONTS.body,
+            fontFamily: "var(--font-body)",
             fontSize: 13,
-            color: COLORS.textFaint,
+            color: "var(--color-text-faint)",
             marginBottom: availablePlatforms.length > 0 ? 16 : 0,
           }}
         >
@@ -83,41 +82,21 @@ function ProfileLinksSection({ links }) {
           {links.map((link) => {
             const Icon = PLATFORM_ICONS[link.platform] || FaGlobe
             return (
-              <div
-                key={link.id}
-                style={{ display: "flex", alignItems: "center", gap: 10 }}
-              >
-                <Icon size={17} color={COLORS.textSecondary} />
+              <div key={link.id} className="link-row">
+                <Icon size={17} color="var(--color-text-secondary)" />
                 <a
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{
-                    flex: 1,
-                    minWidth: 0,
-                    color: COLORS.accent,
-                    fontFamily: FONTS.body,
-                    fontSize: 13,
-                    textDecoration: "none",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
+                  className="link-row__url"
                 >
                   {link.url}
                 </a>
                 <button
                   type="button"
-                  onClick={() => handleDelete(link.id)}
+                  className="link-row__delete"
                   disabled={isDeleting}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: COLORS.danger,
-                    cursor: "pointer",
-                    padding: 4,
-                    flexShrink: 0,
-                  }}
+                  onClick={() => handleDelete(link.id)}
                 >
                   <FaTrash size={12} />
                 </button>
@@ -128,18 +107,13 @@ function ProfileLinksSection({ links }) {
       )}
 
       {availablePlatforms.length > 0 && (
-        <form onSubmit={handleAdd} style={{ display: "flex", gap: 8 }}>
+        <form className="inline-add-form" onSubmit={handleAdd}>
           <select
+            className="select"
+            style={{ height: 40, fontSize: 12, width: 118, flexShrink: 0 }}
             value={platform}
             onChange={(e) => setPlatform(e.target.value)}
             required
-            style={{
-              ...styles.input,
-              height: 40,
-              fontSize: 12,
-              width: 118,
-              flexShrink: 0,
-            }}
           >
             <option value="">Scegli</option>
             {availablePlatforms.map((p) => (
@@ -150,34 +124,18 @@ function ProfileLinksSection({ links }) {
           </select>
           <input
             type="url"
+            className="input"
+            style={{ height: 40, fontSize: 12, flex: 1, minWidth: 0 }}
             placeholder="https://..."
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             required
-            style={{
-              ...styles.input,
-              height: 40,
-              fontSize: 12,
-              flex: 1,
-              minWidth: 0,
-            }}
           />
           <button
             type="submit"
+            className="btn-accent-sm"
+            style={{ padding: "0 13px", fontSize: 10.5 }}
             disabled={isAdding || !platform}
-            style={{
-              height: 40,
-              padding: "0 13px",
-              borderRadius: 12,
-              background: COLORS.accent,
-              flexShrink: 0,
-              border: "none",
-              color: COLORS.onAccent,
-              fontFamily: FONTS.mono,
-              fontSize: 10.5,
-              cursor: "pointer",
-              opacity: isAdding || !platform ? 0.5 : 1,
-            }}
           >
             AGGIUNGI
           </button>
@@ -185,14 +143,7 @@ function ProfileLinksSection({ links }) {
       )}
 
       {errorMsg && (
-        <div
-          style={{
-            fontFamily: FONTS.body,
-            fontSize: 12,
-            color: COLORS.danger,
-            marginTop: 10,
-          }}
-        >
+        <div className="error-text" style={{ fontSize: 12, marginTop: 10 }}>
           {errorMsg}
         </div>
       )}
