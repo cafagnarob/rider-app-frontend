@@ -1,0 +1,42 @@
+.rides-history-page__header {
+  padding: 0 20px 18px;
+}
+
+.ride-list {
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ride-card-link {
+  text-decoration: none;
+}
+
+.ride-card__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.ride-card__title {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 17px;
+  line-height: 1.15;
+  color: var(--color-text);
+}
+
+.ride-card__date {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-text-muted);
+  margin-top: 3px;
+}
+
+.ride-card__badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
