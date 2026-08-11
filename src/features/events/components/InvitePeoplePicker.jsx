@@ -5,12 +5,16 @@ import {
 } from "../../social/followApi"
 import { useGetCurrentUserQuery } from "../../users/usersApi"
 import { useInviteUserMutation } from "../invitesApi"
-import { COLORS, FONTS, styles } from "../../../styles/theme"
 
-const STATUS_LABELS = {
-  PENDING: { text: "IN ATTESA", color: COLORS.accent, bg: COLORS.accentSoftBg },
-  ACCEPTED: { text: "ACCETTATO", color: "#4ADE80", bg: "#173323" },
-  REJECTED: { text: "RIFIUTATO", color: COLORS.textMuted, bg: COLORS.cardAlt },
+const STATUS_CLASSES = {
+  PENDING: "invite-status-badge--pending",
+  ACCEPTED: "invite-status-badge--accepted",
+  REJECTED: "invite-status-badge--rejected",
+}
+const STATUS_TEXT = {
+  PENDING: "IN ATTESA",
+  ACCEPTED: "ACCETTATO",
+  REJECTED: "RIFIUTATO",
 }
 
 function InvitePeoplePicker({ eventId, existingInvites }) {
@@ -57,46 +61,24 @@ function InvitePeoplePicker({ eventId, existingInvites }) {
     <div>
       <input
         type="text"
+        className="input"
+        style={{ height: 42, marginBottom: 10 }}
         placeholder="Cerca tra i tuoi contatti..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        style={{ ...styles.input, height: 42, marginBottom: 10 }}
       />
 
       {feedback && (
-        <div
-          style={{
-            fontFamily: FONTS.body,
-            fontSize: 12,
-            color: COLORS.danger,
-            marginBottom: 10,
-          }}
-        >
+        <div className="error-text" style={{ fontSize: 12, marginBottom: 10 }}>
           {feedback}
         </div>
       )}
 
       {filtered.length === 0 && (
-        <p
-          style={{
-            fontFamily: FONTS.body,
-            fontSize: 13,
-            color: COLORS.textFaint,
-          }}
-        >
-          Nessun contatto trovato.
-        </p>
+        <p className="picker-empty-text">Nessun contatto trovato.</p>
       )}
 
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 6,
-          maxHeight: 260,
-          overflowY: "auto",
-        }}
-      >
+      <div className="contact-list">
         {filtered.map((contact) => {
           const existingInvite = (existingInvites || []).find(
             (i) => i.invitedUsername === contact.username,
@@ -104,99 +86,44 @@ function InvitePeoplePicker({ eventId, existingInvites }) {
           const isInvited = invitedUsernames.has(contact.username)
 
           return (
-            <div
-              key={contact.username}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                padding: "9px 11px",
-                borderRadius: 11,
-                background: COLORS.cardAlt,
-                border: `1px solid ${COLORS.borderSoft}`,
-              }}
-            >
+            <div key={contact.username} className="contact-row">
               <img
                 src={contact.profilePicture}
                 alt={contact.username}
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: "50%",
-                  objectFit: "cover",
-                  background: COLORS.surfaceRaised,
-                }}
+                className="contact-row__avatar"
               />
-              <span style={{ flex: 1, fontFamily: FONTS.body, fontSize: 14 }}>
-                {contact.username}
-              </span>
+              <span className="contact-row__name">{contact.username}</span>
 
               {isInvited ? (
                 existingInvite.status === "REJECTED" ? (
                   <div
                     style={{ display: "flex", alignItems: "center", gap: 6 }}
                   >
-                    <span
-                      style={{
-                        padding: "4px 9px",
-                        borderRadius: 8,
-                        fontFamily: FONTS.mono,
-                        fontSize: 9.5,
-                        background: STATUS_LABELS.REJECTED.bg,
-                        color: STATUS_LABELS.REJECTED.color,
-                      }}
-                    >
+                    <span className="invite-status-badge invite-status-badge--rejected">
                       RIFIUTATO
                     </span>
                     <button
                       type="button"
-                      onClick={() => handleInvite(contact.username)}
+                      className="btn-accent-xs"
                       disabled={isLoading}
-                      style={{
-                        height: 30,
-                        padding: "0 12px",
-                        borderRadius: 9,
-                        background: COLORS.accent,
-                        border: "none",
-                        color: COLORS.onAccent,
-                        fontFamily: FONTS.mono,
-                        fontSize: 10,
-                        cursor: "pointer",
-                      }}
+                      onClick={() => handleInvite(contact.username)}
                     >
                       REINVITA
                     </button>
                   </div>
                 ) : (
                   <span
-                    style={{
-                      padding: "4px 9px",
-                      borderRadius: 8,
-                      fontFamily: FONTS.mono,
-                      fontSize: 9.5,
-                      background: STATUS_LABELS[existingInvite.status].bg,
-                      color: STATUS_LABELS[existingInvite.status].color,
-                    }}
+                    className={`invite-status-badge ${STATUS_CLASSES[existingInvite.status]}`}
                   >
-                    {STATUS_LABELS[existingInvite.status].text}
+                    {STATUS_TEXT[existingInvite.status]}
                   </span>
                 )
               ) : (
                 <button
                   type="button"
-                  onClick={() => handleInvite(contact.username)}
+                  className="btn-accent-xs"
                   disabled={isLoading}
-                  style={{
-                    height: 30,
-                    padding: "0 12px",
-                    borderRadius: 9,
-                    background: COLORS.accent,
-                    border: "none",
-                    color: COLORS.onAccent,
-                    fontFamily: FONTS.mono,
-                    fontSize: 10,
-                    cursor: "pointer",
-                  }}
+                  onClick={() => handleInvite(contact.username)}
                 >
                   INVITA
                 </button>
