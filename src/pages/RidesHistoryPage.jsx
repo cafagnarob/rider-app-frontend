@@ -1,20 +1,10 @@
 import { useState } from "react"
-import { Spinner } from "react-bootstrap"
 import { Link } from "react-router-dom"
+import { Spinner } from "react-bootstrap"
 import { useGetMyRidesQuery } from "../features/rides/ridesApi"
-import { RIDE_TYPE_LABELS } from "../utils/constants"
 import NotificationBell from "../features/notification/components/NotificationBell"
-import { COLORS, FONTS, styles } from "../styles/theme"
-
-const pillStyle = {
-  padding: "4px 10px",
-  borderRadius: 8,
-  background: COLORS.cardAlt,
-  border: `1px solid ${COLORS.borderSoft}`,
-  fontFamily: FONTS.mono,
-  fontSize: 9.5,
-  color: COLORS.textSecondary,
-}
+import { RIDE_TYPE_LABELS } from "../utils/constants"
+import "./RidesHistoryPage.css"
 
 function RidesHistoryPage() {
   const [page, setPage] = useState(0)
@@ -22,50 +12,32 @@ function RidesHistoryPage() {
 
   if (isLoading) {
     return (
-      <div style={{ textAlign: "center", padding: "60px 0" }}>
-        <Spinner animation="border" style={{ color: COLORS.accent }} />
+      <div className="centered-spinner">
+        <Spinner animation="border" style={{ color: "#FF7A2F" }} />
       </div>
     )
   }
 
   if (isError) {
     return (
-      <div style={{ ...styles.emptyState, margin: 20 }}>
+      <div className="empty-state" style={{ margin: 20 }}>
         Impossibile caricare lo storico.
       </div>
     )
   }
 
   return (
-    <div style={{ ...styles.pageBg, paddingTop: 20, paddingBottom: 40 }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "0 20px 18px",
-        }}
-      >
-        <div style={{ ...styles.pageTitle, fontSize: 26 }}>I MIEI GIRI</div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+    <div className="page">
+      <div className="header-row rides-history-page__header">
+        <div className="page-title" style={{ fontSize: 26 }}>
+          I MIEI GIRI
+        </div>
+        <div className="header-actions">
           <NotificationBell />
           <Link
             to="/rides/new"
-            style={{
-              height: 40,
-              padding: "0 15px",
-              borderRadius: 12,
-              background: COLORS.accent,
-              border: "none",
-              color: COLORS.onAccent,
-              fontFamily: FONTS.heading,
-              fontWeight: 700,
-              fontSize: 14,
-              letterSpacing: ".04em",
-              display: "inline-flex",
-              alignItems: "center",
-              textDecoration: "none",
-            }}
+            className="btn-accent-sm"
+            style={{ fontSize: 14 }}
           >
             + USCITA
           </Link>
@@ -73,62 +45,24 @@ function RidesHistoryPage() {
       </div>
 
       {data.content.length === 0 ? (
-        <p
-          style={{
-            fontFamily: FONTS.body,
-            fontSize: 13,
-            color: COLORS.textFaint,
-            textAlign: "center",
-            padding: "60px 20px",
-          }}
-        >
+        <p className="empty-list-text">
           Non hai ancora registrato nessuna uscita.
         </p>
       ) : (
-        <div
-          style={{
-            padding: "0 20px",
-            display: "flex",
-            flexDirection: "column",
-            gap: 12,
-            opacity: isFetching ? 0.6 : 1,
-          }}
-        >
+        <div className="ride-list" style={{ opacity: isFetching ? 0.6 : 1 }}>
           {data.content.map((ride) => (
             <Link
               key={ride.id}
               to={`/rides/${ride.id}`}
-              style={{ textDecoration: "none" }}
+              className="ride-card-link"
             >
-              <div style={{ ...styles.card, padding: 16 }}>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-                    marginBottom: 10,
-                  }}
-                >
+              <div className="card" style={{ padding: 16 }}>
+                <div className="ride-card__top">
                   <div>
-                    <div
-                      style={{
-                        fontFamily: FONTS.heading,
-                        fontWeight: 700,
-                        fontSize: 17,
-                        lineHeight: 1.15,
-                        color: COLORS.text,
-                      }}
-                    >
+                    <div className="ride-card__title">
                       {ride.title || "Uscita senza titolo"}
                     </div>
-                    <div
-                      style={{
-                        fontFamily: FONTS.mono,
-                        fontSize: 10,
-                        color: COLORS.textMuted,
-                        marginTop: 3,
-                      }}
-                    >
+                    <div className="ride-card__date">
                       {new Date(ride.startedAt).toLocaleDateString("it-IT", {
                         day: "numeric",
                         month: "long",
@@ -137,48 +71,30 @@ function RidesHistoryPage() {
                     </div>
                   </div>
                   {ride.inProgress && (
-                    <span
-                      style={{
-                        padding: "4px 10px",
-                        borderRadius: 8,
-                        background: COLORS.dangerBg,
-                        border: `1px solid ${COLORS.dangerBorder}`,
-                        fontFamily: FONTS.mono,
-                        fontSize: 9,
-                        color: COLORS.danger,
-                        flexShrink: 0,
-                      }}
-                    >
+                    <span className="meta-badge meta-badge--danger">
                       IN CORSO
                     </span>
                   )}
                 </div>
 
-                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                <div className="ride-card__badges">
                   {ride.type && (
-                    <span style={pillStyle}>
+                    <span className="meta-badge">
                       {RIDE_TYPE_LABELS[ride.type] || ride.type}
                     </span>
                   )}
                   {ride.distanceKm != null && (
-                    <span style={pillStyle}>
+                    <span className="meta-badge">
                       {ride.distanceKm.toFixed(1).replace(".", ",")} KM
                     </span>
                   )}
                   {ride.avgSpeedKmH != null && (
-                    <span style={pillStyle}>
+                    <span className="meta-badge">
                       {ride.avgSpeedKmH.toFixed(0)} KM/H MEDIA
                     </span>
                   )}
                   {ride.vehicle && (
-                    <span
-                      style={{
-                        ...pillStyle,
-                        background: COLORS.accentSoftBg,
-                        border: `1px solid ${COLORS.accentSoftBorder}`,
-                        color: COLORS.accent,
-                      }}
-                    >
+                    <span className="meta-badge meta-badge--accent">
                       {ride.vehicle.nickname ||
                         `${ride.vehicle.brandName} ${ride.vehicle.modelName}`}
                     </span>
@@ -191,47 +107,33 @@ function RidesHistoryPage() {
       )}
 
       {data.totalPages > 1 && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: 16,
-            padding: "24px 20px",
-          }}
-        >
+        <div className="pagination-row">
           <button
             type="button"
-            disabled={data.first || isFetching}
-            onClick={() => setPage((p) => p - 1)}
+            className="btn-secondary"
             style={{
-              ...styles.secondaryButton,
               height: 40,
               padding: "0 16px",
               opacity: data.first ? 0.4 : 1,
             }}
+            disabled={data.first || isFetching}
+            onClick={() => setPage((p) => p - 1)}
           >
             PRECEDENTE
           </button>
-          <span
-            style={{
-              fontFamily: FONTS.mono,
-              fontSize: 11,
-              color: COLORS.textMuted,
-            }}
-          >
+          <span className="pagination-row__label">
             {data.number + 1} / {data.totalPages}
           </span>
           <button
             type="button"
-            disabled={data.last || isFetching}
-            onClick={() => setPage((p) => p + 1)}
+            className="btn-secondary"
             style={{
-              ...styles.secondaryButton,
               height: 40,
               padding: "0 16px",
               opacity: data.last ? 0.4 : 1,
             }}
+            disabled={data.last || isFetching}
+            onClick={() => setPage((p) => p + 1)}
           >
             SUCCESSIVA
           </button>
