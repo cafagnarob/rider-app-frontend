@@ -27,7 +27,7 @@ function ForgotPasswordPage() {
       </div>
 
       <div className="forgot-password-page__content">
-        <div className="forgot-password-page__title">PASSWORD DIMENTICATA</div>
+        <div className="page-heading">PASSWORD DIMENTICATA</div>
 
         {isSuccess ? (
           <div className="success-box success-box--narrow">
