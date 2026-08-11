@@ -9,7 +9,7 @@ import {
 } from "../features/events/eventsApi"
 import { useGetFeedQuery } from "../features/social/postsApi"
 import { useGeolocation } from "../utils/useGeolocation"
-import NotificationBell from "../features/notifications/components/NotificationBell"
+import NotificationBell from "../features/notification/components/NotificationBell"
 import { MAP_STYLE_URL } from "../utils/mapStyle"
 import { COLORS } from "../styles/theme" // solo per i marcatori MapLibre, DOM creati fuori da React — stessa eccezione di EventDetailPage
 import { EVENT_TYPE_LABELS } from "../utils/constants"
