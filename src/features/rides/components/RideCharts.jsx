@@ -9,7 +9,20 @@ import {
   ResponsiveContainer,
 } from "recharts"
 import { haversineDistance } from "../../../utils/geo"
-import { COLORS, FONTS } from "../../../styles/theme"
+
+// valori letti da theme.js: qui servono come dati JS per Recharts, non come CSS applicabile al DOM
+const COLORS = {
+  accent: "#FF7A2F",
+  borderSoft: "rgba(255,255,255,.08)",
+  borderStrong: "rgba(255,255,255,.14)",
+  text: "#F4F2F0",
+  textMuted: "rgba(255,255,255,.42)",
+  card: "#13141A",
+}
+const FONTS = {
+  body: "Archivo, system-ui, sans-serif",
+  mono: "'IBM Plex Mono', monospace",
+}
 
 function RideCharts({ points }) {
   const chartData = useMemo(() => {
@@ -30,13 +43,7 @@ function RideCharts({ points }) {
 
   if (chartData.length === 0) {
     return (
-      <p
-        style={{
-          fontFamily: FONTS.body,
-          fontSize: 13,
-          color: COLORS.textFaint,
-        }}
-      >
+      <p className="picker-empty-text">
         Dati insufficienti per generare i grafici.
       </p>
     )
@@ -58,19 +65,9 @@ function RideCharts({ points }) {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+    <div className="chart-sections">
       <div>
-        <p
-          style={{
-            ...axisStyle,
-            fontSize: 10,
-            letterSpacing: ".08em",
-            textTransform: "uppercase",
-            marginBottom: 10,
-          }}
-        >
-          VELOCITÀ LUNGO IL PERCORSO
-        </p>
+        <p className="chart-section-title">VELOCITÀ LUNGO IL PERCORSO</p>
         <ResponsiveContainer width="100%" height={200}>
           <LineChart
             data={chartData}
@@ -121,17 +118,7 @@ function RideCharts({ points }) {
 
       {hasAltitude && (
         <div>
-          <p
-            style={{
-              ...axisStyle,
-              fontSize: 10,
-              letterSpacing: ".08em",
-              textTransform: "uppercase",
-              marginBottom: 10,
-            }}
-          >
-            ALTIMETRIA
-          </p>
+          <p className="chart-section-title">ALTIMETRIA</p>
           <ResponsiveContainer width="100%" height={200}>
             <LineChart
               data={chartData}
