@@ -2,7 +2,7 @@ import { Spinner } from "react-bootstrap"
 import { useGetBrandsQuery } from "../features/catalog/catalogApi"
 import { useNavigate } from "react-router-dom"
 import { useState } from "react"
-import "./BrandsPage.css"
+import "../pages/CSS/BrandsPage.css"
 
 function BrandsPage() {
   const { data: brands, isLoading, isError } = useGetBrandsQuery()

@@ -9,7 +9,7 @@ import {
 } from "../features/events/eventsApi"
 import NotificationBell from "../features/notification/components/NotificationBell"
 import { VISIBILITY_LABELS, EVENT_TYPE_LABELS } from "../utils/constants"
-import "./EventsListPage.css"
+import "../pages/CSS/EventsListPage.css"
 
 const TABS = [
   { key: "search", label: "SCOPRI" },

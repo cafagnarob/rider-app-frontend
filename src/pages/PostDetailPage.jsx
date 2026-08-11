@@ -13,7 +13,7 @@ import {
 import { useGetCurrentUserQuery } from "../features/users/usersApi"
 import PostAutoCarousel from "../features/social/components/PostAutoCarousel"
 import { formatRelativeTime } from "../utils/dateFormat"
-import "./PostDetailPage.css"
+import "../pages/CSS/PostDetailPage.css"
 
 function PostDetailPage() {
   const { postId } = useParams()

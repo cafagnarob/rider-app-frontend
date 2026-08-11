@@ -8,7 +8,7 @@ import {
 } from "../features/events/eventsApi"
 import { useGetMyRoutesQuery } from "../features/routesMap/routesApi"
 import { searchPlaces } from "../utils/geocoding"
-import "./AddEventDayPage.css"
+import "../pages/CSS/AddEventDayPage.css"
 
 const DAY_DRAFT_KEY = "eventDayDraft"
 

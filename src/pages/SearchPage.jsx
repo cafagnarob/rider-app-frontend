@@ -12,7 +12,7 @@ import {
   VISIBILITY_LABELS,
   EVENT_TYPE_LABELS,
 } from "../utils/constants"
-import "./SearchPage.css"
+import "../pages/CSS/SearchPage.css"
 
 const TABS = [
   { key: "people", label: "MOTOCICLISTI" },

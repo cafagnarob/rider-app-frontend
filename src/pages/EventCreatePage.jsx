@@ -8,7 +8,7 @@ import { generateAccessCode } from "../utils/codeGenerator"
 import { useInviteUserMutation } from "../features/events/invitesApi"
 import InviteSelector from "../features/events/components/InviteSelector"
 import { searchPlaces } from "../utils/geocoding"
-import "./EventCreatePage.css"
+import "../pages/CSS/EventCreatePage.css"
 
 const DRAFT_KEY = "eventDraft"
 

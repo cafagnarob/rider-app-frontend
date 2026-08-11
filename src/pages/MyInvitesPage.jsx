@@ -6,7 +6,7 @@ import {
   useRejectInviteMutation,
 } from "../features/events/invitesApi"
 import { formatRelativeTime } from "../utils/dateFormat"
-import "./MyInvitesPage.css"
+import "../pages/CSS/MyInvitesPage.css"
 
 function MyInvitesPage() {
   const { data: invites, isLoading, isError } = useGetMyInvitesQuery()

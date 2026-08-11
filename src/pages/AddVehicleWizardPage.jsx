@@ -8,7 +8,7 @@ import {
 } from "../features/catalog/catalogApi"
 import { useAddVehicleMutation } from "../features/vehicles/vehiclesApi"
 import { CATEGORY_LABELS } from "../utils/constants"
-import "./AddVehicleWizardPage.css"
+import "../pages/CSS/AddVehicleWizardPage.css"
 
 const STEPS = ["MARCA", "MODELLO", "DETTAGLI"]
 

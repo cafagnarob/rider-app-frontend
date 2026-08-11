@@ -4,7 +4,7 @@ import { Spinner } from "react-bootstrap"
 import { useGetMyRidesQuery } from "../features/rides/ridesApi"
 import NotificationBell from "../features/notification/components/NotificationBell"
 import { RIDE_TYPE_LABELS } from "../utils/constants"
-import "./RidesHistoryPage.css"
+import "../pages/CSS/RidesHistoryPage.css"
 
 function RidesHistoryPage() {
   const [page, setPage] = useState(0)

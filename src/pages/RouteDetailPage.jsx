@@ -14,7 +14,7 @@ import { decodePolyline } from "../utils/polyline"
 import { downloadGpx } from "../utils/gpx"
 import { MAP_STYLE_URL } from "../utils/mapStyle"
 import { COLORS } from "../styles/theme" // solo per i marcatori MapLibre, DOM creati fuori da React
-import "./RouteDetailPage.css"
+import "../pages/CSS/RouteDetailPage.css"
 
 function RouteDetailPage() {
   const { routeId } = useParams()

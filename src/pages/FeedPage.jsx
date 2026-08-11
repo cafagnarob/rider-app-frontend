@@ -4,7 +4,7 @@ import { useGetFeedQuery } from "../features/social/postsApi"
 import NotificationBell from "../features/notification/components/NotificationBell"
 import PostCard from "../features/social/components/PostCard"
 import CreatePostModal from "../features/social/components/CreatePostModal"
-import "./FeedPage.css"
+import "../pages/CSS/FeedPage.css"
 
 const TABS = [
   { key: "FOLLOWING", label: "SEGUITI" },

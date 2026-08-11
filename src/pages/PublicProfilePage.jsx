@@ -11,7 +11,7 @@ import {
   useToggleFollowMutation,
 } from "../features/social/followApi"
 import { useGetUserPostsQuery } from "../features/social/postsApi"
-import "./PublicProfilePage.css"
+import "../pages/CSS/PublicProfilePage.css"
 
 const PLATFORM_ICONS = {
   INSTAGRAM: FaInstagram,

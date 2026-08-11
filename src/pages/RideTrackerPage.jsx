@@ -12,7 +12,7 @@ import { rideStarted, rideCleared } from "../features/rides/rideSlice"
 import { startTracking, stopTracking } from "../features/rides/trackingService"
 import { formatDuration, toLocalDateTimeString } from "../utils/geo"
 import { RIDE_TYPE_LABELS } from "../utils/constants"
-import "./RideTrackerPage.css"
+import "../pages/CSS/RideTrackerPage.css"
 
 function RideTrackerPage() {
   const dispatch = useDispatch()

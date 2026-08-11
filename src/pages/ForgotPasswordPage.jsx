@@ -2,7 +2,7 @@ import { useState } from "react"
 import { Link } from "react-router-dom"
 import { FaTimes } from "react-icons/fa"
 import { useForgotPasswordMutation } from "../features/auth/authApi"
-import "./ForgotPasswordPage.css"
+import "../pages/CSS/ForgotPasswordPage.css"
 
 function ForgotPasswordPage() {
   const [email, setEmail] = useState("")

@@ -10,7 +10,7 @@ import RideMap from "../components/map/RideMap"
 import RideCharts from "../features/rides/components/RideCharts"
 import { formatDuration } from "../utils/geo"
 import { RIDE_TYPE_LABELS } from "../utils/constants"
-import "./RideDetailPage.css"
+import "../pages/CSS/RideDetailPage.css"
 
 function RideDetailPage() {
   const { rideId } = useParams()

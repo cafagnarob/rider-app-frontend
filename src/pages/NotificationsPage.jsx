@@ -11,7 +11,7 @@ import {
   NOTIFICATION_ICONS,
 } from "../utils/notifications"
 import { formatRelativeTime } from "../utils/dateFormat"
-import "./NotificationsPage.css"
+import "../pages/CSS/NotificationsPage.css"
 
 function NotificationsPage() {
   const [page, setPage] = useState(0)

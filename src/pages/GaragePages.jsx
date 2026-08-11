@@ -2,7 +2,7 @@ import { useGetCurrentUserQuery } from "../features/users/usersApi"
 import { useGetMyVehiclesQuery } from "../features/vehicles/vehiclesApi"
 import { useNavigate, Link } from "react-router-dom"
 import { Spinner } from "react-bootstrap"
-import "./GaragePage.css"
+import "../pages/CSS/GaragePage.css"
 import {
   useSelectVehicleMutation,
   useClearVehicleMutation,

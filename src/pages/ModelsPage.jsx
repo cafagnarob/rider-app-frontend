@@ -9,7 +9,7 @@ import {
 } from "../features/catalog/catalogApi"
 import { useGetMyVehiclesQuery } from "../features/vehicles/vehiclesApi"
 import { CATEGORY_LABELS, CC_RANGES } from "../utils/constants"
-import "./ModelsPage.css"
+import "../pages/CSS/ModelsPage.css"
 
 const ORDER_OPTIONS = [
   { value: "name", label: "Nome" },

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
-import { Map, Marker, NavigationControl, FullscreenControl } from "maplibre-gl"
+import { Map, Marker, FullscreenControl } from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
 import { Spinner } from "react-bootstrap"
 import { FaArrowDown, FaArrowUp, FaSearch, FaTrash } from "react-icons/fa"
@@ -12,7 +12,7 @@ import { decodePolyline } from "../utils/polyline"
 import { searchPlaces } from "../utils/geocoding"
 import { MAP_STYLE_URL } from "../utils/mapStyle"
 import { COLORS, FONTS } from "../styles/theme" // solo per marcatori/layer MapLibre, DOM/paint fuori da React
-import "./RouteEditorPage.css"
+import "../pages/CSS/RouteEditorPage.css"
 
 const START_CENTER = [16.2977, 41.3203]
 

@@ -11,7 +11,7 @@ import { useGetFollowStatsQuery } from "../features/social/followApi"
 import ProfileEditModal from "../features/users/components/ProfileEditModal"
 import ProfileLinksSection from "../features/users/components/ProfileLinksSection"
 import SecuritySection from "../features/users/components/SecuritySection"
-import "./ProfilePage.css"
+import "../pages/CSS/ProfilePage.css"
 
 const MENU_ITEMS = [
   { to: "/garage", label: "Garage" },

@@ -13,7 +13,7 @@ import NotificationBell from "../features/notification/components/NotificationBe
 import { MAP_STYLE_URL } from "../utils/mapStyle"
 import { COLORS } from "../styles/theme" // solo per i marcatori MapLibre, DOM creati fuori da React — stessa eccezione di EventDetailPage
 import { EVENT_TYPE_LABELS } from "../utils/constants"
-import "./HomePage.css"
+import "../pages/CSS/HomePage.css"
 
 const RADIUS_KM = 40
 const INITIAL_CENTER = [12.4964, 41.9028]

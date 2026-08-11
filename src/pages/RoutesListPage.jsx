@@ -8,7 +8,7 @@ import {
   useSetImportableMutation,
 } from "../features/routesMap/routesApi"
 import { downloadGpx } from "../utils/gpx"
-import "./RoutesListPage.css"
+import "../pages/CSS/RoutesListPage.css"
 
 function RoutesListPage() {
   const [page, setPage] = useState(0)

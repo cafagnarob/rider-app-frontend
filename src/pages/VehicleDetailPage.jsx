@@ -15,7 +15,7 @@ import { useGetMyRidesQuery } from "../features/rides/ridesApi"
 import { useGetPostsByVehicleQuery } from "../features/social/postsApi"
 import VehicleEditModal from "../features/vehicles/components/VehicleEditModal"
 import { CATEGORY_LABELS, RIDE_TYPE_LABELS } from "../utils/constants"
-import "./VehicleDetailPage.css"
+import "../pages/CSS/VehicleDetailPage.css"
 
 function VehicleDetailPage() {
   const { vehicleId } = useParams()

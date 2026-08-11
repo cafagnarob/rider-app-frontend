@@ -26,7 +26,7 @@ import { decodePolyline } from "../utils/polyline"
 import { MAP_STYLE_URL } from "../utils/mapStyle"
 import { COLORS } from "../styles/theme" // solo per i marcatori MapLibre: sono DOM creati a mano, fuori dal render React, quindi non possono usare classi CSS — restano gli unici tre riferimenti diretti a COLORS in questo file
 import { VISIBILITY_LABELS, EVENT_TYPE_LABELS } from "../utils/constants"
-import "./EventDetailPage.css"
+import "../pages/CSS/EventDetailPage.css"
 
 function EventDetailPage() {
   const { eventId } = useParams()
