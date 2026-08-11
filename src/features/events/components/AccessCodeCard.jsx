@@ -4,7 +4,6 @@ import {
   useRegenerateAccessCodeMutation,
 } from "../eventsApi"
 import { generateAccessCode } from "../../../utils/codeGenerator"
-import { COLORS, FONTS, styles } from "../../../styles/theme"
 
 function AccessCodeCard({ eventId }) {
   const { data, isLoading } = useGetAccessCodeQuery(eventId)
@@ -40,38 +39,17 @@ function AccessCodeCard({ eventId }) {
   }
 
   return (
-    <div style={{ ...styles.card, padding: 18, marginBottom: 20 }}>
-      <div style={{ ...styles.fieldLabel, marginBottom: 10 }}>
-        CODICE DI ACCESSO
-      </div>
+    <div className="card section-card">
+      <div className="field-label section-card__label">CODICE DI ACCESSO</div>
 
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          marginBottom: 12,
-        }}
-      >
-        <div
-          style={{
-            flex: 1,
-            padding: "12px 14px",
-            borderRadius: 12,
-            background: COLORS.cardAlt,
-            border: `1px solid ${COLORS.borderSoft}`,
-            fontFamily: FONTS.mono,
-            fontSize: 18,
-            letterSpacing: ".15em",
-            color: COLORS.accent,
-          }}
-        >
+      <div className="code-display-row">
+        <div className="code-display-box">
           {isLoading ? "······" : data?.accessCode}
         </div>
         <button
           type="button"
+          className="btn-secondary code-copy-btn"
           onClick={handleCopy}
-          style={{ ...styles.secondaryButton, height: 46, padding: "0 14px" }}
         >
           {copied ? "OK" : "COPIA"}
         </button>
@@ -80,61 +58,39 @@ function AccessCodeCard({ eventId }) {
       {!showConfirm ? (
         <button
           type="button"
+          className="text-btn text-btn--secondary"
+          style={{ fontSize: 10 }}
           onClick={() => setShowConfirm(true)}
-          style={{
-            background: "none",
-            border: "none",
-            color: COLORS.textSecondary,
-            fontFamily: FONTS.mono,
-            fontSize: 10,
-            cursor: "pointer",
-          }}
         >
           RIGENERA CODICE
         </button>
       ) : (
         <form onSubmit={handleRegenerate}>
-          <div
-            style={{
-              fontFamily: FONTS.body,
-              fontSize: 12,
-              color: COLORS.textSecondary,
-              marginBottom: 8,
-            }}
-          >
+          <div className="code-hint-text">
             Chi ha già partecipato non è coinvolto: il nuovo codice servirà solo
             a chi si iscrive da ora in poi. Conferma con la tua password.
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             <input
               type="password"
+              className="input"
+              style={{ height: 42, flex: 1 }}
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              style={{ ...styles.input, height: 42, flex: 1 }}
             />
             <button
               type="submit"
+              className="btn-secondary"
+              style={{ height: 42, padding: "0 14px" }}
               disabled={isRegenerating}
-              style={{
-                ...styles.secondaryButton,
-                height: 42,
-                padding: "0 14px",
-              }}
             >
               {isRegenerating ? "..." : "CONFERMA"}
             </button>
           </div>
           {errorMsg && (
-            <div
-              style={{
-                fontFamily: FONTS.body,
-                fontSize: 12,
-                color: COLORS.danger,
-                marginTop: 8,
-              }}
-            >
+            <div className="error-text" style={{ fontSize: 12, marginTop: 8 }}>
               {errorMsg}
             </div>
           )}
