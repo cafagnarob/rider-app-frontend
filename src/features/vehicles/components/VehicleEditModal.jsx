@@ -1,11 +1,11 @@
 import { useState } from "react"
+import { FaTimes, FaTrash } from "react-icons/fa"
 import {
-  useDeleteVehiclePhotoMutation,
   useUpdateVehicleMutation,
   useUpdateVehiclePhotoMutation,
+  useDeleteVehiclePhotoMutation,
 } from "../vehiclesApi"
-import { COLORS, FONTS, styles } from "../../../styles/theme"
-import { FaTimes, FaTrash } from "react-icons/fa"
+import "./VehicleEditModal.css"
 
 function VehicleEditModal({ vehicle, onClose }) {
   const [updateVehicle, { isLoading: isSaving }] = useUpdateVehicleMutation()
@@ -93,153 +93,44 @@ function VehicleEditModal({ vehicle, onClose }) {
   const currentImage = preview || vehicle?.photoUrl
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(6,6,7,.72)",
-        zIndex: 200,
-        display: "flex",
-        alignItems: "flex-end",
-        justifyContent: "center",
-      }}
-      onClick={handleClose}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          width: "100%",
-          maxWidth: 480,
-          maxHeight: "92vh",
-          overflowY: "auto",
-          background: COLORS.bg,
-          borderRadius: "24px 24px 0 0",
-          border: `1px solid ${COLORS.borderSoft}`,
-          borderBottom: "none",
-        }}
-      >
+    <div className="sheet-overlay" onClick={handleClose}>
+      <div className="sheet-panel" onClick={(e) => e.stopPropagation()}>
         <form onSubmit={handleSubmit}>
-          <div
-            style={{
-              position: "sticky",
-              top: 0,
-              background: COLORS.bg,
-              zIndex: 2,
-              borderBottom: `1px solid ${COLORS.borderSoft}`,
-              padding: "20px 20px 14px",
-              display: "flex",
-              alignItems: "center",
-              gap: 12,
-            }}
-          >
-            <button
-              type="button"
-              onClick={handleClose}
-              style={styles.iconButton}
-            >
+          <div className="sheet-header">
+            <button type="button" className="btn-icon" onClick={handleClose}>
               <FaTimes />
             </button>
-            <div
-              style={{
-                flex: 1,
-                ...styles.pageTitle,
-                fontSize: 20,
-                lineHeight: 1.15,
-              }}
-            >
+            <div className="sheet-header__title">
               {vehicle.model.brand.name} {vehicle.model.name}
             </div>
             <button
               type="submit"
+              className="sheet-save-btn"
               disabled={isBusy}
-              style={{
-                height: 40,
-                padding: "0 16px",
-                borderRadius: 13,
-                background: COLORS.accent,
-                border: "none",
-                color: COLORS.onAccent,
-                fontFamily: FONTS.heading,
-                fontWeight: 700,
-                fontSize: 15,
-                letterSpacing: ".05em",
-                cursor: "pointer",
-                opacity: isBusy ? 0.5 : 1,
-              }}
+              style={{ opacity: isBusy ? 0.5 : 1 }}
             >
               {isSaving || isUploading ? "..." : "SALVA"}
             </button>
           </div>
 
-          <div
-            style={{
-              padding: 20,
-              display: "flex",
-              flexDirection: "column",
-              gap: 16,
-            }}
-          >
+          <div className="sheet-body">
             <div>
-              <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>FOTO</div>
+              <div className="field-label form-group__label">FOTO</div>
 
               {currentImage ? (
-                <div
-                  style={{
-                    height: 160,
-                    borderRadius: 14,
-                    overflow: "hidden",
-                    background: COLORS.cardAlt,
-                    marginBottom: 10,
-                  }}
-                >
-                  <img
-                    src={currentImage}
-                    alt=""
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                      display: "block",
-                    }}
-                  />
+                <div className="photo-field__preview">
+                  <img src={currentImage} alt="" />
                 </div>
               ) : (
-                <div
-                  style={{
-                    height: 100,
-                    borderRadius: 14,
-                    background: COLORS.card,
-                    border: `1px dashed ${COLORS.borderStrong}`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginBottom: 10,
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: FONTS.mono,
-                      fontSize: 11,
-                      color: COLORS.textFaint,
-                    }}
-                  >
+                <div className="photo-field__placeholder">
+                  <span className="photo-field__placeholder-text">
                     NESSUNA FOTO
                   </span>
                 </div>
               )}
 
-              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                <label
-                  style={{
-                    ...styles.secondaryButton,
-                    height: 36,
-                    padding: "0 14px",
-                    fontSize: 12,
-                    display: "inline-flex",
-                    alignItems: "center",
-                    cursor: "pointer",
-                  }}
-                >
+              <div className="photo-field__actions">
+                <label className="btn-secondary photo-field__change-label">
                   {currentImage ? "CAMBIA FOTO" : "AGGIUNGI FOTO"}
                   <input
                     type="file"
@@ -251,23 +142,10 @@ function VehicleEditModal({ vehicle, onClose }) {
                 {vehicle.photoUrl && !newPhoto && (
                   <button
                     type="button"
-                    onClick={handleRemovePhoto}
+                    className="photo-field__remove-btn"
                     disabled={isBusy}
-                    style={{
-                      height: 36,
-                      padding: "0 12px",
-                      borderRadius: 10,
-                      background: COLORS.dangerBg,
-                      border: `1px solid ${COLORS.dangerBorder}`,
-                      color: COLORS.danger,
-                      fontFamily: FONTS.mono,
-                      fontSize: 10,
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 5,
-                      opacity: isBusy ? 0.5 : 1,
-                    }}
+                    style={{ opacity: isBusy ? 0.5 : 1 }}
+                    onClick={handleRemovePhoto}
                   >
                     <FaTrash size={10} /> {isRemoving ? "..." : "RIMUOVI"}
                   </button>
@@ -275,96 +153,74 @@ function VehicleEditModal({ vehicle, onClose }) {
               </div>
 
               {preview && (
-                <div
-                  style={{
-                    fontFamily: FONTS.body,
-                    fontSize: 12,
-                    color: COLORS.accent,
-                    marginTop: 8,
-                  }}
-                >
+                <div className="photo-field__hint">
                   Nuova foto selezionata — verrà caricata al salvataggio.
                 </div>
               )}
             </div>
 
             <div>
-              <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
-                SOPRANNOME
-              </div>
+              <div className="field-label form-group__label">SOPRANNOME</div>
               <input
                 type="text"
+                className="input"
                 value={form.nickname}
                 onChange={set("nickname")}
-                style={styles.input}
               />
             </div>
 
-            <div style={{ display: "flex", gap: 12 }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
-                  ANNO
-                </div>
+            <div className="field-row">
+              <div className="field-col">
+                <div className="field-label form-group__label">ANNO</div>
                 <input
                   type="number"
+                  className="input"
                   value={form.year}
                   min={vehicle.model.yearStart}
                   max={vehicle.model.yearEnd || new Date().getFullYear()}
                   onChange={set("year")}
-                  style={{ ...styles.input, width: "100%" }}
                 />
               </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
-                  COLORE
-                </div>
+              <div className="field-col">
+                <div className="field-label form-group__label">COLORE</div>
                 <input
                   type="text"
+                  className="input"
                   value={form.color}
                   onChange={set("color")}
-                  style={{ ...styles.input, width: "100%" }}
                 />
               </div>
             </div>
 
             <div>
-              <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>TARGA</div>
+              <div className="field-label form-group__label">TARGA</div>
               <input
                 type="text"
+                className="input"
+                style={{ textTransform: "uppercase" }}
                 value={form.licensePlate}
                 onChange={set("licensePlate")}
-                style={{ ...styles.input, textTransform: "uppercase" }}
               />
             </div>
 
             <div>
-              <div style={{ ...styles.fieldLabel, marginBottom: 8 }}>
+              <div className="field-label form-group__label">
                 NUMERO DI TELAIO (VIN)
               </div>
               <input
                 type="text"
+                className="input"
                 maxLength={17}
+                style={{
+                  textTransform: "uppercase",
+                  fontFamily: "var(--font-mono)",
+                }}
                 value={form.vin}
                 onChange={set("vin")}
-                style={{
-                  ...styles.input,
-                  textTransform: "uppercase",
-                  fontFamily: FONTS.mono,
-                }}
               />
             </div>
 
-            {errorMsg && (
-              <div
-                style={{
-                  fontFamily: FONTS.body,
-                  fontSize: 13,
-                  color: COLORS.danger,
-                }}
-              >
-                {errorMsg}
-              </div>
-            )}
+            {errorMsg && <div className="error-text">{errorMsg}</div>}
           </div>
         </form>
       </div>
