@@ -4,7 +4,6 @@ import {
   useGetFollowingQuery,
 } from "../../social/followApi"
 import { useGetCurrentUserQuery } from "../../users/usersApi"
-import { COLORS, FONTS, styles } from "../../../styles/theme"
 
 function InviteSelector({ selected, onChange }) {
   const { data: me } = useGetCurrentUserQuery()
@@ -42,88 +41,37 @@ function InviteSelector({ selected, onChange }) {
     <div>
       <input
         type="text"
+        className="input"
+        style={{ height: 42, marginBottom: 10 }}
         placeholder="Cerca tra i tuoi contatti..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        style={{ ...styles.input, height: 42, marginBottom: 10 }}
       />
 
       {filtered.length === 0 && (
-        <p
-          style={{
-            fontFamily: FONTS.body,
-            fontSize: 13,
-            color: COLORS.textFaint,
-          }}
-        >
-          Nessun contatto trovato.
-        </p>
+        <p className="picker-empty-text">Nessun contatto trovato.</p>
       )}
 
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 6,
-          maxHeight: 240,
-          overflowY: "auto",
-        }}
-      >
+      <div className="contact-list">
         {filtered.map((contact) => {
           const isSelected = selected.includes(contact.username)
           return (
             <button
               type="button"
               key={contact.username}
+              className={`selectable-contact-row ${isSelected ? "selectable-contact-row--selected" : ""}`}
               onClick={() => toggle(contact.username)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                padding: "9px 11px",
-                borderRadius: 11,
-                cursor: "pointer",
-                textAlign: "left",
-                background: isSelected ? COLORS.accentSoftBg : COLORS.cardAlt,
-                border: `1px solid ${isSelected ? COLORS.accentSoftBorder : COLORS.borderSoft}`,
-              }}
             >
               <img
                 src={contact.profilePicture}
                 alt={contact.username}
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: "50%",
-                  objectFit: "cover",
-                  background: COLORS.surfaceRaised,
-                }}
+                className="contact-row__avatar"
               />
-              <span
-                style={{
-                  flex: 1,
-                  fontFamily: FONTS.body,
-                  fontSize: 14,
-                  color: COLORS.text,
-                }}
-              >
+              <span className="selectable-contact-row__name">
                 {contact.username}
               </span>
               <span
-                style={{
-                  width: 20,
-                  height: 20,
-                  borderRadius: 6,
-                  flexShrink: 0,
-                  background: isSelected ? COLORS.accent : "transparent",
-                  border: `1px solid ${isSelected ? COLORS.accent : COLORS.borderStrong}`,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontFamily: FONTS.mono,
-                  fontSize: 12,
-                  color: COLORS.onAccent,
-                }}
+                className={`selectable-contact-row__checkbox ${isSelected ? "selectable-contact-row__checkbox--checked" : ""}`}
               >
                 {isSelected ? "✓" : ""}
               </span>
@@ -133,14 +81,7 @@ function InviteSelector({ selected, onChange }) {
       </div>
 
       {selected.length > 0 && (
-        <div
-          style={{
-            fontFamily: FONTS.mono,
-            fontSize: 10,
-            color: COLORS.textMuted,
-            marginTop: 8,
-          }}
-        >
+        <div className="selection-count">
           {selected.length} SELEZIONAT{selected.length === 1 ? "O" : "I"}
         </div>
       )}
