@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react"
-import { COLORS } from "../../../styles/theme"
 
 const AUTOPLAY_INTERVAL = 4000
 const RESUME_DELAY = 5000
@@ -55,6 +54,22 @@ function PostAutoCarousel({ media, height = 320, onDoubleClick }) {
     setDragOffset(dragDeltaX.current)
   }
 
+  const tapTimer = useRef(null)
+
+  useEffect(() => () => clearTimeout(tapTimer.current), [])
+
+  const handleTap = () => {
+    if (tapTimer.current) {
+      clearTimeout(tapTimer.current)
+      tapTimer.current = null
+      onDoubleClick?.()
+    } else {
+      tapTimer.current = setTimeout(() => {
+        tapTimer.current = null
+      }, 260)
+    }
+  }
+
   const handlePointerUp = () => {
     if (count < 2) {
       handleTap()
@@ -75,44 +90,21 @@ function PostAutoCarousel({ media, height = 320, onDoubleClick }) {
     setIsDragging(false)
   }
 
-  const tapTimer = useRef(null)
-
-  useEffect(() => () => clearTimeout(tapTimer.current), [])
-
-  const handleTap = () => {
-    if (tapTimer.current) {
-      clearTimeout(tapTimer.current)
-      tapTimer.current = null
-      onDoubleClick?.()
-    } else {
-      tapTimer.current = setTimeout(() => {
-        tapTimer.current = null
-      }, 260)
-    }
-  }
-
   if (count === 0) return null
 
   return (
     <div
+      className="auto-carousel"
+      style={{ height }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerLeave={handlePointerCancel}
-      style={{
-        position: "relative",
-        height,
-        borderRadius: 18,
-        overflow: "hidden",
-        border: `1px solid ${COLORS.borderSoft}`,
-        touchAction: "pan-y",
-      }}
     >
       <div
+        className="auto-carousel__track"
         style={{
-          display: "flex",
           width: `${count * 100}%`,
-          height: "100%",
           transform: `translateX(calc(${-index * (100 / count)}% + ${dragOffset}px))`,
           transition: isDragging
             ? "none"
@@ -122,46 +114,21 @@ function PostAutoCarousel({ media, height = 320, onDoubleClick }) {
         {media.map((m) => (
           <div
             key={m.id}
-            style={{ width: `${100 / count}%`, height: "100%", flexShrink: 0 }}
+            className="auto-carousel__slide"
+            style={{ width: `${100 / count}%` }}
           >
-            <img
-              src={m.mediaUrl}
-              alt=""
-              draggable={false}
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                display: "block",
-              }}
-            />
+            <img src={m.mediaUrl} alt="" draggable={false} />
           </div>
         ))}
       </div>
 
       {count > 1 && (
-        <div
-          style={{
-            position: "absolute",
-            bottom: 12,
-            left: 0,
-            right: 0,
-            display: "flex",
-            justifyContent: "center",
-            gap: 5,
-          }}
-        >
+        <div className="auto-carousel__dots">
           {media.map((_, i) => (
             <span
               key={i}
-              style={{
-                width: i === index ? 16 : 5,
-                height: 5,
-                borderRadius: 3,
-                background:
-                  i === index ? COLORS.accent : "rgba(255,255,255,.35)",
-                transition: "width 0.25s ease",
-              }}
+              className={`auto-carousel__dot ${i === index ? "auto-carousel__dot--active" : ""}`}
+              style={{ width: i === index ? 16 : 5 }}
             />
           ))}
         </div>
