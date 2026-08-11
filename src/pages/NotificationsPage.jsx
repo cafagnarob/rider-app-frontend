@@ -1,17 +1,17 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { Spinner } from "react-bootstrap"
 import {
   useGetNotificationsQuery,
-  useMarkAllAsReadMutation,
   useMarkAsReadMutation,
+  useMarkAllAsReadMutation,
 } from "../features/notification/notificationsApi"
 import {
   buildNotificationLink,
   NOTIFICATION_ICONS,
 } from "../utils/notifications"
-import { Spinner } from "react-bootstrap"
 import { formatRelativeTime } from "../utils/dateFormat"
-import { COLORS, FONTS, styles } from "../styles/theme"
+import "./NotificationsPage.css"
 
 function NotificationsPage() {
   const [page, setPage] = useState(0)
@@ -34,49 +34,30 @@ function NotificationsPage() {
 
   if (isLoading) {
     return (
-      <div style={{ textAlign: "center", padding: "60px 0" }}>
-        <Spinner animation="border" style={{ color: COLORS.accent }} />
+      <div className="centered-spinner">
+        <Spinner animation="border" style={{ color: "#FF7A2F" }} />
       </div>
     )
   }
 
   return (
-    <div style={{ ...styles.pageBg, paddingTop: 20, paddingBottom: 40 }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "0 20px 18px",
-        }}
-      >
-        <div style={{ ...styles.pageTitle, fontSize: 26 }}>NOTIFICHE</div>
+    <div className="page">
+      <div className="header-row notifications-page__header">
+        <div className="page-title" style={{ fontSize: 26 }}>
+          NOTIFICHE
+        </div>
         <button
           type="button"
+          className="btn-secondary"
+          style={{ height: 36, padding: "0 13px", fontSize: 10.5 }}
           onClick={() => markAllAsRead()}
-          style={{
-            ...styles.secondaryButton,
-            height: 36,
-            padding: "0 13px",
-            fontSize: 10.5,
-          }}
         >
           SEGNA TUTTE
         </button>
       </div>
 
       {data?.content.length === 0 ? (
-        <p
-          style={{
-            fontFamily: FONTS.body,
-            fontSize: 13,
-            color: COLORS.textFaint,
-            textAlign: "center",
-            padding: "60px 20px",
-          }}
-        >
-          Non hai notifiche.
-        </p>
+        <p className="empty-list-text">Non hai notifiche.</p>
       ) : (
         <div style={{ opacity: isFetching ? 0.6 : 1 }}>
           {data.content.map((n) => {
@@ -87,69 +68,31 @@ function NotificationsPage() {
               n.referenceId,
               n.type,
             )
+
             return (
               <div
                 key={n.id}
+                className={`notification-row ${clickable ? "notification-row--clickable" : ""} ${!n.read ? "notification-row--unread" : ""}`}
                 onClick={() => handleClick(n)}
-                style={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  gap: 13,
-                  padding: "14px 20px",
-                  borderBottom: `1px solid ${COLORS.borderSoft}`,
-                  cursor: clickable ? "pointer" : "default",
-                  background: n.read ? "transparent" : "rgba(255,122,47,.05)",
-                }}
               >
                 {n.actorProfilePicture ? (
                   <img
                     src={n.actorProfilePicture}
                     alt=""
-                    style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: "50%",
-                      objectFit: "cover",
-                      background: COLORS.surfaceRaised,
-                      flexShrink: 0,
-                    }}
+                    className="notification-row__avatar"
                   />
                 ) : (
-                  <div
-                    style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: "50%",
-                      background: COLORS.cardAlt,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      flexShrink: 0,
-                    }}
-                  >
+                  <div className="notification-row__icon-fallback">
                     <Icon style={{ color }} size={17} />
                   </div>
                 )}
-                <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="notification-row__body">
                   <p
-                    style={{
-                      fontFamily: FONTS.body,
-                      fontSize: 14,
-                      fontWeight: n.read ? 400 : 600,
-                      color: COLORS.text,
-                      margin: "0 0 4px",
-                      lineHeight: 1.4,
-                    }}
+                    className={`notification-row__message ${!n.read ? "notification-row__message--unread" : ""}`}
                   >
                     {n.message}
                   </p>
-                  <span
-                    style={{
-                      fontFamily: FONTS.mono,
-                      fontSize: 9.5,
-                      color: COLORS.textMuted,
-                    }}
-                  >
+                  <span className="notification-row__time">
                     {formatRelativeTime(n.createdAt)}
                   </span>
                 </div>
@@ -160,47 +103,33 @@ function NotificationsPage() {
       )}
 
       {data?.totalPages > 1 && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: 16,
-            padding: "24px 20px",
-          }}
-        >
+        <div className="pagination-row">
           <button
             type="button"
-            disabled={data.first || isFetching}
-            onClick={() => setPage((p) => p - 1)}
+            className="btn-secondary"
             style={{
-              ...styles.secondaryButton,
               height: 40,
               padding: "0 16px",
               opacity: data.first ? 0.4 : 1,
             }}
+            disabled={data.first || isFetching}
+            onClick={() => setPage((p) => p - 1)}
           >
             PRECEDENTE
           </button>
-          <span
-            style={{
-              fontFamily: FONTS.mono,
-              fontSize: 11,
-              color: COLORS.textMuted,
-            }}
-          >
+          <span className="pagination-row__label">
             {data.number + 1} / {data.totalPages}
           </span>
           <button
             type="button"
-            disabled={data.last || isFetching}
-            onClick={() => setPage((p) => p + 1)}
+            className="btn-secondary"
             style={{
-              ...styles.secondaryButton,
               height: 40,
               padding: "0 16px",
               opacity: data.last ? 0.4 : 1,
             }}
+            disabled={data.last || isFetching}
+            onClick={() => setPage((p) => p + 1)}
           >
             SUCCESSIVA
           </button>
