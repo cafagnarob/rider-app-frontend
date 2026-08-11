@@ -9,10 +9,10 @@ import { searchPlaces } from "../utils/geocoding"
 import ModelDetailModal from "../features/catalog/components/ModelDetailModal"
 import {
   CATEGORY_LABELS,
-  EVENT_TYPE_LABELS,
   VISIBILITY_LABELS,
+  EVENT_TYPE_LABELS,
 } from "../utils/constants"
-import { COLORS, FONTS, styles } from "../styles/theme"
+import "./SearchPage.css"
 
 const TABS = [
   { key: "people", label: "MOTOCICLISTI" },
@@ -84,72 +84,34 @@ function SearchPage() {
   }
 
   return (
-    <div style={{ ...styles.pageBg, paddingTop: 20, paddingBottom: 40 }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          padding: "0 20px 16px",
-        }}
-      >
-        <button
-          type="button"
-          onClick={() => navigate(-1)}
-          style={styles.iconButton}
-        >
+    <div className="page">
+      <div className="search-page__header">
+        <button type="button" className="btn-icon" onClick={() => navigate(-1)}>
           <FaArrowLeft />
         </button>
-        <div style={{ position: "relative", flex: 1 }}>
+        <div className="search-page__search-wrap">
           <input
             type="search"
+            className="input"
             autoFocus
             placeholder="Cerca motociclisti, moto, eventi, luoghi..."
             value={queryInput}
             onChange={handleChange}
-            style={{ ...styles.input, height: 44, paddingRight: 40 }}
+            style={{ height: 44, paddingRight: 40 }}
           />
-          <FaSearch
-            style={{
-              position: "absolute",
-              right: 15,
-              top: "50%",
-              transform: "translateY(-50%)",
-              color: COLORS.textMuted,
-            }}
-          />
+          <FaSearch className="search-input-wrap__icon" />
         </div>
       </div>
 
-      <div
-        style={{
-          display: "flex",
-          gap: 8,
-          padding: "0 20px 18px",
-          overflowX: "auto",
-        }}
-      >
+      <div className="search-page__tabs">
         {TABS.map((t) => {
           const active = tab === t.key
           return (
             <button
               key={t.key}
               type="button"
+              className={`search-tab-pill ${active ? "search-tab-pill--active" : ""}`}
               onClick={() => setTab(t.key)}
-              style={{
-                height: 34,
-                padding: "0 13px",
-                borderRadius: 10,
-                flexShrink: 0,
-                background: active ? COLORS.accent : COLORS.card,
-                border: `1px solid ${COLORS.border}`,
-                color: active ? COLORS.onAccent : COLORS.textSecondary,
-                fontFamily: FONTS.mono,
-                fontSize: 10,
-                letterSpacing: ".05em",
-                cursor: "pointer",
-                whiteSpace: "nowrap",
-              }}
             >
               {t.label}
             </button>
@@ -158,83 +120,34 @@ function SearchPage() {
       </div>
 
       {!query.trim() && (
-        <p
-          style={{
-            fontFamily: FONTS.body,
-            fontSize: 13,
-            color: COLORS.textFaint,
-            textAlign: "center",
-            padding: "50px 20px",
-          }}
-        >
-          Digita per iniziare a cercare.
-        </p>
+        <p className="search-page__prompt">Digita per iniziare a cercare.</p>
       )}
 
       {query.trim() && tab === "people" && (
-        <div style={{ padding: "0 20px" }}>
+        <div className="search-page__tab-content">
           {usersQuery.isLoading ? (
             <div style={{ textAlign: "center", padding: 40 }}>
-              <Spinner animation="border" style={{ color: COLORS.accent }} />
+              <Spinner animation="border" style={{ color: "#FF7A2F" }} />
             </div>
           ) : usersQuery.data?.content.length === 0 ? (
-            <p
-              style={{
-                fontFamily: FONTS.body,
-                fontSize: 13,
-                color: COLORS.textFaint,
-                textAlign: "center",
-                padding: 40,
-              }}
-            >
-              Nessun motociclista trovato.
-            </p>
+            <p className="search-result-empty">Nessun motociclista trovato.</p>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {usersQuery.data?.content.map((u) => (
                 <Link
                   key={u.id}
                   to={`/profile/${u.username}`}
-                  style={{
-                    ...styles.card,
-                    padding: 13,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 12,
-                    textDecoration: "none",
-                  }}
+                  className="card result-row"
                 >
                   <img
                     src={u.profilePicture}
                     alt={u.username}
-                    style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: "50%",
-                      objectFit: "cover",
-                      background: COLORS.surfaceRaised,
-                    }}
+                    className="result-row__avatar"
                   />
                   <div>
-                    <div
-                      style={{
-                        fontFamily: FONTS.heading,
-                        fontWeight: 600,
-                        fontSize: 15,
-                        color: COLORS.text,
-                      }}
-                    >
-                      {u.username}
-                    </div>
+                    <div className="result-row__title">{u.username}</div>
                     {(u.name || u.surname) && (
-                      <div
-                        style={{
-                          fontFamily: FONTS.mono,
-                          fontSize: 10,
-                          color: COLORS.textMuted,
-                          marginTop: 2,
-                        }}
-                      >
+                      <div className="result-row__subtitle">
                         {u.name} {u.surname}
                       </div>
                     )}
@@ -247,74 +160,32 @@ function SearchPage() {
       )}
 
       {query.trim() && tab === "bikes" && (
-        <div style={{ padding: "0 20px" }}>
+        <div className="search-page__tab-content">
           {modelsQuery.isLoading ? (
             <div style={{ textAlign: "center", padding: 40 }}>
-              <Spinner animation="border" style={{ color: COLORS.accent }} />
+              <Spinner animation="border" style={{ color: "#FF7A2F" }} />
             </div>
           ) : modelsQuery.data?.content.length === 0 ? (
-            <p
-              style={{
-                fontFamily: FONTS.body,
-                fontSize: 13,
-                color: COLORS.textFaint,
-                textAlign: "center",
-                padding: 40,
-              }}
-            >
-              Nessun modello trovato.
-            </p>
+            <p className="search-result-empty">Nessun modello trovato.</p>
           ) : (
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: 10,
-              }}
-            >
+            <div className="grid-2">
               {modelsQuery.data?.content.map((model) => (
                 <div
                   key={model.id}
+                  className="card"
+                  style={{ cursor: "pointer", overflow: "hidden" }}
                   onClick={() => setSelectedModel(model)}
-                  style={{
-                    ...styles.card,
-                    cursor: "pointer",
-                    overflow: "hidden",
-                  }}
                 >
-                  <div
-                    style={{ aspectRatio: "16/10", background: COLORS.cardAlt }}
-                  >
+                  <div className="model-tile__image">
                     {model.imageUrl && (
-                      <img
-                        src={model.imageUrl}
-                        alt={model.name}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                        }}
-                      />
+                      <img src={model.imageUrl} alt={model.name} />
                     )}
                   </div>
-                  <div style={{ padding: "10px 11px" }}>
-                    <div
-                      style={{
-                        fontFamily: FONTS.heading,
-                        fontWeight: 600,
-                        fontSize: 14,
-                      }}
-                    >
+                  <div className="model-tile__info">
+                    <div className="model-tile__name">
                       {model.brand?.name} {model.name}
                     </div>
-                    <div
-                      style={{
-                        fontFamily: FONTS.mono,
-                        fontSize: 9,
-                        color: COLORS.textMuted,
-                        marginTop: 4,
-                      }}
-                    >
+                    <div className="model-tile__meta">
                       {CATEGORY_LABELS[model.category] || model.category}
                     </div>
                   </div>
@@ -326,85 +197,46 @@ function SearchPage() {
       )}
 
       {query.trim() && tab === "events" && (
-        <div style={{ padding: "0 20px" }}>
+        <div className="search-page__tab-content">
           {eventsQuery.isLoading ? (
             <div style={{ textAlign: "center", padding: 40 }}>
-              <Spinner animation="border" style={{ color: COLORS.accent }} />
+              <Spinner animation="border" style={{ color: "#FF7A2F" }} />
             </div>
           ) : eventsQuery.data?.content.length === 0 ? (
-            <p
+            <p className="search-result-empty">Nessun evento trovato.</p>
+          ) : (
+            <div
               style={{
-                fontFamily: FONTS.body,
-                fontSize: 13,
-                color: COLORS.textFaint,
-                textAlign: "center",
-                padding: 40,
+                display: "flex",
+                flexDirection: "column",
+                gap: 10,
               }}
             >
-              Nessun evento trovato.
-            </p>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {eventsQuery.data?.content.map((event) => {
                 const start = new Date(event.startDateTime)
                 return (
                   <Link
                     key={event.id}
                     to={`/events/${event.id}`}
-                    style={{
-                      ...styles.card,
-                      padding: 14,
-                      display: "flex",
-                      gap: 12,
-                      textDecoration: "none",
-                    }}
+                    className="card search-event-row"
                   >
-                    <div
-                      style={{
-                        width: 40,
-                        height: 40,
-                        flexShrink: 0,
-                        borderRadius: 10,
-                        background: COLORS.surfaceRaised,
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontFamily: FONTS.mono,
-                        color: COLORS.accent,
-                      }}
-                    >
-                      <span style={{ fontSize: 13 }}>{start.getDate()}</span>
-                      <span style={{ fontSize: 8, color: COLORS.textMuted }}>
+                    <div className="search-event-row__date">
+                      <span className="search-event-row__day">
+                        {start.getDate()}
+                      </span>
+                      <span className="search-event-row__month">
                         {start
                           .toLocaleDateString("it-IT", { month: "short" })
                           .toUpperCase()}
                       </span>
                     </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div
-                        style={{
-                          fontFamily: FONTS.heading,
-                          fontWeight: 600,
-                          fontSize: 15,
-                          color: COLORS.text,
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
+                    <div className="search-event-row__info">
+                      <div className="search-event-row__title">
                         {event.title}
                       </div>
-                      <div
-                        style={{
-                          fontFamily: FONTS.mono,
-                          fontSize: 9.5,
-                          color: COLORS.textMuted,
-                          marginTop: 3,
-                        }}
-                      >
+                      <div className="search-event-row__meta">
                         {event.type !== "STANDARD" && (
-                          <span style={{ color: COLORS.accent }}>
+                          <span style={{ color: "var(--color-accent)" }}>
                             {EVENT_TYPE_LABELS[event.type]} ·{" "}
                           </span>
                         )}
@@ -421,54 +253,24 @@ function SearchPage() {
       )}
 
       {query.trim() && tab === "places" && (
-        <div style={{ padding: "0 20px" }}>
+        <div className="search-page__tab-content">
           {isSearchingPlaces ? (
             <div style={{ textAlign: "center", padding: 40 }}>
-              <Spinner animation="border" style={{ color: COLORS.accent }} />
+              <Spinner animation="border" style={{ color: "#FF7A2F" }} />
             </div>
           ) : places.length === 0 ? (
-            <p
-              style={{
-                fontFamily: FONTS.body,
-                fontSize: 13,
-                color: COLORS.textFaint,
-                textAlign: "center",
-                padding: 40,
-              }}
-            >
-              Nessun luogo trovato.
-            </p>
+            <p className="search-result-empty">Nessun luogo trovato.</p>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {places.map((place) => (
                 <button
                   key={place.id}
                   type="button"
+                  className="card place-result-btn"
                   onClick={() => handlePlaceClick(place)}
-                  style={{
-                    ...styles.card,
-                    padding: 14,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 12,
-                    border: `1px solid ${COLORS.border}`,
-                    cursor: "pointer",
-                    textAlign: "left",
-                    width: "100%",
-                  }}
                 >
-                  <FaMapMarkerAlt
-                    style={{ color: COLORS.accent, flexShrink: 0 }}
-                  />
-                  <span
-                    style={{
-                      fontFamily: FONTS.body,
-                      fontSize: 14,
-                      color: COLORS.text,
-                    }}
-                  >
-                    {place.name}
-                  </span>
+                  <FaMapMarkerAlt className="place-result-btn__icon" />
+                  <span className="place-result-btn__label">{place.name}</span>
                 </button>
               ))}
             </div>
