@@ -1,0 +1,133 @@
+.search-page__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px 16px;
+}
+
+.search-page__search-wrap {
+  position: relative;
+  flex: 1;
+}
+
+.search-page__tabs {
+  display: flex;
+  gap: 8px;
+  padding: 0 20px 18px;
+  overflow-x: auto;
+}
+
+.search-tab-pill {
+  height: 34px;
+  padding: 0 13px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.search-tab-pill--active {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.search-page__prompt {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-faint);
+  text-align: center;
+  padding: 50px 20px;
+}
+
+.search-page__tab-content {
+  padding: 0 20px;
+}
+
+.search-result-empty {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-faint);
+  text-align: center;
+  padding: 40px;
+}
+
+.search-event-row {
+  padding: 14px;
+  gap: 12px;
+  text-decoration: none;
+  display: flex;
+  flex-direction: row;
+}
+
+.search-event-row__date {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: var(--color-surface-raised);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  color: var(--color-accent);
+}
+
+.search-event-row__day {
+  font-size: 13px;
+}
+
+.search-event-row__month {
+  font-size: 8px;
+  color: var(--color-text-muted);
+}
+
+.search-event-row__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.search-event-row__title {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.search-event-row__meta {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--color-text-muted);
+  margin-top: 3px;
+}
+
+.place-result-btn {
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+
+.place-result-btn__icon {
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.place-result-btn__label {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text);
+}
