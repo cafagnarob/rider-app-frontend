@@ -1,14 +1,14 @@
 import { useRef, useState } from "react"
-import {
-  useDeleteRouteMutation,
-  useGetMyRoutesQuery,
-  useSetImportableMutation,
-} from "../features/routesMap/routesApi"
 import { Link, useNavigate } from "react-router-dom"
 import { Spinner } from "react-bootstrap"
-import { downloadGpx } from "../utils/gpx"
-import { COLORS, FONTS, styles } from "../styles/theme"
 import { FaDownload, FaTrash } from "react-icons/fa"
+import {
+  useGetMyRoutesQuery,
+  useDeleteRouteMutation,
+  useSetImportableMutation,
+} from "../features/routesMap/routesApi"
+import { downloadGpx } from "../utils/gpx"
+import "./RoutesListPage.css"
 
 function RoutesListPage() {
   const [page, setPage] = useState(0)
@@ -26,11 +26,8 @@ function RoutesListPage() {
     timerRef.current = setTimeout(() => setPage(0), 400)
   }
 
-  const filtered = data?.content.filter((r) =>
-    r.name.toLowerCase().includes(searchInput.toLowerCase()),
-  )
-
-  const handleDelete = async (routeId) => {
+  const handleDelete = async (e, routeId) => {
+    e.stopPropagation()
     try {
       await deleteRoute(routeId).unwrap()
     } catch (err) {
@@ -50,231 +47,114 @@ function RoutesListPage() {
 
   if (isLoading) {
     return (
-      <div style={{ textAlign: "center", padding: "60px 0" }}>
-        <Spinner animation="border" style={{ color: COLORS.accent }} />
+      <div className="centered-spinner">
+        <Spinner animation="border" style={{ color: "#FF7A2F" }} />
       </div>
     )
   }
 
   if (isError) {
     return (
-      <div style={{ ...styles.emptyState, margin: 20 }}>
+      <div className="empty-state" style={{ margin: 20 }}>
         Impossibile caricare i percorsi.
       </div>
     )
   }
 
+  const filtered = data?.content.filter((r) =>
+    r.name.toLowerCase().includes(searchInput.toLowerCase()),
+  )
+
   return (
-    <div style={{ ...styles.pageBg, paddingTop: 20, paddingBottom: 40 }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "0 20px 16px",
-        }}
-      >
-        <div style={{ ...styles.pageTitle, fontSize: 28 }}>PERCORSI</div>
-        <Link
-          to="/routes/new"
-          style={{
-            height: 40,
-            padding: "0 15px",
-            borderRadius: 12,
-            background: COLORS.accent,
-            border: "none",
-            color: COLORS.onAccent,
-            fontFamily: FONTS.heading,
-            fontWeight: 700,
-            fontSize: 15,
-            letterSpacing: ".04em",
-            display: "inline-flex",
-            alignItems: "center",
-            textDecoration: "none",
-          }}
-        >
+    <div className="page">
+      <div className="header-row routes-list-page__header">
+        <div className="page-title" style={{ fontSize: 28 }}>
+          PERCORSI
+        </div>
+        <Link to="/routes/new" className="btn-accent-sm">
           + NUOVO
         </Link>
       </div>
 
-      <div style={{ padding: "0 20px 16px" }}>
+      <div className="routes-list-page__search">
         <input
           type="search"
+          className="input input--compact"
           placeholder="Cerca percorso..."
           value={searchInput}
           onChange={handleSearchChange}
-          style={{ ...styles.input, height: 44 }}
         />
       </div>
 
       {data.content.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "60px 20px" }}>
-          <p
-            style={{
-              fontFamily: FONTS.body,
-              fontSize: 13,
-              color: COLORS.textSecondary,
-              marginBottom: 22,
-            }}
-          >
+        <div className="empty-hero">
+          <p className="empty-hero__text">
             Non hai ancora creato nessun percorso.
           </p>
-          <Link
-            to="/routes/new"
-            style={{
-              ...styles.primaryButton,
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "0 32px",
-              textDecoration: "none",
-            }}
-          >
+          <Link to="/routes/new" className="btn-primary empty-hero__cta">
             CREA IL PRIMO
           </Link>
         </div>
       ) : filtered.length === 0 ? (
-        <p
-          style={{
-            fontFamily: FONTS.body,
-            fontSize: 13,
-            color: COLORS.textFaint,
-            textAlign: "center",
-            padding: "40px 20px",
-          }}
-        >
+        <p className="no-results-text">
           Nessun percorso corrisponde alla ricerca.
         </p>
       ) : (
-        <div
-          style={{
-            padding: "0 20px",
-            display: "flex",
-            flexDirection: "column",
-            gap: 12,
-            opacity: isFetching ? 0.6 : 1,
-          }}
-        >
+        <div className="route-list" style={{ opacity: isFetching ? 0.6 : 1 }}>
           {filtered.map((route) => (
             <div
               key={route.id}
+              className="card"
+              style={{ padding: 16, cursor: "pointer" }}
               onClick={() => navigate(`/routes/${route.id}`)}
-              style={{ ...styles.card, padding: 16, cursor: "pointer" }}
             >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "flex-start",
-                  marginBottom: 10,
-                }}
-              >
-                <div
-                  style={{
-                    fontFamily: FONTS.heading,
-                    fontWeight: 700,
-                    fontSize: 18,
-                    lineHeight: 1.15,
-                  }}
-                >
-                  {route.name}
-                </div>
+              <div className="route-card__header">
+                <div className="route-card__name">{route.name}</div>
                 {route.importable && (
-                  <span
-                    style={{
-                      padding: "3px 8px",
-                      borderRadius: 7,
-                      background: COLORS.accentSoftBg,
-                      border: `1px solid ${COLORS.accentSoftBorder}`,
-                      fontFamily: FONTS.mono,
-                      fontSize: 9,
-                      color: COLORS.accent,
-                      flexShrink: 0,
-                      marginLeft: 8,
-                    }}
-                  >
+                  <span className="route-card__importable-badge">
                     IMPORTABILE
                   </span>
                 )}
               </div>
 
-              <div
-                style={{
-                  display: "flex",
-                  gap: 6,
-                  flexWrap: "wrap",
-                  marginBottom: 14,
-                }}
-              >
-                <span style={pillStyle}>
+              <div className="route-card__badges">
+                <span className="meta-badge">
                   {(route.distanceMeters / 1000).toFixed(1).replace(".", ",")}{" "}
                   KM
                 </span>
-                <span style={pillStyle}>
+                <span className="meta-badge">
                   {Math.round(route.durationSeconds / 60)} MIN
                 </span>
-                <span style={pillStyle}>{route.waypoints.length} TAPPE</span>
+                <span className="meta-badge">
+                  {route.waypoints.length} TAPPE
+                </span>
                 {route.avoidHighways && (
-                  <span style={pillStyle}>NO AUTOSTRADE</span>
+                  <span className="meta-badge">NO AUTOSTRADE</span>
                 )}
-                {route.avoidTolls && <span style={pillStyle}>NO PEDAGGI</span>}
+                {route.avoidTolls && (
+                  <span className="meta-badge">NO PEDAGGI</span>
+                )}
               </div>
 
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div className="route-card__actions">
                 <button
                   type="button"
+                  className="btn-outline-xs"
                   onClick={(e) => handleExport(e, route)}
-                  style={{
-                    height: 32,
-                    padding: "0 12px",
-                    borderRadius: 9,
-                    background: COLORS.card,
-                    border: `1px solid ${COLORS.borderStrong}`,
-                    color: COLORS.textSecondary,
-                    fontFamily: FONTS.mono,
-                    fontSize: 9.5,
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 5,
-                  }}
                 >
                   <FaDownload size={9} /> GPX
                 </button>
-
                 <button
                   type="button"
+                  className="btn-danger-xs"
                   onClick={(e) => handleDelete(e, route.id)}
-                  style={{
-                    height: 32,
-                    padding: "0 12px",
-                    borderRadius: 9,
-                    background: COLORS.dangerBg,
-                    border: `1px solid ${COLORS.dangerBorder}`,
-                    color: COLORS.danger,
-                    fontFamily: FONTS.mono,
-                    fontSize: 9.5,
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 5,
-                  }}
                 >
                   <FaTrash size={9} /> ELIMINA
                 </button>
 
                 <label
+                  className="importable-toggle"
                   onClick={(e) => e.stopPropagation()}
-                  style={{
-                    marginLeft: "auto",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                    fontFamily: FONTS.mono,
-                    fontSize: 9.5,
-                    color: COLORS.textMuted,
-                    cursor: "pointer",
-                  }}
                 >
                   <input
                     type="checkbox"
@@ -292,47 +172,33 @@ function RoutesListPage() {
       )}
 
       {data.totalPages > 1 && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: 16,
-            padding: "24px 20px",
-          }}
-        >
+        <div className="pagination-row">
           <button
             type="button"
-            disabled={data.first || isFetching}
-            onClick={() => setPage((p) => p - 1)}
+            className="btn-secondary"
             style={{
-              ...styles.secondaryButton,
               height: 40,
               padding: "0 16px",
               opacity: data.first ? 0.4 : 1,
             }}
+            disabled={data.first || isFetching}
+            onClick={() => setPage((p) => p - 1)}
           >
             PRECEDENTE
           </button>
-          <span
-            style={{
-              fontFamily: FONTS.mono,
-              fontSize: 11,
-              color: COLORS.textMuted,
-            }}
-          >
+          <span className="pagination-row__label">
             {data.number + 1} / {data.totalPages}
           </span>
           <button
             type="button"
-            disabled={data.last || isFetching}
-            onClick={() => setPage((p) => p + 1)}
+            className="btn-secondary"
             style={{
-              ...styles.secondaryButton,
               height: 40,
               padding: "0 16px",
               opacity: data.last ? 0.4 : 1,
             }}
+            disabled={data.last || isFetching}
+            onClick={() => setPage((p) => p + 1)}
           >
             SUCCESSIVA
           </button>
@@ -340,16 +206,6 @@ function RoutesListPage() {
       )}
     </div>
   )
-}
-
-const pillStyle = {
-  padding: "4px 10px",
-  borderRadius: 8,
-  background: COLORS.cardAlt,
-  border: `1px solid ${COLORS.borderSoft}`,
-  fontFamily: FONTS.mono,
-  fontSize: 9.5,
-  color: COLORS.textSecondary,
 }
 
 export default RoutesListPage
