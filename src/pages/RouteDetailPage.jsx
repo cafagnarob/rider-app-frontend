@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react"
-import { Spinner } from "react-bootstrap"
 import { useParams, useNavigate } from "react-router-dom"
+import { Spinner } from "react-bootstrap"
 import {
   Map as MapLibreMap,
   Marker,
@@ -8,12 +8,13 @@ import {
   FullscreenControl,
 } from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
+import { FaArrowLeft, FaDownload } from "react-icons/fa"
 import { useGetRouteByIdQuery } from "../features/routesMap/routesApi"
 import { decodePolyline } from "../utils/polyline"
-import { COLORS, FONTS, styles } from "../styles/theme"
-import { FaArrowLeft, FaDownload } from "react-icons/fa"
 import { downloadGpx } from "../utils/gpx"
 import { MAP_STYLE_URL } from "../utils/mapStyle"
+import { COLORS } from "../styles/theme" // solo per i marcatori MapLibre, DOM creati fuori da React
+import "./RouteDetailPage.css"
 
 function RouteDetailPage() {
   const { routeId } = useParams()
@@ -108,93 +109,66 @@ function RouteDetailPage() {
 
   if (isLoading) {
     return (
-      <div style={{ textAlign: "center", padding: "60px 0" }}>
-        <Spinner animation="border" style={{ color: COLORS.accent }} />
+      <div className="centered-spinner">
+        <Spinner animation="border" style={{ color: "#FF7A2F" }} />
       </div>
     )
   }
 
-  if (isError)
+  if (isError) {
     return (
-      <div style={{ ...styles.emptyState, margin: 20 }}>
+      <div className="empty-state" style={{ margin: 20 }}>
         Percorso non trovato.
       </div>
     )
+  }
 
   return (
-    <div style={{ ...styles.pageBg, paddingBottom: 40 }}>
-      <div style={{ position: "relative", height: 260 }}>
+    <div className="page" style={{ paddingTop: 0 }}>
+      <div className="route-detail-page__map-wrapper">
         <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
         <button
           type="button"
+          className="btn-icon map-back-btn"
           onClick={() => navigate(-1)}
-          style={{
-            ...styles.iconButton,
-            position: "absolute",
-            left: 16,
-            top: 16,
-            background: "rgba(10,10,12,.8)",
-          }}
         >
           <FaArrowLeft />
         </button>
       </div>
 
-      <div style={{ padding: "20px 20px 0" }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            marginBottom: 14,
-          }}
-        >
-          <div style={{ ...styles.pageTitle, fontSize: 26 }}>{route.name}</div>
+      <div className="route-detail-page__content">
+        <div className="route-detail-page__title-row">
+          <div className="page-title" style={{ fontSize: 26 }}>
+            {route.name}
+          </div>
           <button
             type="button"
+            className="btn-outline-sm"
             onClick={() => downloadGpx(route)}
-            style={{
-              height: 38,
-              padding: "0 14px",
-              borderRadius: 11,
-              background: COLORS.card,
-              flexShrink: 0,
-              border: `1px solid ${COLORS.borderStrong}`,
-              color: COLORS.textSecondary,
-              fontFamily: FONTS.mono,
-              fontSize: 10,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-            }}
           >
             <FaDownload size={11} /> GPX
           </button>
         </div>
 
         <div
-          style={{
-            ...styles.statGrid,
-            gridTemplateColumns: "1fr 1fr 1fr",
-            marginBottom: 20,
-          }}
+          className="stat-grid stat-grid--cols-3"
+          style={{ marginBottom: 20 }}
         >
-          <div style={styles.statCell}>
-            <span style={styles.statLabel}>DISTANZA</span>
-            <span style={styles.statValue}>
+          <div className="stat-cell">
+            <span className="stat-label">DISTANZA</span>
+            <span className="stat-value">
               {(route.distanceMeters / 1000).toFixed(1).replace(".", ",")} KM
             </span>
           </div>
-          <div style={styles.statCell}>
-            <span style={styles.statLabel}>DURATA</span>
-            <span style={styles.statValue}>
+          <div className="stat-cell">
+            <span className="stat-label">DURATA</span>
+            <span className="stat-value">
               {Math.round(route.durationSeconds / 60)} MIN
             </span>
           </div>
-          <div style={styles.statCell}>
-            <span style={styles.statLabel}>TAPPE</span>
-            <span style={styles.statValue}>{route.waypoints.length}</span>
+          <div className="stat-cell">
+            <span className="stat-label">TAPPE</span>
+            <span className="stat-value">{route.waypoints.length}</span>
           </div>
         </div>
 
@@ -203,73 +177,31 @@ function RouteDetailPage() {
             href={route.googleMapsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            style={{
-              ...styles.secondaryButton,
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "0 18px",
-              textDecoration: "none",
-              marginBottom: 24,
-            }}
+            className="btn-secondary btn-link-wrap route-detail-page__maps-link"
           >
             APRI IN GOOGLE MAPS
           </a>
         )}
 
-        <div style={styles.sectionTitle}>TAPPE</div>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 8,
-            marginTop: 12,
-          }}
-        >
-          {route.waypoints.map((wp, index) => (
-            <div
-              key={wp.sequence}
-              style={{
-                ...styles.card,
-                padding: "11px 13px",
-                display: "flex",
-                alignItems: "center",
-                gap: 11,
-              }}
-            >
-              <span
-                style={{
-                  width: 24,
-                  height: 24,
-                  borderRadius: "50%",
-                  flexShrink: 0,
-                  background:
-                    index === 0
-                      ? "#173323"
-                      : index === route.waypoints.length - 1
-                        ? COLORS.dangerBg
-                        : COLORS.cardAlt,
-                  color:
-                    index === 0
-                      ? "#4ADE80"
-                      : index === route.waypoints.length - 1
-                        ? COLORS.danger
-                        : COLORS.textSecondary,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontFamily: FONTS.mono,
-                  fontSize: 10,
-                }}
-              >
-                {index + 1}
-              </span>
-              <span style={{ fontFamily: FONTS.body, fontSize: 13.5 }}>
-                {wp.label ||
-                  `${wp.latitude.toFixed(4)}, ${wp.longitude.toFixed(4)}`}
-              </span>
-            </div>
-          ))}
+        <div className="section-title">TAPPE</div>
+        <div className="route-detail-page__waypoint-list">
+          {route.waypoints.map((wp, index) => {
+            const isStart = index === 0
+            const isEnd = index === route.waypoints.length - 1
+            return (
+              <div key={wp.sequence} className="card waypoint-row">
+                <span
+                  className={`waypoint-row__number ${isStart ? "waypoint-row__number--start" : isEnd ? "waypoint-row__number--end" : ""}`}
+                >
+                  {index + 1}
+                </span>
+                <span className="waypoint-row__label">
+                  {wp.label ||
+                    `${wp.latitude.toFixed(4)}, ${wp.longitude.toFixed(4)}`}
+                </span>
+              </div>
+            )
+          })}
         </div>
       </div>
     </div>
