@@ -1,0 +1,62 @@
+.public-profile-page__header-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.public-profile-page__avatar {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--color-surface-raised);
+  flex-shrink: 0;
+}
+
+.public-profile-page__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.public-profile-page__fullname {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1.15;
+}
+
+.public-profile-page__username {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-bottom: 10px;
+}
+
+.public-profile-page__stats {
+  gap: 22px;
+  margin-bottom: 16px;
+}
+
+.public-profile-page__description {
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 8px;
+}
+
+.public-profile-page__location {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-bottom: 12px;
+}
+
+.public-profile-page__vehicle-badge {
+  display: inline-block;
+  margin-bottom: 14px;
+}
+
+.public-profile-page__posts-header {
+  padding: 20px 20px 10px;
+}
