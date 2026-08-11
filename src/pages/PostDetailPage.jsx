@@ -1,7 +1,7 @@
 import { useState } from "react"
-import { Spinner } from "react-bootstrap"
-import { FaHeart, FaRegHeart, FaTrash, FaArrowLeft } from "react-icons/fa"
 import { useParams, useNavigate, Link } from "react-router-dom"
+import { FaArrowLeft, FaHeart, FaRegHeart, FaTrash } from "react-icons/fa"
+import { Spinner } from "react-bootstrap"
 import {
   useGetPostByIdQuery,
   useGetCommentsQuery,
@@ -11,9 +11,9 @@ import {
   useToggleLikeMutation,
 } from "../features/social/postsApi"
 import { useGetCurrentUserQuery } from "../features/users/usersApi"
-import { formatRelativeTime } from "../utils/dateFormat"
-import { COLORS, FONTS, styles } from "../styles/theme"
 import PostAutoCarousel from "../features/social/components/PostAutoCarousel"
+import { formatRelativeTime } from "../utils/dateFormat"
+import "./PostDetailPage.css"
 
 function PostDetailPage() {
   const { postId } = useParams()
@@ -68,15 +68,17 @@ function PostDetailPage() {
 
   if (isLoading) {
     return (
-      <div style={{ textAlign: "center", padding: "60px 0" }}>
-        <Spinner animation="border" style={{ color: COLORS.accent }} />
+      <div className="centered-spinner">
+        <Spinner animation="border" style={{ color: "#FF7A2F" }} />
       </div>
     )
   }
 
   if (isError) {
     return (
-      <div style={{ ...styles.emptyState, margin: 20 }}>Post non trovato.</div>
+      <div className="empty-state" style={{ margin: 20 }}>
+        Post non trovato.
+      </div>
     )
   }
 
@@ -90,81 +92,40 @@ function PostDetailPage() {
     : null
 
   return (
-    <div style={{ ...styles.pageBg, paddingTop: 20, paddingBottom: 20 }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          padding: "0 20px 16px",
-        }}
-      >
-        <button
-          type="button"
-          onClick={() => navigate(-1)}
-          style={styles.iconButton}
-        >
+    <div className="page" style={{ paddingBottom: 20 }}>
+      <div className="icon-header">
+        <button type="button" className="btn-icon" onClick={() => navigate(-1)}>
           <FaArrowLeft />
         </button>
         {isAuthor && (
           <button
             type="button"
+            className="btn-icon icon-btn--danger ml-auto"
             onClick={handleDeletePost}
             disabled={isDeletingPost}
-            style={{
-              ...styles.iconButton,
-              marginLeft: "auto",
-              color: COLORS.danger,
-            }}
           >
             <FaTrash size={14} />
           </button>
         )}
       </div>
 
-      <div style={{ padding: "0 20px" }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            marginBottom: 14,
-          }}
-        >
+      <div className="post-detail-page__section">
+        <div className="post-detail-page__author-row">
           <Link to={`/profile/${post.authorUsername}`}>
             <img
               src={post.authorProfilePicture}
               alt={post.authorUsername}
-              style={{
-                width: 42,
-                height: 42,
-                borderRadius: "50%",
-                objectFit: "cover",
-                background: COLORS.surfaceRaised,
-              }}
+              className="post-detail-page__avatar"
             />
           </Link>
           <div>
             <Link
               to={`/profile/${post.authorUsername}`}
-              style={{
-                fontFamily: FONTS.heading,
-                fontWeight: 600,
-                fontSize: 19,
-                color: COLORS.text,
-                textDecoration: "none",
-              }}
+              className="post-detail-page__author-name"
             >
               {post.authorUsername}
             </Link>
-            <div
-              style={{
-                fontFamily: FONTS.mono,
-                fontSize: 10,
-                color: COLORS.textMuted,
-                marginTop: 2,
-              }}
-            >
+            <div className="post-detail-page__author-meta">
               {bikeLabel ? `${bikeLabel} · ` : ""}
               {formatRelativeTime(post.createdAt)}
             </div>
@@ -174,18 +135,7 @@ function PostDetailPage() {
         {post.event && (
           <Link
             to={`/events/${post.event.id}`}
-            style={{
-              display: "inline-block",
-              marginBottom: 14,
-              padding: "7px 12px",
-              borderRadius: 11,
-              background: COLORS.accentSoftBg,
-              border: `1px solid ${COLORS.accentSoftBorder}`,
-              fontFamily: FONTS.mono,
-              fontSize: 11,
-              color: COLORS.accent,
-              textDecoration: "none",
-            }}
+            className="post-detail-page__event-badge"
           >
             {post.event.title}
           </Link>
@@ -193,64 +143,24 @@ function PostDetailPage() {
 
         {post.ride && (
           <div
-            style={{
-              display: "inline-block",
-              marginBottom: 14,
-              marginLeft: post.event ? 8 : 0,
-              padding: "7px 12px",
-              borderRadius: 11,
-              background: COLORS.card,
-              border: `1px solid ${COLORS.border}`,
-              fontFamily: FONTS.mono,
-              fontSize: 11,
-              color: COLORS.textSecondary,
-            }}
+            className={`post-detail-page__ride-badge ${post.event ? "post-detail-page__ride-badge--after-event" : ""}`}
           >
             {post.ride.distanceKm?.toFixed(1)} KM
           </div>
         )}
 
         {post.media?.length > 0 && (
-          <div style={{ marginBottom: 14 }}>
+          <div className="post-detail-page__media">
             <PostAutoCarousel media={post.media} onDoubleClick={handleLike} />
           </div>
         )}
 
-        {post.text && (
-          <p
-            style={{
-              fontSize: 15,
-              lineHeight: 1.5,
-              color: "rgba(255,255,255,.88)",
-              marginBottom: 16,
-            }}
-          >
-            {post.text}
-          </p>
-        )}
+        {post.text && <p className="post-detail-page__text">{post.text}</p>}
 
         <button
           type="button"
+          className={`post-detail-page__like-btn ${post.likedByCurrentUser ? "post-detail-page__like-btn--liked" : ""}`}
           onClick={handleLike}
-          style={{
-            height: 42,
-            padding: "0 15px",
-            borderRadius: 13,
-            marginBottom: 24,
-            background: post.likedByCurrentUser
-              ? COLORS.accentSoftBg
-              : COLORS.card,
-            border: `1px solid ${COLORS.border}`,
-            color: post.likedByCurrentUser
-              ? COLORS.accent
-              : COLORS.textSecondary,
-            fontFamily: FONTS.mono,
-            fontSize: 12,
-            display: "flex",
-            alignItems: "center",
-            gap: 7,
-            cursor: "pointer",
-          }}
         >
           {post.likedByCurrentUser ? (
             <FaHeart size={14} />
@@ -261,65 +171,41 @@ function PostDetailPage() {
         </button>
       </div>
 
-      <div style={{ padding: "0 20px" }}>
-        <div style={styles.sectionTitle}>COMMENTI ({post.commentCount})</div>
+      <div className="post-detail-page__section">
+        <div className="section-title">COMMENTI ({post.commentCount})</div>
 
         <form
+          className="post-detail-page__comment-form"
           onSubmit={handleSubmit}
-          style={{ display: "flex", gap: 8, margin: "16px 0" }}
         >
           <input
             type="text"
+            className="input post-detail-page__comment-input"
             maxLength={500}
             placeholder="Scrivi un commento..."
             value={text}
             onChange={(e) => setText(e.target.value)}
             required
-            style={{ ...styles.input, height: 44, flex: 1 }}
           />
           <button
             type="submit"
+            className="post-detail-page__send-btn"
             disabled={isSending || !text.trim()}
-            style={{
-              height: 44,
-              padding: "0 16px",
-              borderRadius: 12,
-              background: COLORS.accent,
-              border: "none",
-              color: COLORS.onAccent,
-              fontFamily: FONTS.heading,
-              fontWeight: 700,
-              fontSize: 14,
-              cursor: "pointer",
-              opacity: isSending || !text.trim() ? 0.5 : 1,
-            }}
+            style={{ opacity: isSending || !text.trim() ? 0.5 : 1 }}
           >
             INVIA
           </button>
         </form>
 
         {errorMsg && (
-          <div
-            style={{
-              fontFamily: FONTS.body,
-              fontSize: 13,
-              color: COLORS.danger,
-              marginBottom: 12,
-            }}
-          >
+          <div className="error-text" style={{ marginBottom: 12 }}>
             {errorMsg}
           </div>
         )}
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <div className="post-detail-page__comment-list">
           {comments?.content.length === 0 && (
-            <p
-              style={{
-                fontFamily: FONTS.body,
-                fontSize: 13,
-                color: COLORS.textFaint,
-              }}
-            >
+            <p className="post-detail-page__empty-comments">
               Nessun commento. Scrivi il primo!
             </p>
           )}
@@ -328,63 +214,28 @@ function PostDetailPage() {
             const canDelete =
               me?.username === comment.authorUsername || isAuthor
             return (
-              <div key={comment.id} style={{ display: "flex", gap: 10 }}>
+              <div key={comment.id} className="comment-row">
                 <img
                   src={comment.authorProfilePicture}
                   alt={comment.authorUsername}
-                  style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: "50%",
-                    objectFit: "cover",
-                    background: COLORS.surfaceRaised,
-                    flexShrink: 0,
-                  }}
+                  className="comment-row__avatar"
                 />
-                <div style={{ flex: 1 }}>
-                  <div
-                    style={{ display: "flex", alignItems: "baseline", gap: 8 }}
-                  >
-                    <span
-                      style={{
-                        fontFamily: FONTS.heading,
-                        fontWeight: 600,
-                        fontSize: 15,
-                      }}
-                    >
+                <div className="comment-row__body">
+                  <div className="comment-row__header">
+                    <span className="comment-row__author">
                       {comment.authorUsername}
                     </span>
-                    <span
-                      style={{
-                        fontFamily: FONTS.mono,
-                        fontSize: 9,
-                        color: COLORS.textFaint,
-                      }}
-                    >
+                    <span className="comment-row__time">
                       {formatRelativeTime(comment.createdAt)}
                     </span>
                   </div>
-                  <p
-                    style={{
-                      fontSize: 13.5,
-                      color: "rgba(255,255,255,.82)",
-                      margin: "3px 0 0",
-                    }}
-                  >
-                    {comment.text}
-                  </p>
+                  <p className="comment-row__text">{comment.text}</p>
                 </div>
                 {canDelete && (
                   <button
                     type="button"
+                    className="comment-row__delete-btn"
                     onClick={() => handleDeleteComment(comment.id)}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      color: COLORS.textFaint,
-                      cursor: "pointer",
-                      padding: 4,
-                    }}
                   >
                     <FaTrash size={11} />
                   </button>
