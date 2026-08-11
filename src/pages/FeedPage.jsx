@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Spinner } from "react-bootstrap"
 import { useGetFeedQuery } from "../features/social/postsApi"
-import NotificationBell from "../features/notifications/components/NotificationBell"
+import NotificationBell from "../features/notification/components/NotificationBell"
 import PostCard from "../features/social/components/PostCard"
 import CreatePostModal from "../features/social/components/CreatePostModal"
 import "./FeedPage.css"
