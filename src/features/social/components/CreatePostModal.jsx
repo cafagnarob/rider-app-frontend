@@ -4,7 +4,6 @@ import { useCreatePostMutation } from "../postsApi"
 import { useGetMyRidesQuery } from "../../rides/ridesApi"
 import { useGetParticipatingEventsQuery } from "../../events/eventsApi"
 import { useGetMyVehiclesQuery } from "../../vehicles/vehiclesApi"
-import { COLORS, FONTS, styles } from "../../../styles/theme"
 
 const MAX_FILES = 6
 const MAX_SIZE = 5 * 1024 * 1024
@@ -144,177 +143,52 @@ function CreatePostModal({ show, onClose }) {
   }
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(6,6,7,.72)",
-        zIndex: 200,
-        display: "flex",
-        alignItems: "flex-end",
-        justifyContent: "center",
-      }}
-      onClick={handleClose}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          width: "100%",
-          maxWidth: 480,
-          maxHeight: "92vh",
-          overflowY: "auto",
-          background: COLORS.bg,
-          borderRadius: "24px 24px 0 0",
-          border: `1px solid ${COLORS.borderSoft}`,
-          borderBottom: "none",
-        }}
-      >
-        <div
-          style={{
-            position: "sticky",
-            top: 0,
-            background: COLORS.bg,
-            zIndex: 2,
-            borderBottom: `1px solid ${COLORS.borderSoft}`,
-            padding: "20px 20px 14px",
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-          }}
-        >
-          <button type="button" onClick={handleClose} style={styles.iconButton}>
+    <div className="sheet-overlay" onClick={handleClose}>
+      <div className="sheet-panel" onClick={(e) => e.stopPropagation()}>
+        <div className="sheet-header">
+          <button type="button" className="btn-icon" onClick={handleClose}>
             <FaTimes />
           </button>
-          <div style={{ flex: 1, ...styles.pageTitle, fontSize: 22 }}>
-            NUOVO POST
-          </div>
+          <div className="sheet-header__title">NUOVO POST</div>
           <button
             type="button"
-            onClick={handleSubmit}
+            className="sheet-save-btn"
             disabled={isLoading || items.length === 0}
-            style={{
-              height: 40,
-              padding: "0 16px",
-              borderRadius: 13,
-              background: COLORS.accent,
-              border: "none",
-              color: COLORS.onAccent,
-              fontFamily: FONTS.heading,
-              fontWeight: 700,
-              fontSize: 15,
-              letterSpacing: ".05em",
-              cursor: "pointer",
-              opacity: isLoading || items.length === 0 ? 0.5 : 1,
-            }}
+            style={{ opacity: isLoading || items.length === 0 ? 0.5 : 1 }}
+            onClick={handleSubmit}
           >
             {isLoading ? "..." : "PUBBLICA"}
           </button>
         </div>
 
-        <div
-          style={{
-            padding: 20,
-            display: "flex",
-            flexDirection: "column",
-            gap: 18,
-          }}
-        >
+        <div className="sheet-body">
           <textarea
+            className="textarea"
+            style={{ minHeight: 130, fontSize: 15 }}
             value={text}
             onChange={(e) => setText(e.target.value)}
             maxLength={1000}
             placeholder="Com'è andata l'uscita?"
-            style={{
-              width: "100%",
-              minHeight: 130,
-              borderRadius: 16,
-              background: COLORS.card,
-              border: `1px solid ${COLORS.borderStrong}`,
-              color: COLORS.text,
-              fontFamily: FONTS.body,
-              fontSize: 15,
-              lineHeight: 1.5,
-              padding: 14,
-              outline: "none",
-              resize: "none",
-              boxSizing: "border-box",
-            }}
           />
-          <div
-            style={{
-              textAlign: "right",
-              fontFamily: FONTS.mono,
-              fontSize: 10,
-              color: COLORS.textFaint,
-            }}
-          >
-            {text.length}/1000
-          </div>
+          <div className="char-counter">{text.length}/1000</div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
-            <span style={styles.fieldLabel}>FOTO · FINO A {MAX_FILES}</span>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr 1fr",
-                gap: 8,
-              }}
-            >
+            <span className="field-label">FOTO · FINO A {MAX_FILES}</span>
+            <div className="photo-upload-grid">
               {items.map((item) => (
-                <div
-                  key={item.id}
-                  style={{ position: "relative", aspectRatio: "1" }}
-                >
-                  <img
-                    src={item.preview}
-                    alt=""
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                      borderRadius: 13,
-                    }}
-                  />
+                <div key={item.id} className="photo-upload-grid__item">
+                  <img src={item.preview} alt="" />
                   <button
                     type="button"
+                    className="photo-upload-grid__remove"
                     onClick={() => handleRemove(item.id)}
-                    style={{
-                      position: "absolute",
-                      top: 5,
-                      right: 5,
-                      width: 22,
-                      height: 22,
-                      borderRadius: "50%",
-                      background: "rgba(10,10,12,.85)",
-                      border: "none",
-                      color: COLORS.text,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                      padding: 0,
-                    }}
                   >
                     <FaTimes size={11} />
                   </button>
                 </div>
               ))}
               {items.length < MAX_FILES && (
-                <label
-                  style={{
-                    aspectRatio: "1",
-                    borderRadius: 13,
-                    background: COLORS.card,
-                    border: `1px dashed ${COLORS.borderStrong}`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    cursor: "pointer",
-                    fontFamily: FONTS.heading,
-                    fontSize: 26,
-                    color: COLORS.textFaint,
-                  }}
-                >
+                <label className="photo-upload-grid__add-tile">
                   +
                   <input
                     type="file"
@@ -329,67 +203,37 @@ function CreatePostModal({ show, onClose }) {
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
-            <span style={styles.fieldLabel}>COLLEGA</span>
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <span className="field-label">COLLEGA</span>
+            <div className="link-chips-row">
               {["ride", "event", "vehicle"].map((type) => (
-                <div key={type} style={{ position: "relative" }}>
-                  <button
-                    type="button"
-                    onClick={() => togglePicker(type)}
-                    style={{
-                      padding: "11px 14px",
-                      borderRadius: 12,
-                      background: isPicked(type)
-                        ? COLORS.accentSoftBg
-                        : COLORS.card,
-                      border: `1px solid ${isPicked(type) ? COLORS.accentSoftBorder : COLORS.borderStrong}`,
-                      fontFamily: FONTS.mono,
-                      fontSize: 11,
-                      color: isPicked(type)
-                        ? COLORS.accent
-                        : COLORS.textSecondary,
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 8,
-                    }}
-                  >
-                    {pillLabel(type)}
-                    {isPicked(type) && (
-                      <span
-                        role="button"
-                        tabIndex={0}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          clearLink(type)
-                        }}
-                        style={{ display: "flex" }}
-                      >
-                        <FaTimes size={10} />
-                      </span>
-                    )}
-                  </button>
-                </div>
+                <button
+                  key={type}
+                  type="button"
+                  className={`link-chip ${isPicked(type) ? "link-chip--picked" : ""}`}
+                  onClick={() => togglePicker(type)}
+                >
+                  {pillLabel(type)}
+                  {isPicked(type) && (
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        clearLink(type)
+                      }}
+                      style={{ display: "flex" }}
+                    >
+                      <FaTimes size={10} />
+                    </span>
+                  )}
+                </button>
               ))}
             </div>
 
             {linkType === "ride" && (
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 6,
-                  marginTop: 4,
-                }}
-              >
+              <div className="picker-list">
                 {ridesPage?.content.length === 0 && (
-                  <span
-                    style={{
-                      fontFamily: FONTS.body,
-                      fontSize: 13,
-                      color: COLORS.textFaint,
-                    }}
-                  >
+                  <span className="picker-empty-text">
                     Nessun giro registrato.
                   </span>
                 )}
@@ -397,11 +241,11 @@ function CreatePostModal({ show, onClose }) {
                   <button
                     key={r.id}
                     type="button"
+                    className="picker-row"
                     onClick={() => {
                       setRideId(r.id)
                       setLinkType(null)
                     }}
-                    style={pickerRowStyle}
                   >
                     {r.title || "Giro senza titolo"} ·{" "}
                     {r.distanceKm?.toFixed(1)} km
@@ -411,22 +255,9 @@ function CreatePostModal({ show, onClose }) {
             )}
 
             {linkType === "event" && (
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 6,
-                  marginTop: 4,
-                }}
-              >
+              <div className="picker-list">
                 {eventsPage?.content.length === 0 && (
-                  <span
-                    style={{
-                      fontFamily: FONTS.body,
-                      fontSize: 13,
-                      color: COLORS.textFaint,
-                    }}
-                  >
+                  <span className="picker-empty-text">
                     Non partecipi a nessun evento.
                   </span>
                 )}
@@ -434,11 +265,11 @@ function CreatePostModal({ show, onClose }) {
                   <button
                     key={ev.id}
                     type="button"
+                    className="picker-row"
                     onClick={() => {
                       setEventId(ev.id)
                       setLinkType(null)
                     }}
-                    style={pickerRowStyle}
                   >
                     {ev.title}
                   </button>
@@ -447,22 +278,9 @@ function CreatePostModal({ show, onClose }) {
             )}
 
             {linkType === "vehicle" && (
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 6,
-                  marginTop: 4,
-                }}
-              >
+              <div className="picker-list">
                 {vehicles?.length === 0 && (
-                  <span
-                    style={{
-                      fontFamily: FONTS.body,
-                      fontSize: 13,
-                      color: COLORS.textFaint,
-                    }}
-                  >
+                  <span className="picker-empty-text">
                     Il tuo garage è vuoto.
                   </span>
                 )}
@@ -470,11 +288,11 @@ function CreatePostModal({ show, onClose }) {
                   <button
                     key={v.id}
                     type="button"
+                    className="picker-row"
                     onClick={() => {
                       setVehicleId(v.id)
                       setLinkType(null)
                     }}
-                    style={pickerRowStyle}
                   >
                     {v.nickname || `${v.model.brand.name} ${v.model.name}`}
                   </button>
@@ -483,32 +301,11 @@ function CreatePostModal({ show, onClose }) {
             )}
           </div>
 
-          {errorMsg && (
-            <div
-              style={{
-                fontFamily: FONTS.body,
-                fontSize: 13,
-                color: COLORS.danger,
-              }}
-            >
-              {errorMsg}
-            </div>
-          )}
+          {errorMsg && <div className="error-text">{errorMsg}</div>}
         </div>
       </div>
     </div>
   )
 }
 
-const pickerRowStyle = {
-  textAlign: "left",
-  padding: "12px 14px",
-  borderRadius: 12,
-  background: COLORS.card,
-  border: `1px solid ${COLORS.borderSoft}`,
-  color: COLORS.text,
-  fontFamily: FONTS.body,
-  fontSize: 14,
-  cursor: "pointer",
-}
 export default CreatePostModal
