@@ -1,7 +1,6 @@
 import { Link, useSearchParams } from "react-router-dom"
-import { useVerifyEmailQuery } from "../features/auth/authApi"
 import { Spinner } from "react-bootstrap"
-import { COLORS, FONTS, styles } from "../styles/theme"
+import { useVerifyEmailQuery } from "../features/auth/authApi"
 
 function VerifyEmailPage() {
   const [searchParams] = useSearchParams()
@@ -12,96 +11,39 @@ function VerifyEmailPage() {
   })
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: COLORS.bg,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 24,
-        textAlign: "center",
-      }}
-    >
-      <div
-        style={{
-          fontFamily: FONTS.heading,
-          fontWeight: 700,
-          fontSize: 30,
-          marginBottom: 26,
-        }}
-      >
+    <div className="centered-page centered-page--text">
+      <div className="page-heading" style={{ marginBottom: 26 }}>
         VERIFICA EMAIL
       </div>
 
       {!token && (
-        <div style={{ ...styles.emptyState, maxWidth: 360 }}>
+        <div className="empty-state empty-state--narrow">
           Link non valido o incompleto. Controlla di aver copiato l'intero
           indirizzo dall'email che hai ricevuto.
         </div>
       )}
 
       {isLoading && (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 14,
-          }}
-        >
-          <Spinner animation="border" style={{ color: COLORS.accent }} />
-          <p
-            style={{
-              fontFamily: FONTS.body,
-              fontSize: 13,
-              color: COLORS.textSecondary,
-            }}
-          >
-            Verifica in corso...
-          </p>
+        <div className="loading-block">
+          <Spinner animation="border" style={{ color: "#FF7A2F" }} />
+          <p className="loading-block__text">Verifica in corso...</p>
         </div>
       )}
 
       {isError && (
-        <div
-          style={{
-            ...styles.emptyState,
-            borderColor: COLORS.dangerBorder,
-            maxWidth: 360,
-          }}
-        >
+        <div className="empty-state empty-state--narrow empty-state--danger">
           Token non valido o scaduto. Puoi richiedere un nuovo link di verifica.
         </div>
       )}
 
       {isSuccess && (
-        <div
-          style={{
-            ...styles.emptyState,
-            borderStyle: "solid",
-            borderColor: COLORS.accentSoftBorder,
-            maxWidth: 360,
-          }}
-        >
+        <div className="success-box success-box--narrow">
           Email verificata con successo! Ora puoi accedere al tuo account.
         </div>
       )}
 
       {(isSuccess || isError) && (
-        <Link
-          to="/login"
-          style={{
-            ...styles.primaryButton,
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "0 32px",
-            textDecoration: "none",
-            marginTop: 20,
-          }}
-        >
+        <Link to="/login" className="btn-primary btn-link-wrap mt-20">
           VAI AL LOGIN
         </Link>
       )}
