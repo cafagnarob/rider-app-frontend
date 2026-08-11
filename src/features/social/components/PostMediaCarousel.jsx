@@ -1,5 +1,4 @@
 import { useRef, useState } from "react"
-import { COLORS } from "../../../styles/theme"
 
 function PostMediaCarousel({ media }) {
   const containerRef = useRef(null)
@@ -15,66 +14,26 @@ function PostMediaCarousel({ media }) {
   if (!media || media.length === 0) return null
 
   return (
-    <div style={{ position: "relative" }} className="carousel-scroll">
+    <div className="media-carousel">
       <div
         ref={containerRef}
+        className="media-carousel__scroll"
         onScroll={handleScroll}
-        style={{
-          display: "flex",
-          overflowX: "auto",
-          scrollSnapType: "x mandatory",
-          borderRadius: 16,
-          border: `1px solid ${COLORS.borderSoft}`,
-          scrollbarWidth: "none",
-        }}
       >
         {media.map((m) => (
-          <div
-            key={m.id}
-            style={{
-              flex: "0 0 100%",
-              scrollSnapAlign: "center",
-              height: 210,
-            }}
-          >
-            <img
-              src={m.mediaUrl}
-              alt=""
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                display: "block",
-              }}
-              draggable={false}
-            />
+          <div key={m.id} className="media-carousel__slide">
+            <img src={m.mediaUrl} alt="" draggable={false} />
           </div>
         ))}
       </div>
 
       {media.length > 1 && (
-        <div
-          style={{
-            position: "absolute",
-            bottom: 10,
-            left: 0,
-            right: 0,
-            display: "flex",
-            justifyContent: "center",
-            gap: 5,
-          }}
-        >
+        <div className="media-carousel__dots">
           {media.map((_, i) => (
             <span
               key={i}
-              style={{
-                width: i === activeIndex ? 14 : 5,
-                height: 5,
-                borderRadius: 3,
-                background:
-                  i === activeIndex ? COLORS.accent : "rgba(255,255,255,.35)",
-                transition: "width 0.2s ease",
-              }}
+              className={`media-carousel__dot ${i === activeIndex ? "media-carousel__dot--active" : ""}`}
+              style={{ width: i === activeIndex ? 14 : 5 }}
             />
           ))}
         </div>
