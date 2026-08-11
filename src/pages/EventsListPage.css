@@ -1,0 +1,31 @@
+.events-list-page__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+}
+
+.events-list-page__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.events-list-page__tabs {
+  padding: 18px 20px 0;
+}
+
+.events-list-page__search {
+  padding: 16px 20px 0;
+}
+
+.events-list-page__filter-chip-wrap {
+  padding: 0 20px 12px;
+}
+
+.events-list-page__list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px 20px 0;
+}
