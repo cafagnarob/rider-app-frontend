@@ -7,7 +7,7 @@ import {
   useGetOrganizedEventsQuery,
   useGetParticipatingEventsQuery,
 } from "../features/events/eventsApi"
-import NotificationBell from "../features/notifications/components/NotificationBell"
+import NotificationBell from "../features/notification/components/NotificationBell"
 import { VISIBILITY_LABELS, EVENT_TYPE_LABELS } from "../utils/constants"
 import "./EventsListPage.css"
 
