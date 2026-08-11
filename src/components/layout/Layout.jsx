@@ -1,24 +1,18 @@
 import { Outlet } from "react-router-dom"
-import { COLORS } from "../../styles/theme"
-import BottomNav from "./BottomNav"
 import { useSelector } from "react-redux"
+import BottomNav from "./BottomNav"
 import ActiveRideBanner from "./ActiveRideBanner"
 
 function Layout() {
   const rideId = useSelector((state) => state.ride.rideId)
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: COLORS.bg,
-        paddingBottom: "104px",
-      }}
-    >
+    <div className={`layout ${rideId ? "layout--ride-active" : ""}`}>
       <Outlet />
       {rideId && <ActiveRideBanner />}
       <BottomNav />
     </div>
   )
 }
+
 export default Layout
