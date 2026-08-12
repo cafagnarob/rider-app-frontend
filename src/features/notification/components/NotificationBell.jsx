@@ -86,9 +86,10 @@ function NotificationBell() {
               const { Icon, color } =
                 NOTIFICATION_ICONS[n.type] || NOTIFICATION_ICONS.SYSTEM
               return (
-                <button
+                <div
                   key={n.id}
-                  type="button"
+                  role="button"
+                  tabIndex={0}
                   className={`notif-dropdown-row ${!n.read ? "notif-dropdown-row--unread" : ""}`}
                   onClick={() => handleClick(n)}
                 >
@@ -97,6 +98,11 @@ function NotificationBell() {
                       src={n.actorProfilePicture}
                       alt=""
                       className="notif-dropdown-row__avatar"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setOpen(false)
+                        navigate(`/profile/${n.actorUsername}`)
+                      }}
                     />
                   ) : (
                     <div className="notif-dropdown-row__icon-fallback">
@@ -114,7 +120,7 @@ function NotificationBell() {
                     </div>
                   </div>
                   {!n.read && <span className="notif-dropdown-row__dot" />}
-                </button>
+                </div>
               )
             })}
 
