@@ -72,6 +72,8 @@ function NotificationsPage() {
             return (
               <div
                 key={n.id}
+                role="button"
+                tabIndex={0}
                 className={`notification-row ${clickable ? "notification-row--clickable" : ""} ${!n.read ? "notification-row--unread" : ""}`}
                 onClick={() => handleClick(n)}
               >
@@ -80,6 +82,10 @@ function NotificationsPage() {
                     src={n.actorProfilePicture}
                     alt=""
                     className="notification-row__avatar"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      navigate(`/profile/${n.actorUsername}`)
+                    }}
                   />
                 ) : (
                   <div className="notification-row__icon-fallback">
