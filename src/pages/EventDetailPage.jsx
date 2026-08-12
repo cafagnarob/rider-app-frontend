@@ -27,6 +27,10 @@ import { MAP_STYLE_URL } from "../utils/mapStyle"
 import { COLORS } from "../styles/theme" // solo per i marcatori MapLibre: sono DOM creati a mano, fuori dal render React, quindi non possono usare classi CSS — restano gli unici tre riferimenti diretti a COLORS in questo file
 import { VISIBILITY_LABELS, EVENT_TYPE_LABELS } from "../utils/constants"
 import "../pages/CSS/EventDetailPage.css"
+import {
+  useAcceptInviteMutation,
+  useRejectInviteMutation,
+} from "../features/events/invitesApi"
 
 function EventDetailPage() {
   const { eventId } = useParams()
@@ -49,6 +53,27 @@ function EventDetailPage() {
 
   const containerRef = useRef(null)
   const mapRef = useRef(null)
+
+  const [acceptInvite, { isLoading: isAcceptingInvite }] =
+    useAcceptInviteMutation()
+  const [rejectInvite, { isLoading: isRejectingInvite }] =
+    useRejectInviteMutation()
+
+  const handleAcceptInvite = async () => {
+    try {
+      await acceptInvite(event.myInviteId).unwrap()
+    } catch (err) {
+      setJoinError(err.data?.message || "Impossibile accettare l'invito.")
+    }
+  }
+
+  const handleRejectInvite = async () => {
+    try {
+      await rejectInvite(event.myInviteId).unwrap()
+    } catch (err) {
+      setJoinError(err.data?.message || "Impossibile rifiutare l'invito.")
+    }
+  }
 
   useEffect(() => {
     if (!containerRef.current || !event) return
@@ -709,9 +734,48 @@ function EventDetailPage() {
               {event.myParticipationStatus === null && (
                 <>
                   {event.visibility === "INVITE_ONLY" ? (
-                    <p className="participation-card__info-text">
-                      Questo evento richiede un invito dall'organizzatore.
-                    </p>
+                    event.myInviteId ? (
+                      <div>
+                        <p
+                          className="participation-card__info-text"
+                          style={{ marginBottom: 12 }}
+                        >
+                          Sei stato invitato a questo evento.
+                        </p>
+                        {joinError && (
+                          <div
+                            className="error-text"
+                            style={{ marginBottom: 10 }}
+                          >
+                            {joinError}
+                          </div>
+                        )}
+                        <div style={{ display: "flex", gap: 8 }}>
+                          <button
+                            type="button"
+                            className="btn-approve"
+                            style={{ flex: 1 }}
+                            disabled={isAcceptingInvite || isRejectingInvite}
+                            onClick={handleAcceptInvite}
+                          >
+                            {isAcceptingInvite ? "..." : "ACCETTA"}
+                          </button>
+                          <button
+                            type="button"
+                            className="btn-reject"
+                            style={{ flex: 1 }}
+                            disabled={isAcceptingInvite || isRejectingInvite}
+                            onClick={handleRejectInvite}
+                          >
+                            {isRejectingInvite ? "..." : "RIFIUTA"}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="participation-card__info-text">
+                        Questo evento richiede un invito dall'organizzatore.
+                      </p>
+                    )
                   ) : isFull ? (
                     <p className="participation-card__info-text">
                       Numero massimo di partecipanti raggiunto.
