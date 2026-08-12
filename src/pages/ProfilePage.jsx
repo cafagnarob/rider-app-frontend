@@ -1,18 +1,34 @@
 import { useState } from "react"
+import { Link } from "react-router-dom"
+import { Spinner } from "react-bootstrap"
+import { FaChevronRight } from "react-icons/fa"
 import {
   useGetCurrentUserQuery,
   useUpdateProfilePictureMutation,
 } from "../features/users/usersApi"
-import { Badge, Button, Card, Spinner } from "react-bootstrap"
-import { Link } from "react-router-dom"
+import { useGetMyInvitesQuery } from "../features/events/invitesApi"
+import { useGetFollowStatsQuery } from "../features/social/followApi"
 import ProfileEditModal from "../features/users/components/ProfileEditModal"
 import ProfileLinksSection from "../features/users/components/ProfileLinksSection"
 import SecuritySection from "../features/users/components/SecuritySection"
+import "../pages/CSS/ProfilePage.css"
+
+const MENU_ITEMS = [
+  { to: "/garage", label: "Garage" },
+  { to: "/routes", label: "Percorsi" },
+  { to: "/catalog", label: "Catalogo moto" },
+  { to: "/notifications", label: "Notifiche" },
+]
 
 function ProfilePage() {
   const { data: profile, isLoading, isError } = useGetCurrentUserQuery()
   const [updatePicture, { isLoading: isUploading }] =
     useUpdateProfilePictureMutation()
+
+  const { data: myInvites } = useGetMyInvitesQuery()
+  const { data: stats } = useGetFollowStatsQuery(profile?.username, {
+    skip: !profile?.username,
+  })
 
   const [showEdit, setShowEdit] = useState(false)
   const [errorMsg, setErrorMsg] = useState("")
@@ -38,122 +54,161 @@ function ProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="text-center py-5">
-        <Spinner animation="border" variant="light" />
+      <div className="centered-spinner">
+        <Spinner animation="border" style={{ color: "#FF7A2F" }} />
       </div>
     )
   }
 
   if (isError) {
     return (
-      <div className="alert alert-danger">Impossibile caricare il profilo.</div>
+      <div className="empty-state" style={{ margin: 20 }}>
+        Impossibile caricare il profilo.
+      </div>
     )
   }
 
   return (
-    <>
-      <Card className="bg-dark text-light border-secondary mb-4">
-        <Card.Body>
-          <div className="d-flex align-items-center gap-3 mb-4">
-            <div className="position-relative">
-              <img
-                src={profile.profilePicture}
-                alt={profile.username}
-                className="rounded-circle"
-                style={{ width: "96px", height: "96px", objectFit: "cover" }}
-              />
-              {isUploading && (
-                <div
-                  className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center rounded-circle"
-                  style={{ backgroundColor: "rgba(0,0,0,0.6)" }}
-                >
-                  <Spinner size="sm" animation="border" variant="light" />
-                </div>
-              )}
-            </div>
-
-            <div>
-              <h3 className="mb-1">
-                {profile.name} {profile.surname}
-              </h3>
-              <p className="text-secondary mb-2">@{profile.username}</p>
-
-              <label className="btn btn-outline-light btn-sm mb-0">
-                Cambia foto
-                <input
-                  type="file"
-                  accept="image/*"
-                  hidden
-                  disabled={isUploading}
-                  onChange={handlePictureChange}
+    <div className="page">
+      <div className="px-20">
+        <div className="profile-page__header-row">
+          <div className="profile-page__avatar-wrap">
+            <img
+              src={profile.profilePicture}
+              alt={profile.username}
+              className="profile-page__avatar"
+            />
+            {isUploading && (
+              <div className="profile-page__avatar-overlay">
+                <Spinner
+                  size="sm"
+                  animation="border"
+                  style={{ color: "#FF7A2F" }}
                 />
-              </label>
-            </div>
+              </div>
+            )}
           </div>
 
-          {errorMsg && (
-            <div className="alert alert-danger py-2">{errorMsg}</div>
-          )}
+          <div className="profile-page__info">
+            <div className="profile-page__fullname">
+              {profile.name} {profile.surname}
+            </div>
+            <div className="profile-page__username">@{profile.username}</div>
 
-          {profile.description && <p className="mb-3">{profile.description}</p>}
-
-          <dl className="row mb-3">
-            {profile.location && (
-              <>
-                <dt className="col-4 col-md-3 text-secondary fw-normal">
-                  Località
-                </dt>
-                <dd className="col-8 col-md-9">{profile.location}</dd>
-              </>
-            )}
-            {profile.birthDate && (
-              <>
-                <dt className="col-4 col-md-3 text-secondary fw-normal">
-                  Data di nascita
-                </dt>
-                <dd className="col-8 col-md-9">
-                  {new Date(profile.birthDate).toLocaleDateString("it-IT")}
-                </dd>
-              </>
-            )}
-            <dt className="col-4 col-md-3 text-secondary fw-normal">
-              Iscritto dal
-            </dt>
-            <dd className="col-8 col-md-9">
-              {new Date(profile.createdAt).toLocaleDateString("it-IT")}
-            </dd>
-          </dl>
-
-          {profile.currentVehicle && (
-            <div className="mb-3">
-              <p className="text-secondary small mb-1">Moto attiva</p>
-              <Link to="/garage" className="text-decoration-none">
-                <Badge bg="warning" text="dark" className="fs-6">
-                  {profile.currentVehicle.nickname ||
-                    `${profile.currentVehicle.brandName} ${profile.currentVehicle.modelName}`}
-                </Badge>
+            <div className="stats-row profile-page__stats">
+              <Link
+                to={`/users/${profile.username}/followers`}
+                className="stat-link"
+              >
+                <span className="stat-count">{stats?.followersCount ?? 0}</span>{" "}
+                <span className="stat-label">FOLLOWER</span>
+              </Link>
+              <Link
+                to={`/users/${profile.username}/following`}
+                className="stat-link"
+              >
+                <span className="stat-count">{stats?.followingCount ?? 0}</span>{" "}
+                <span className="stat-label">SEGUITI</span>
               </Link>
             </div>
-          )}
 
-          <Button
-            className="rounded-pill px-4 fw-bold border-0"
-            style={{ backgroundColor: "#FFBE5D", color: "#000" }}
-            onClick={() => setShowEdit(true)}
-          >
-            Modifica profilo
-          </Button>
-        </Card.Body>
-      </Card>
-      <ProfileLinksSection links={profile.links || []} />
-      <SecuritySection profile={profile} />
+            <label className="btn-secondary profile-page__change-photo-btn">
+              CAMBIA FOTO
+              <input
+                type="file"
+                accept="image/*"
+                hidden
+                disabled={isUploading}
+                onChange={handlePictureChange}
+              />
+            </label>
+          </div>
+        </div>
+
+        {errorMsg && (
+          <div className="error-text" style={{ marginBottom: 14 }}>
+            {errorMsg}
+          </div>
+        )}
+
+        {profile.description && (
+          <p className="profile-page__description">{profile.description}</p>
+        )}
+
+        <div className="info-rows profile-page__info-rows">
+          {profile.location && (
+            <div className="info-row">
+              <span className="info-row__label">Località</span>
+              <span>{profile.location}</span>
+            </div>
+          )}
+          {profile.birthDate && (
+            <div className="info-row">
+              <span className="info-row__label">Data di nascita</span>
+              <span>
+                {new Date(profile.birthDate).toLocaleDateString("it-IT")}
+              </span>
+            </div>
+          )}
+          <div className="info-row">
+            <span className="info-row__label">Iscritto dal</span>
+            <span>
+              {new Date(profile.createdAt).toLocaleDateString("it-IT")}
+            </span>
+          </div>
+        </div>
+
+        {profile.currentVehicle && (
+          <Link to="/garage" className="profile-page__vehicle-link">
+            <span className="pill pill--accent">
+              MOTO ATTIVA ·{" "}
+              {profile.currentVehicle.nickname ||
+                `${profile.currentVehicle.brandName} ${profile.currentVehicle.modelName}`}
+            </span>
+          </Link>
+        )}
+
+        <button
+          type="button"
+          className="btn-primary btn-block"
+          style={{ marginBottom: 28 }}
+          onClick={() => setShowEdit(true)}
+        >
+          MODIFICA PROFILO
+        </button>
+
+        <div className="field-label profile-page__account-label">
+          IL MIO ACCOUNT
+        </div>
+        <div className="menu-list profile-page__menu">
+          {MENU_ITEMS.map((item) => (
+            <Link key={item.to} to={item.to} className="menu-list-item">
+              {item.label}
+              <FaChevronRight size={11} color="var(--color-text-faint)" />
+            </Link>
+          ))}
+
+          <Link to="/invites" className="menu-list-item">
+            <span>Inviti ricevuti</span>
+            <div className="flex-gap-10" style={{ gap: 8 }}>
+              {myInvites?.length > 0 && (
+                <span className="count-badge">{myInvites.length}</span>
+              )}
+              <FaChevronRight size={11} color="var(--color-text-faint)" />
+            </div>
+          </Link>
+        </div>
+
+        <ProfileLinksSection links={profile.links || []} />
+        <SecuritySection profile={profile} />
+      </div>
 
       <ProfileEditModal
         key={showEdit ? "open" : "closed"}
         profile={showEdit ? profile : null}
         onClose={() => setShowEdit(false)}
       />
-    </>
+    </div>
   )
 }
 

@@ -1,0 +1,53 @@
+.routes-list-page__header {
+  padding: 0 20px 16px;
+}
+
+.routes-list-page__search {
+  padding: 0 20px 16px;
+}
+
+.route-list {
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.route-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.route-card__name {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1.15;
+}
+
+.route-card__importable-badge {
+  padding: 3px 8px;
+  border-radius: 7px;
+  background: var(--color-accent-soft-bg);
+  border: 1px solid var(--color-accent-soft-border);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--color-accent);
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.route-card__badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.route-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

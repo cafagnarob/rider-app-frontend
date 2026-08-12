@@ -100,6 +100,10 @@ export const usersApi = apiSlice.injectEndpoints({
         { type: "User", id: username },
       ],
     }),
+    searchUsers: builder.query({
+      query: ({ query, page = 0, size = 20 }) =>
+        `/users/search?query=${encodeURIComponent(query)}&page=${page}&size=${size}`,
+    }),
   }),
 })
 export const {
@@ -116,4 +120,5 @@ export const {
   useUpdateEmailMutation,
   useDeactivateAccountMutation,
   useGetPublicProfileQuery,
+  useSearchUsersQuery,
 } = usersApi

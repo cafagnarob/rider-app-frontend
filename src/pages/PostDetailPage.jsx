@@ -1,7 +1,7 @@
 import { useState } from "react"
-import { Card, Spinner, Button, Form, Badge, Carousel } from "react-bootstrap"
-import { FaHeart, FaRegHeart, FaTrash, FaArrowLeft } from "react-icons/fa"
 import { useParams, useNavigate, Link } from "react-router-dom"
+import { FaArrowLeft, FaHeart, FaRegHeart, FaTrash } from "react-icons/fa"
+import { Spinner } from "react-bootstrap"
 import {
   useGetPostByIdQuery,
   useGetCommentsQuery,
@@ -11,7 +11,9 @@ import {
   useToggleLikeMutation,
 } from "../features/social/postsApi"
 import { useGetCurrentUserQuery } from "../features/users/usersApi"
+import PostAutoCarousel from "../features/social/components/PostAutoCarousel"
 import { formatRelativeTime } from "../utils/dateFormat"
+import "../pages/CSS/PostDetailPage.css"
 
 function PostDetailPage() {
   const { postId } = useParams()
@@ -30,6 +32,11 @@ function PostDetailPage() {
   const [errorMsg, setErrorMsg] = useState("")
 
   const isAuthor = me?.username === post?.authorUsername
+
+  const handleLike = () => {
+    if (!post) return
+    toggleLike({ postId, liked: post.likedByCurrentUser })
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -61,175 +68,182 @@ function PostDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="text-center py-5">
-        <Spinner animation="border" variant="light" />
+      <div className="centered-spinner">
+        <Spinner animation="border" style={{ color: "#FF7A2F" }} />
       </div>
     )
   }
 
   if (isError) {
-    return <div className="alert alert-danger">Post non trovato.</div>
+    return (
+      <div className="empty-state" style={{ margin: 20 }}>
+        Post non trovato.
+      </div>
+    )
   }
 
-  return (
-    <div style={{ maxWidth: "540px", margin: "0 auto" }}>
-      <Button
-        variant="outline-light"
-        size="sm"
-        className="mb-3"
-        onClick={() => navigate(-1)}
-      >
-        <FaArrowLeft /> Indietro
-      </Button>
+  if (!post) {
+    return null
+  }
 
-      <Card className="bg-dark text-light border-secondary mb-4">
-        <Card.Header className="bg-dark border-secondary d-flex align-items-center gap-2">
-          <img
-            src={post.authorProfilePicture}
-            alt={post.authorUsername}
-            className="rounded-circle"
-            style={{ width: "36px", height: "36px", objectFit: "cover" }}
-          />
-          <div className="flex-grow-1">
-            <span className="fw-semibold">{post.authorUsername}</span>
-            <div className="text-secondary" style={{ fontSize: "0.75rem" }}>
+  const bikeLabel = post.vehicle
+    ? post.vehicle.nickname ||
+      `${post.vehicle.brandName} ${post.vehicle.modelName}`
+    : null
+
+  return (
+    <div className="page" style={{ paddingBottom: 20 }}>
+      <div className="icon-header">
+        <button type="button" className="btn-icon" onClick={() => navigate(-1)}>
+          <FaArrowLeft />
+        </button>
+        {isAuthor && (
+          <button
+            type="button"
+            className="btn-icon icon-btn--danger ml-auto"
+            onClick={handleDeletePost}
+            disabled={isDeletingPost}
+          >
+            <FaTrash size={14} />
+          </button>
+        )}
+      </div>
+
+      <div className="post-detail-page__section">
+        <div className="post-detail-page__author-row">
+          <Link to={`/profile/${post.authorUsername}`}>
+            <img
+              src={post.authorProfilePicture}
+              alt={post.authorUsername}
+              className="post-detail-page__avatar"
+            />
+          </Link>
+          <div>
+            <Link
+              to={`/profile/${post.authorUsername}`}
+              className="post-detail-page__author-name"
+            >
+              {post.authorUsername}
+            </Link>
+            <div className="post-detail-page__author-meta">
+              {bikeLabel ? `${bikeLabel} · ` : ""}
               {formatRelativeTime(post.createdAt)}
             </div>
           </div>
-          {isAuthor && (
-            <Button
-              variant="outline-danger"
-              size="sm"
-              disabled={isDeletingPost}
-              onClick={handleDeletePost}
-            >
-              <FaTrash />
-            </Button>
-          )}
-        </Card.Header>
+        </div>
 
-        {post.media?.length === 1 && (
-          <div className="ratio ratio-1x1">
-            <img
-              src={post.media[0].mediaUrl}
-              alt=""
-              style={{ objectFit: "cover" }}
-            />
+        {post.event && (
+          <Link
+            to={`/events/${post.event.id}`}
+            className="post-detail-page__event-badge"
+          >
+            {post.event.title}
+          </Link>
+        )}
+
+        {post.ride && (
+          <div
+            className={`post-detail-page__ride-badge ${post.event ? "post-detail-page__ride-badge--after-event" : ""}`}
+          >
+            {post.ride.distanceKm?.toFixed(1)} KM
           </div>
         )}
 
-        {post.media?.length > 1 && (
-          <Carousel interval={null} data-bs-theme="dark">
-            {post.media.map((m) => (
-              <Carousel.Item key={m.id}>
-                <div className="ratio ratio-1x1">
-                  <img src={m.mediaUrl} alt="" style={{ objectFit: "cover" }} />
-                </div>
-              </Carousel.Item>
-            ))}
-          </Carousel>
+        {post.media?.length > 0 && (
+          <div className="post-detail-page__media">
+            <PostAutoCarousel media={post.media} onDoubleClick={handleLike} />
+          </div>
         )}
 
-        <Card.Body>
-          <Button
-            variant="link"
-            className="p-0 text-decoration-none d-flex align-items-center gap-1 mb-2"
-            style={{ color: post.likedByCurrentUser ? "#dc3545" : "#adb5bd" }}
-            onClick={() =>
-              toggleLike({ postId, liked: post.likedByCurrentUser })
-            }
-          >
-            {post.likedByCurrentUser ? <FaHeart /> : <FaRegHeart />}
-            <span className="small">{post.likeCount}</span>
-          </Button>
+        {post.text && <p className="post-detail-page__text">{post.text}</p>}
 
-          {post.text && <p className="mb-2">{post.text}</p>}
-
-          {post.event && (
-            <Link
-              to={`/events/${post.event.id}`}
-              className="text-decoration-none"
-            >
-              <Badge bg="warning" text="dark">
-                Evento: {post.event.title}
-              </Badge>
-            </Link>
+        <button
+          type="button"
+          className={`post-detail-page__like-btn ${post.likedByCurrentUser ? "post-detail-page__like-btn--liked" : ""}`}
+          onClick={handleLike}
+        >
+          {post.likedByCurrentUser ? (
+            <FaHeart size={14} />
+          ) : (
+            <FaRegHeart size={14} />
           )}
-        </Card.Body>
-      </Card>
+          MI PIACE · {post.likeCount}
+        </button>
+      </div>
 
-      <h5 className="mb-3">Commenti ({post.commentCount})</h5>
+      <div className="post-detail-page__section">
+        <div className="section-title">COMMENTI ({post.commentCount})</div>
 
-      <Form onSubmit={handleSubmit} className="mb-4">
-        <div className="d-flex gap-2">
-          <Form.Control
-            as="textarea"
-            rows={2}
+        <form
+          className="post-detail-page__comment-form"
+          onSubmit={handleSubmit}
+        >
+          <input
+            type="text"
+            className="input post-detail-page__comment-input"
             maxLength={500}
-            className="bg-transparent text-light"
             placeholder="Scrivi un commento..."
             value={text}
             onChange={(e) => setText(e.target.value)}
             required
           />
-          <Button
+          <button
             type="submit"
-            variant="warning"
+            className="post-detail-page__send-btn"
             disabled={isSending || !text.trim()}
-            className="align-self-end"
+            style={{ opacity: isSending || !text.trim() ? 0.5 : 1 }}
           >
-            Invia
-          </Button>
-        </div>
-        <Form.Text className="text-secondary">{text.length}/500</Form.Text>
-      </Form>
+            INVIA
+          </button>
+        </form>
 
-      {errorMsg && <div className="alert alert-danger py-2">{errorMsg}</div>}
-
-      <div className="d-flex flex-column gap-3">
-        {comments?.content.length === 0 && (
-          <p className="text-secondary small">
-            Nessun commento. Scrivi il primo!
-          </p>
+        {errorMsg && (
+          <div className="error-text" style={{ marginBottom: 12 }}>
+            {errorMsg}
+          </div>
         )}
 
-        {comments?.content.map((comment) => {
-          const canDelete = me?.username === comment.authorUsername || isAuthor
-          return (
-            <div key={comment.id} className="d-flex gap-2">
-              <img
-                src={comment.authorProfilePicture}
-                alt={comment.authorUsername}
-                className="rounded-circle"
-                style={{ width: "32px", height: "32px", objectFit: "cover" }}
-              />
-              <div className="flex-grow-1">
-                <div className="d-flex align-items-baseline gap-2">
-                  <span className="fw-semibold small">
-                    {comment.authorUsername}
-                  </span>
-                  <span
-                    className="text-secondary"
-                    style={{ fontSize: "0.7rem" }}
-                  >
-                    {formatRelativeTime(comment.createdAt)}
-                  </span>
+        <div className="post-detail-page__comment-list">
+          {comments?.content.length === 0 && (
+            <p className="post-detail-page__empty-comments">
+              Nessun commento. Scrivi il primo!
+            </p>
+          )}
+
+          {comments?.content.map((comment) => {
+            const canDelete =
+              me?.username === comment.authorUsername || isAuthor
+            return (
+              <div key={comment.id} className="comment-row">
+                <img
+                  src={comment.authorProfilePicture}
+                  alt={comment.authorUsername}
+                  className="comment-row__avatar"
+                />
+                <div className="comment-row__body">
+                  <div className="comment-row__header">
+                    <span className="comment-row__author">
+                      {comment.authorUsername}
+                    </span>
+                    <span className="comment-row__time">
+                      {formatRelativeTime(comment.createdAt)}
+                    </span>
+                  </div>
+                  <p className="comment-row__text">{comment.text}</p>
                 </div>
-                <p className="mb-0 small">{comment.text}</p>
+                {canDelete && (
+                  <button
+                    type="button"
+                    className="comment-row__delete-btn"
+                    onClick={() => handleDeleteComment(comment.id)}
+                  >
+                    <FaTrash size={11} />
+                  </button>
+                )}
               </div>
-              {canDelete && (
-                <Button
-                  variant="link"
-                  size="sm"
-                  className="p-0 text-secondary"
-                  onClick={() => handleDeleteComment(comment.id)}
-                >
-                  <FaTrash />
-                </Button>
-              )}
-            </div>
-          )
-        })}
+            )
+          })}
+        </div>
       </div>
     </div>
   )

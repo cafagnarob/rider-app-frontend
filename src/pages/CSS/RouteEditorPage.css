@@ -1,0 +1,10 @@
+.route-editor-page__intro {
+  padding: 20px 20px 0;
+}
+
+.route-editor-page__hint {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-text-muted);
+  margin-bottom: 14px;
+}

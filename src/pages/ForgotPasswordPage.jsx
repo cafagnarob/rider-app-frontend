@@ -1,83 +1,63 @@
 import { useState } from "react"
-import { useForgotPasswordMutation } from "../features/auth/authApi"
-import { Button, Card } from "react-bootstrap"
-import { Form } from "react-bootstrap"
-import { IoCloseCircle } from "react-icons/io5"
 import { Link } from "react-router-dom"
+import { FaTimes } from "react-icons/fa"
+import { useForgotPasswordMutation } from "../features/auth/authApi"
+import "../pages/CSS/ForgotPasswordPage.css"
 
 function ForgotPasswordPage() {
-  const [email, setEmial] = useState("")
+  const [email, setEmail] = useState("")
   const [forgotPassword, { isLoading, isSuccess, error }] =
     useForgotPasswordMutation()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      await forgotPassword(email).unwrap
+      await forgotPassword(email).unwrap()
     } catch (err) {
       console.error("Richiesta reset fallita:", err)
     }
   }
 
   return (
-    <Card className="min-vh-100 bg-black text-light p-3">
-      <Card.Body className="d-flex flex-column h-100 ">
-        <div className="d-flex w-100 justify-content-end mt-3">
-          <Link to="/login" className="text-light">
-            <IoCloseCircle className="fs-2" />
-          </Link>
-        </div>
-        <div className="d-flex flex-column justify-content-center align-items-center flex-grow-1">
-          <Card.Title className="py-5 fs-1">Password dimenticata</Card.Title>
+    <div className="forgot-password-page">
+      <div className="forgot-password-page__top-bar">
+        <Link to="/login" className="forgot-password-page__close-link">
+          <FaTimes size={22} />
+        </Link>
+      </div>
 
-          {isSuccess ? (
-            <div className="alert alert-success">
-              Se l'indirizzo è registrato, riceverai a breve un link per
-              reimpostare la password. Controlla la tua casella di posta.
-            </div>
-          ) : (
-            <Form
-              onSubmit={handleSubmit}
-              className="w-100"
-              style={{ maxWidth: "400px" }}
-            >
-              <Form.Group
-                className="mb-3"
-                controlId="email"
-                data-bs-theme="dark"
-              >
-                <Form.Label>E-mail</Form.Label>
-                <Form.Control
-                  type="email"
-                  value={email}
-                  placeholder="name@example.com"
-                  className="bg-transparent"
-                  onChange={(e) => setEmial(e.target.value)}
-                  required
-                />
-              </Form.Group>
+      <div className="forgot-password-page__content">
+        <div className="page-heading">PASSWORD DIMENTICATA</div>
 
-              {error && (
-                <div className="alert alert-danger py-2">
-                  Si è verificato un errore. Riprova più tardi.
-                </div>
-              )}
+        {isSuccess ? (
+          <div className="success-box success-box--narrow">
+            Se l'indirizzo è registrato, riceverai a breve un link per
+            reimpostare la password. Controlla la tua casella di posta.
+          </div>
+        ) : (
+          <form className="forgot-password-page__form" onSubmit={handleSubmit}>
+            <input
+              type="email"
+              className="input"
+              placeholder="name@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
 
-              <div className="d-flex justify-content-center">
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                  className="rounded-pill px-5 fw-bold my-3 border-0"
-                  style={{ backgroundColor: "#FFBE5D", color: "#000" }}
-                >
-                  {isLoading ? "Invio in corso..." : "Invia link"}
-                </Button>
+            {error && (
+              <div className="error-text">
+                Si è verificato un errore. Riprova più tardi.
               </div>
-            </Form>
-          )}
-        </div>
-      </Card.Body>
-    </Card>
+            )}
+
+            <button type="submit" className="btn-primary" disabled={isLoading}>
+              {isLoading ? "..." : "INVIA LINK"}
+            </button>
+          </form>
+        )}
+      </div>
+    </div>
   )
 }
 

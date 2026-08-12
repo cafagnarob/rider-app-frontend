@@ -1,14 +1,12 @@
 import { useState } from "react"
 import { useNavigate, useSearchParams, Link } from "react-router-dom"
 import { useResetPasswordMutation } from "../features/auth/authApi"
-import { Button, Card, Form } from "react-bootstrap"
-import { FaEye, FaEyeSlash } from "react-icons/fa"
+import PasswordInput from "../components/PasswordInput"
 
 function ResetPasswordPage() {
   const [searchParams] = useSearchParams()
   const token = searchParams.get("token")
 
-  const [showPass, setShowPass] = useState(false)
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [validationError, setValidationError] = useState("")
@@ -34,93 +32,65 @@ function ResetPasswordPage() {
 
   if (!token) {
     return (
-      <Card className="min-vh-100 bg-black text-light p-3">
-        <Card.Body className="d-flex">
-          <div className="alert mt-5 text-center d-flex flex-column justify-content-center">
-            <p>
-              Link non valido o incompleto. Richiedi un nuovo link dalla
-              pagina{" "}
-            </p>
-            <br />
-            <p>
-              <Link to="/forgot-password">password dimenticata</Link>.
-            </p>
-          </div>
-        </Card.Body>
-      </Card>
+      <div className="centered-page">
+        <div className="empty-state empty-state--narrow">
+          Link non valido o incompleto. Richiedi un nuovo link dalla pagina{" "}
+          <Link to="/forgot-password" className="link-accent">
+            password dimenticata
+          </Link>
+          .
+        </div>
+      </div>
     )
   }
 
   return (
-    <Card className="min-vh-100 bg-black text-light p-3">
-      <Card.Body>
-        <Card.Title className="py-5 fs-1">Nuova password</Card.Title>
-        <Form onSubmit={handleSubmit}>
-          <Form.Group
-            className="mb-3 position-relative"
-            controlId="newPassword"
-            data-bs-theme="dark"
-          >
-            <Form.Label>Nuova password</Form.Label>
-            <Form.Control
-              type={showPass ? "text" : "password"}
-              value={newPassword}
-              placeholder="********"
-              className="bg-transparent"
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
-            />
-            <span
-              onClick={() => setShowPass(!showPass)}
-              style={{
-                cursor: "pointer",
-                position: "absolute",
-                right: "12px",
-                top: "38px",
-              }}
-            >
-              {showPass ? <FaEyeSlash /> : <FaEye />}
-            </span>
-          </Form.Group>
+    <div className="centered-page">
+      <div className="page-heading">NUOVA PASSWORD</div>
 
-          <Form.Group
-            className="mb-3"
-            controlId="confirmPassword"
-            data-bs-theme="dark"
-          >
-            <Form.Label>Conferma password</Form.Label>
-            <Form.Control
-              type={showPass ? "text" : "password"}
-              value={confirmPassword}
-              placeholder="********"
-              className="bg-transparent"
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-            />
-          </Form.Group>
+      <form
+        className="form-stack"
+        style={{ width: "100%", maxWidth: 360 }}
+        onSubmit={handleSubmit}
+      >
+        <div>
+          <div className="field-label form-group__label">NUOVA PASSWORD</div>
+          <PasswordInput
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            required
+          />
+        </div>
 
-          {validationError && (
-            <div className="alert alert-warning py-2">{validationError}</div>
-          )}
-          {error && (
-            <div className="alert alert-danger py-2">
-              Token non valido o scaduto. Richiedi un nuovo link.
-            </div>
-          )}
+        <div>
+          <div className="field-label form-group__label">CONFERMA PASSWORD</div>
+          <PasswordInput
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+          />
+        </div>
 
-          <div className="d-flex justify-content-center">
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="rounded-pill px-5 fw-bold my-3 border-0"
-              style={{ backgroundColor: "#FFBE5D", color: "#000" }}
-            >
-              {isLoading ? "Salvataggio..." : "Reimposta password"}
-            </Button>
+        {validationError && (
+          <div className="warning-text">{validationError}</div>
+        )}
+        {error && (
+          <div className="error-text">
+            Token non valido o scaduto. Richiedi un nuovo link.
           </div>
-        </Form>
-      </Card.Body>
-    </Card>
+        )}
+
+        <button
+          type="submit"
+          className="btn-primary"
+          disabled={isLoading}
+          style={{ opacity: isLoading ? 0.6 : 1 }}
+        >
+          {isLoading ? "..." : "REIMPOSTA PASSWORD"}
+        </button>
+      </form>
+    </div>
   )
 }
+
 export default ResetPasswordPage

@@ -1,11 +1,10 @@
-import { Badge, Button, Form, Modal } from "react-bootstrap"
-import { CATEGORY_LABELS } from "../../../utils/constants"
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import {
   useAddVehicleMutation,
   useGetMyVehiclesQuery,
 } from "../../vehicles/vehiclesApi"
-import { useState } from "react"
+import { CATEGORY_LABELS } from "../../../utils/constants"
 
 function ModelDetailModal({ model, onClose }) {
   const navigate = useNavigate()
@@ -49,171 +48,214 @@ function ModelDetailModal({ model, onClose }) {
     }
   }
 
-  return (
-    <Modal show={!!model} onHide={handleClose} centered data-bs-theme="dark">
-      {model && (
-        <>
-          <Modal.Header
-            closeButton
-            className="bg-dark text-light border-secondary"
-          >
-            <Modal.Title className="fs-5">
-              {model.brand?.name} {model.name}
-            </Modal.Title>
-          </Modal.Header>
+  if (!model) return null
 
-          <Modal.Body className="bg-dark text-light">
-            {model.imageUrl && (
-              <div className="ratio ratio-16x9 mb-3">
-                <img
-                  src={model.imageUrl}
-                  alt={model.name}
-                  style={{ objectFit: "cover", borderRadius: "0.5rem" }}
-                />
+  return (
+    <div className="sheet-overlay" onClick={handleClose}>
+      <div className="sheet-panel" onClick={(e) => e.stopPropagation()}>
+        <div className="sheet-header" style={{ display: "block" }}>
+          <div
+            className="page-title"
+            style={{ fontSize: 20, lineHeight: 1.15 }}
+          >
+            {model.brand?.name} {model.name}
+          </div>
+        </div>
+
+        <div style={{ padding: 20 }}>
+          {model.imageUrl && (
+            <div
+              style={{
+                aspectRatio: "16/9",
+                borderRadius: 16,
+                overflow: "hidden",
+                background: "var(--color-card-alt)",
+                marginBottom: 16,
+              }}
+            >
+              <img
+                src={model.imageUrl}
+                alt={model.name}
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
+            </div>
+          )}
+
+          <div
+            style={{
+              display: "flex",
+              gap: 6,
+              flexWrap: "wrap",
+              marginBottom: 16,
+            }}
+          >
+            <span className="meta-badge">
+              {CATEGORY_LABELS[model.category] || model.category}
+            </span>
+            <span className="meta-badge">
+              {model.yearEnd
+                ? `${model.yearStart} – ${model.yearEnd}`
+                : `DAL ${model.yearStart}`}
+            </span>
+            {ownedCount > 0 && (
+              <span className="meta-badge meta-badge--accent">
+                NEL TUO GARAGE ({ownedCount})
+              </span>
+            )}
+          </div>
+
+          <div
+            className="stat-grid"
+            style={{
+              gridTemplateColumns: model.weightKg ? "1fr 1fr 1fr" : "1fr 1fr",
+              marginBottom: showForm ? 20 : 4,
+            }}
+          >
+            <div className="stat-cell">
+              <span className="stat-label">CILINDRATA</span>
+              <span className="stat-value" style={{ fontSize: 17 }}>
+                {model.engineCc} CC
+              </span>
+            </div>
+            <div className="stat-cell">
+              <span className="stat-label">POTENZA</span>
+              <span className="stat-value" style={{ fontSize: 17 }}>
+                {model.horsePower} CV
+              </span>
+            </div>
+            {model.weightKg && (
+              <div className="stat-cell">
+                <span className="stat-label">PESO</span>
+                <span className="stat-value" style={{ fontSize: 17 }}>
+                  {model.weightKg} KG
+                </span>
               </div>
             )}
+          </div>
 
-            <div className="d-flex gap-2 flex-wrap mb-3">
-              <Badge bg="secondary">
-                {CATEGORY_LABELS[model.category] || model.category}
-              </Badge>
-              <Badge bg="secondary">
-                {model.yearEnd
-                  ? `${model.yearStart} – ${model.yearEnd}`
-                  : `dal ${model.yearStart}`}
-              </Badge>
-              {ownedCount > 0 && (
-                <Badge bg="warning" text="dark">
-                  Nel tuo garage ({ownedCount})
-                </Badge>
-              )}
-            </div>
-
-            <dl className="row mb-0">
-              <dt className="col-6 text-secondary fw-normal">Cilindrata</dt>
-              <dd className="col-6 text-end">{model.engineCc} cc</dd>
-
-              <dt className="col-6 text-secondary fw-normal">Potenza</dt>
-              <dd className="col-6 text-end">{model.horsePower} CV</dd>
-
-              {model.weightKg && (
-                <>
-                  <dt className="col-6 text-secondary fw-normal">Peso</dt>
-                  <dd className="col-6 text-end">{model.weightKg} kg</dd>
-                </>
-              )}
-            </dl>
-            {showForm && (
-              <Form
-                onSubmit={handleAdd}
-                className="mt-4 pt-3 border-top border-secondary"
-              >
-                <div className="row">
-                  <div className="col-6">
-                    <Form.Group className="mb-3">
-                      <Form.Label>Anno</Form.Label>
-                      <Form.Control
-                        type="number"
-                        className="bg-transparent"
-                        value={form.year}
-                        min={model.yearStart}
-                        max={model.yearEnd || new Date().getFullYear()}
-                        onChange={(e) =>
-                          setForm({ ...form, year: e.target.value })
-                        }
-                        required
-                      />
-                    </Form.Group>
-                  </div>
-                  <div className="col-6">
-                    <Form.Group className="mb-3">
-                      <Form.Label>Km attuali</Form.Label>
-                      <Form.Control
-                        type="number"
-                        className="bg-transparent"
-                        value={form.initialMileage}
-                        min={0}
-                        onChange={(e) =>
-                          setForm({ ...form, initialMileage: e.target.value })
-                        }
-                        required
-                      />
-                    </Form.Group>
-                  </div>
+          {showForm && (
+            <form
+              onSubmit={handleAdd}
+              style={{
+                marginTop: 20,
+                paddingTop: 18,
+                borderTop: "1px solid var(--color-border-soft)",
+                display: "flex",
+                flexDirection: "column",
+                gap: 14,
+              }}
+            >
+              <div className="field-row">
+                <div className="field-col">
+                  <div className="field-label form-group__label">ANNO</div>
+                  <input
+                    type="number"
+                    className="input"
+                    style={{ width: "100%" }}
+                    value={form.year}
+                    min={model.yearStart}
+                    max={model.yearEnd || new Date().getFullYear()}
+                    onChange={(e) => setForm({ ...form, year: e.target.value })}
+                    required
+                  />
                 </div>
-
-                <Form.Group className="mb-3">
-                  <Form.Label>Targa (opzionale)</Form.Label>
-                  <Form.Control
-                    type="text"
-                    className="bg-transparent text-uppercase"
-                    placeholder="AB12345"
-                    value={form.licensePlate}
-                    pattern="[A-Za-z]{2}[0-9]{5}"
-                    title="Formato: due lettere seguite da cinque cifre (es. AB12345)"
-                    onChange={(e) =>
-                      setForm({ ...form, licensePlate: e.target.value })
-                    }
-                  />
-                  <Form.Text className="text-secondary">
-                    Formato: AB12345
-                  </Form.Text>
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                  <Form.Label>Soprannome (opzionale)</Form.Label>
-                  <Form.Control
-                    type="text"
-                    className="bg-transparent"
-                    placeholder="La Rossa"
-                    value={form.nickname}
-                    onChange={(e) =>
-                      setForm({ ...form, nickname: e.target.value })
-                    }
-                  />
-                </Form.Group>
-
-                {error && (
-                  <div className="alert alert-danger py-2">
-                    {error.data?.message || "Errore durante il salvataggio."}
+                <div className="field-col">
+                  <div className="field-label form-group__label">
+                    KM ATTUALI
                   </div>
-                )}
+                  <input
+                    type="number"
+                    className="input"
+                    style={{ width: "100%" }}
+                    value={form.initialMileage}
+                    min={0}
+                    onChange={(e) =>
+                      setForm({ ...form, initialMileage: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+              </div>
 
-                <Button
-                  type="submit"
-                  disabled={isAdding}
-                  className="w-100 rounded-pill fw-bold border-0"
-                  style={{ backgroundColor: "#FFBE5D", color: "#000" }}
-                >
-                  {isAdding ? "Salvataggio..." : "Conferma"}
-                </Button>
-              </Form>
-            )}
-          </Modal.Body>
+              <div>
+                <div className="field-label form-group__label">
+                  TARGA (OPZIONALE)
+                </div>
+                <input
+                  type="text"
+                  className="input"
+                  style={{ textTransform: "uppercase" }}
+                  placeholder="AB12345"
+                  value={form.licensePlate}
+                  pattern="[A-Za-z]{2}[0-9]{5}"
+                  title="Formato: due lettere seguite da cinque cifre (es. AB12345)"
+                  onChange={(e) =>
+                    setForm({ ...form, licensePlate: e.target.value })
+                  }
+                />
+                <div className="duration-hint">FORMATO: AB12345</div>
+              </div>
 
-          {!showForm && (
-            <Modal.Footer className="bg-dark border-secondary">
-              {ownedCount > 0 && (
-                <Button
-                  variant="outline-light"
-                  onClick={() => navigate("/garage")}
-                >
-                  Vai al garage
-                </Button>
+              <div>
+                <div className="field-label form-group__label">
+                  SOPRANNOME (OPZIONALE)
+                </div>
+                <input
+                  type="text"
+                  className="input"
+                  placeholder="La Rossa"
+                  value={form.nickname}
+                  onChange={(e) =>
+                    setForm({ ...form, nickname: e.target.value })
+                  }
+                />
+              </div>
+
+              {error && (
+                <div className="error-text">
+                  {error.data?.message || "Errore durante il salvataggio."}
+                </div>
               )}
 
-              <Button
-                className="rounded-pill px-4 fw-bold border-0"
-                style={{ backgroundColor: "#FFBE5D", color: "#000" }}
-                onClick={() => setShowForm(true)}
+              <button
+                type="submit"
+                className="btn-primary"
+                disabled={isAdding}
+                style={{ opacity: isAdding ? 0.6 : 1 }}
               >
-                Aggiungi al garage
-              </Button>
-            </Modal.Footer>
+                {isAdding ? "..." : "CONFERMA"}
+              </button>
+            </form>
           )}
-        </>
-      )}
-    </Modal>
+        </div>
+
+        {!showForm && (
+          <div className="sheet-footer">
+            {ownedCount > 0 && (
+              <button
+                type="button"
+                className="btn-secondary"
+                style={{ flex: 1 }}
+                onClick={() => navigate("/garage")}
+              >
+                VAI AL GARAGE
+              </button>
+            )}
+            <button
+              type="button"
+              className="btn-primary"
+              style={{
+                flex: ownedCount > 0 ? 1 : undefined,
+                width: ownedCount > 0 ? undefined : "100%",
+              }}
+              onClick={() => setShowForm(true)}
+            >
+              AGGIUNGI AL GARAGE
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
   )
 }
 

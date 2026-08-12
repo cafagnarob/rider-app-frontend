@@ -25,3 +25,30 @@ export const PLATFORM_LABELS = {
   TIKTOK: "TikTok",
   WEBSITE: "Sito web",
 }
+
+export const RIDE_TYPE_LABELS = {
+  TOUR: "Tour",
+  COMMUTE: "Spostamento",
+  ADVENTURE: "Avventura",
+  EVENT: "Evento",
+  TRAINING: "Allenamento",
+}
+
+export const VISIBILITY_LABELS = {
+  PUBLIC: "Pubblico",
+  PRIVATE_CODE: "Con codice",
+  INVITE_ONLY: "Solo su invito",
+}
+
+export const PARTICIPATION_LABELS = {
+  PENDING: "In attesa",
+  ACCEPTED: "Confermato",
+  REJECTED: "Rifiutato",
+  CANCELLED: "Annullato",
+}
+
+export const EVENT_TYPE_LABELS = {
+  STANDARD: "GIRO",
+  RADUNO: "RADUNO",
+  MULTI_DAY_TRIP: "VIAGGIO",
+}

@@ -1,0 +1,95 @@
+.vehicle-detail-page__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 20px 16px;
+}
+
+.vehicle-detail-page__delete-btn {
+  margin-left: auto;
+  height: 40px;
+  padding: 0 13px;
+  border-radius: 12px;
+  background: var(--color-danger-bg);
+  border: 1px solid var(--color-danger-border);
+  color: var(--color-danger);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.vehicle-detail-page__hero {
+  height: 220px;
+  margin: 0 20px 18px;
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--color-card-alt);
+}
+
+.vehicle-detail-page__hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.vehicle-detail-page__badge-wrap {
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+.vehicle-detail-page__title {
+  font-size: 28px;
+  margin-bottom: 4px;
+}
+
+.vehicle-detail-page__subtitle {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-bottom: 16px;
+}
+
+.vehicle-detail-page__pills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.vehicle-detail-page__actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 28px;
+}
+
+.vehicle-detail-page__section {
+  margin-bottom: 28px;
+}
+
+.vehicle-detail-page__section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 12px;
+}
+
+.vehicle-detail-page__count {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-text-muted);
+}
+
+.vehicle-detail-page__empty-text {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-faint);
+}
+
+.vehicle-detail-page__ride-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}

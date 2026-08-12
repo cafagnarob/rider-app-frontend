@@ -1,7 +1,8 @@
-import { Card, Form, Spinner } from "react-bootstrap"
+import { Spinner } from "react-bootstrap"
 import { useGetBrandsQuery } from "../features/catalog/catalogApi"
 import { useNavigate } from "react-router-dom"
 import { useState } from "react"
+import "../pages/CSS/BrandsPage.css"
 
 function BrandsPage() {
   const { data: brands, isLoading, isError } = useGetBrandsQuery()
@@ -15,68 +16,63 @@ function BrandsPage() {
 
   if (isLoading) {
     return (
-      <div className="text-center py-5">
-        <Spinner animation="border" variant="light" />
+      <div style={{ textAlign: "center", padding: "60px 0" }}>
+        <Spinner animation="border" style={{ color: "#FF7A2F" }} />
       </div>
     )
   }
 
   if (isError) {
     return (
-      <div className="alert alert-danger">
+      <div className="empty-state empty-state-margin">
         Impossibile caricare i brand. Riprova più tardi.
       </div>
     )
   }
 
   return (
-    <>
-      <div className="d-flex justify-content-between align-items-center mb-4 gap-3">
-        <h2 className="mb-0">Scegli un brand</h2>
-        <Form.Control
+    <div className="page">
+      <div className="brands-page__header">
+        <div className="page-title brands-page__title">CATALOGO</div>
+        <input
           type="search"
+          className="input input--compact"
           placeholder="Cerca brand..."
-          className="bg-transparent text-light"
-          style={{ maxWidth: "260px" }}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
+
       {filteredBrands.length === 0 ? (
-        <p className="text-secondary">Nessun brand corrisponde alla ricerca.</p>
+        <p className="no-results-text">
+          Nessun brand corrisponde alla ricerca.
+        </p>
       ) : (
-        <div className="row g-3">
+        <div className="grid-3 px-20">
           {filteredBrands.map((brand) => (
-            <div className="col-6 col-md-4 col-lg-3" key={brand.id}>
-              <Card
-                className="bg-dark text-light h-100 border-secondary"
-                style={{ cursor: "pointer" }}
-                onClick={() => navigate(`/catalog/${brand.id}`)}
-              >
-                <div className="ratio ratio-1x1 d-flex align-items-center justify-content-center">
-                  {brand.logoUrl ? (
-                    <img
-                      src={brand.logoUrl}
-                      alt={brand.name}
-                      style={{ objectFit: "contain", padding: "1rem" }}
-                    />
-                  ) : (
-                    <div className="d-flex align-items-center justify-content-center h-100">
-                      <span className="fs-1 fw-bold text-secondary">
-                        {brand.name.charAt(0)}
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <Card.Body className="text-center py-2">
-                  <Card.Title className="fs-6 mb-0">{brand.name}</Card.Title>
-                </Card.Body>
-              </Card>
+            <div
+              key={brand.id}
+              className="card"
+              style={{ cursor: "pointer", overflow: "hidden" }}
+              onClick={() => navigate(`/catalog/${brand.id}`)}
+            >
+              <div className="brand-tile__image">
+                {brand.logoUrl ? (
+                  <img src={brand.logoUrl} alt={brand.name} />
+                ) : (
+                  <span className="brand-tile__fallback">
+                    {brand.name.charAt(0)}
+                  </span>
+                )}
+              </div>
+              <div className="brand-tile__name">
+                <span>{brand.name}</span>
+              </div>
             </div>
           ))}
         </div>
       )}
-    </>
+    </div>
   )
 }
 export default BrandsPage

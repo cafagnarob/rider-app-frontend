@@ -1,4 +1,4 @@
-import { Button, Card, Form, InputGroup } from "react-bootstrap"
+import { useState } from "react"
 import {
   FaFacebook,
   FaGlobe,
@@ -11,7 +11,6 @@ import {
   useAddProfileLinkMutation,
   useDeleteProfileLinkMutation,
 } from "../usersApi"
-import { useState } from "react"
 import { PLATFORM_LABELS } from "../../../utils/constants"
 
 const PLATFORM_ICONS = {
@@ -57,84 +56,98 @@ function ProfileLinksSection({ links }) {
   }
 
   return (
-    <Card className="bg-dark text-light border-secondary mb-4">
-      <Card.Body>
-        <Card.Title className="fs-6 mb-3">Link social</Card.Title>
-        {links.length === 0 ? (
-          <p className="text-secondary small">
-            Non hai ancora aggiunto nessun link.
-          </p>
-        ) : (
-          <div className="d-flex flex-column gap-2 mb-3">
-            {links.map((link) => {
-              const Icon = PLATFORM_ICONS[link.platform] || FaGlobe
-              return (
-                <div key={link.id} className="d-flex align-items-center gap-2">
-                  <Icon className="fs-5" />
-                  <a
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-decoration-none flex-grow-1 text-truncate"
-                    style={{ color: "#FFBE5D" }}
-                  >
-                    {link.url}
-                  </a>
-                  <Button
-                    variant="outline-danger"
-                    size="sm"
-                    disabled={isDeleting}
-                    onClick={() => handleDelete(link.id)}
-                  >
-                    <FaTrash />
-                  </Button>
-                </div>
-              )
-            })}
-          </div>
-        )}
+    <div className="card section-card">
+      <div className="field-label section-card__label">LINK SOCIAL</div>
 
-        {availablePlatforms.length > 0 && (
-          <Form onSubmit={handleAdd}>
-            <InputGroup size="sm" data-bs-theme="dark">
-              <Form.Select
-                className="bg-transparent text-light"
-                style={{ maxWidth: "140px" }}
-                value={platform}
-                onChange={(e) => setPlatform(e.target.value)}
-                required
-              >
-                <option value="">Piattaforma</option>
-                {availablePlatforms.map((p) => (
-                  <option key={p} value={p}>
-                    {PLATFORM_LABELS[p]}
-                  </option>
-                ))}
-              </Form.Select>
-              <Form.Control
-                type="url"
-                className="bg-transparent text-light"
-                placeholder="https://..."
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                required
-              />
-              <Button
-                type="submit"
-                variant="outline-warning"
-                disabled={isAdding || !platform}
-              >
-                Aggiungi
-              </Button>
-            </InputGroup>
-          </Form>
-        )}
+      {links.length === 0 ? (
+        <p
+          style={{
+            fontFamily: "var(--font-body)",
+            fontSize: 13,
+            color: "var(--color-text-faint)",
+            marginBottom: availablePlatforms.length > 0 ? 16 : 0,
+          }}
+        >
+          Non hai ancora aggiunto nessun link.
+        </p>
+      ) : (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 10,
+            marginBottom: 16,
+          }}
+        >
+          {links.map((link) => {
+            const Icon = PLATFORM_ICONS[link.platform] || FaGlobe
+            return (
+              <div key={link.id} className="link-row">
+                <Icon size={17} color="var(--color-text-secondary)" />
+                <a
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="link-row__url"
+                >
+                  {link.url}
+                </a>
+                <button
+                  type="button"
+                  className="link-row__delete"
+                  disabled={isDeleting}
+                  onClick={() => handleDelete(link.id)}
+                >
+                  <FaTrash size={12} />
+                </button>
+              </div>
+            )
+          })}
+        </div>
+      )}
 
-        {errorMsg && (
-          <div className="alert alert-danger py-2 mt-3 mb-0">{errorMsg}</div>
-        )}
-      </Card.Body>
-    </Card>
+      {availablePlatforms.length > 0 && (
+        <form className="inline-add-form" onSubmit={handleAdd}>
+          <select
+            className="select"
+            style={{ height: 40, fontSize: 12, width: 118, flexShrink: 0 }}
+            value={platform}
+            onChange={(e) => setPlatform(e.target.value)}
+            required
+          >
+            <option value="">Scegli</option>
+            {availablePlatforms.map((p) => (
+              <option key={p} value={p}>
+                {PLATFORM_LABELS[p]}
+              </option>
+            ))}
+          </select>
+          <input
+            type="url"
+            className="input"
+            style={{ height: 40, fontSize: 12, flex: 1, minWidth: 0 }}
+            placeholder="https://..."
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            required
+          />
+          <button
+            type="submit"
+            className="btn-accent-sm"
+            style={{ padding: "0 13px", fontSize: 10.5 }}
+            disabled={isAdding || !platform}
+          >
+            AGGIUNGI
+          </button>
+        </form>
+      )}
+
+      {errorMsg && (
+        <div className="error-text" style={{ fontSize: 12, marginTop: 10 }}>
+          {errorMsg}
+        </div>
+      )}
+    </div>
   )
 }
 

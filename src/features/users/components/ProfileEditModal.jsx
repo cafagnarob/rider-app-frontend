@@ -1,6 +1,7 @@
-import { Button, Form, Modal } from "react-bootstrap"
-import { useUpdateProfileMutation } from "../usersApi"
 import { useState } from "react"
+import { FaTimes } from "react-icons/fa"
+import { useUpdateProfileMutation } from "../usersApi"
+import PlaceSearchInput from "../../../components/PlaceSearchInput"
 
 function ProfileEditModal({ profile, onClose }) {
   const [updateProfile, { isLoading }] = useUpdateProfileMutation()
@@ -13,126 +14,121 @@ function ProfileEditModal({ profile, onClose }) {
     location: profile?.location || "",
     birthDate: profile?.birthDate || "",
   })
+  const [locationValue, setLocationValue] = useState(
+    profile?.location ? { label: profile.location } : null,
+  )
+  const [locationChanged, setLocationChanged] = useState(false)
+
+  const handleLocationChange = (place) => {
+    setLocationValue(place)
+    setLocationChanged(true)
+  }
+
+  const set = (field) => (e) =>
+    setForm((prev) => ({ ...prev, [field]: e.target.value }))
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setErrorMsg("")
     try {
-      await updateProfile({
+      const payload = {
         name: form.name || null,
         surname: form.surname || null,
         description: form.description || null,
-        location: form.location || null,
         birthDate: form.birthDate || null,
-      }).unwrap()
+      }
+      if (locationChanged) {
+        payload.location = locationValue?.label || null
+        payload.locationLat = locationValue?.lat ?? null
+        payload.locationLng = locationValue?.lng ?? null
+      }
+      await updateProfile(payload).unwrap()
       onClose()
     } catch (err) {
       setErrorMsg(err.data?.message || "Errore durante il salvataggio.")
     }
   }
 
-  return (
-    <Modal show={!!profile} onHide={onClose} centered data-bs-theme="dark">
-      {profile && (
-        <Form onSubmit={handleSubmit}>
-          <Modal.Header
-            closeButton
-            className="bg-dark text-light border-secondary"
-          >
-            <Modal.Title className="fs-5">Modifica profilo</Modal.Title>
-          </Modal.Header>
+  if (!profile) return null
 
-          <Modal.Body className="bg-dark text-light">
-            <div className="row">
-              <div className="col-6">
-                <Form.Group className="mb-3">
-                  <Form.Label>Nome</Form.Label>
-                  <Form.Control
-                    type="text"
-                    className="bg-transparent"
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  />
-                </Form.Group>
+  return (
+    <div className="sheet-overlay" onClick={onClose}>
+      <div className="sheet-panel" onClick={(e) => e.stopPropagation()}>
+        <form onSubmit={handleSubmit}>
+          <div className="sheet-header">
+            <button type="button" className="btn-icon" onClick={onClose}>
+              <FaTimes />
+            </button>
+            <div className="sheet-header__title">MODIFICA PROFILO</div>
+            <button
+              type="submit"
+              className="sheet-save-btn"
+              disabled={isLoading}
+              style={{ opacity: isLoading ? 0.5 : 1 }}
+            >
+              {isLoading ? "..." : "SALVA"}
+            </button>
+          </div>
+
+          <div className="sheet-body">
+            <div className="field-row">
+              <div className="field-col">
+                <div className="field-label form-group__label">NOME</div>
+                <input
+                  type="text"
+                  className="input"
+                  value={form.name}
+                  onChange={set("name")}
+                />
               </div>
-              <div className="col-6">
-                <Form.Group className="mb-3">
-                  <Form.Label>Cognome</Form.Label>
-                  <Form.Control
-                    type="text"
-                    className="bg-transparent"
-                    value={form.surname}
-                    onChange={(e) =>
-                      setForm({ ...form, surname: e.target.value })
-                    }
-                  />
-                </Form.Group>
+              <div className="field-col">
+                <div className="field-label form-group__label">COGNOME</div>
+                <input
+                  type="text"
+                  className="input"
+                  value={form.surname}
+                  onChange={set("surname")}
+                />
               </div>
             </div>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Bio</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                className="bg-transparent"
-                placeholder="Raccontaci qualcosa di te..."
+            <div>
+              <div className="field-label form-group__label">BIO</div>
+              <textarea
+                className="textarea"
                 value={form.description}
-                onChange={(e) =>
-                  setForm({ ...form, description: e.target.value })
-                }
+                onChange={set("description")}
+                rows={3}
+                placeholder="Raccontaci qualcosa di te..."
               />
-            </Form.Group>
+            </div>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Località</Form.Label>
-              <Form.Control
-                type="text"
-                className="bg-transparent"
-                placeholder="Latina, Italia"
-                value={form.location}
-                onChange={(e) => setForm({ ...form, location: e.target.value })}
+            <div>
+              <div className="field-label form-group__label">LOCALITÀ</div>
+              <PlaceSearchInput
+                value={locationValue}
+                onChange={handleLocationChange}
               />
-            </Form.Group>
+            </div>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Data di nascita</Form.Label>
-              <Form.Control
+            <div>
+              <div className="field-label form-group__label">
+                DATA DI NASCITA
+              </div>
+              <input
                 type="date"
-                className="bg-transparent"
+                className="input"
                 max={new Date().toISOString().split("T")[0]}
                 value={form.birthDate}
-                onChange={(e) =>
-                  setForm({ ...form, birthDate: e.target.value })
-                }
+                onChange={set("birthDate")}
               />
-            </Form.Group>
+            </div>
 
-            {errorMsg && (
-              <div className="alert alert-danger py-2">{errorMsg}</div>
-            )}
-          </Modal.Body>
-
-          <Modal.Footer className="bg-dark border-secondary">
-            <Button
-              variant="outline-light"
-              onClick={onClose}
-              disabled={isLoading}
-            >
-              Annulla
-            </Button>
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="rounded-pill px-4 fw-bold border-0"
-              style={{ backgroundColor: "#FFBE5D", color: "#000" }}
-            >
-              {isLoading ? "Salvataggio..." : "Salva"}
-            </Button>
-          </Modal.Footer>
-        </Form>
-      )}
-    </Modal>
+            {errorMsg && <div className="error-text">{errorMsg}</div>}
+          </div>
+        </form>
+      </div>
+    </div>
   )
 }
 

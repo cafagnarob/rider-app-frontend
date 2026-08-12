@@ -1,16 +1,17 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { Spinner } from "react-bootstrap"
 import {
   useGetNotificationsQuery,
-  useMarkAllAsReadMutation,
   useMarkAsReadMutation,
+  useMarkAllAsReadMutation,
 } from "../features/notification/notificationsApi"
 import {
   buildNotificationLink,
   NOTIFICATION_ICONS,
 } from "../utils/notifications"
-import { Button, Spinner } from "react-bootstrap"
 import { formatRelativeTime } from "../utils/dateFormat"
+import "../pages/CSS/NotificationsPage.css"
 
 function NotificationsPage() {
   const [page, setPage] = useState(0)
@@ -22,65 +23,84 @@ function NotificationsPage() {
 
   const handleClick = (n) => {
     if (!n.read) markAsRead(n.id)
-    const link = buildNotificationLink(n.referenceType, n.referenceId)
+    const link = buildNotificationLink(
+      n.referenceType,
+      n.referenceId,
+      n.type,
+      n.actorUsername,
+    )
     if (link) navigate(link)
   }
 
   if (isLoading) {
     return (
-      <div className="text-center py-5">
-        <Spinner animation="border" variant="light" />
+      <div className="centered-spinner">
+        <Spinner animation="border" style={{ color: "#FF7A2F" }} />
       </div>
     )
   }
 
   return (
-    <div style={{ maxWidth: "640px", margin: "0 auto" }}>
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="mb-0">Notifiche</h2>
-        <Button
-          variant="outline-light"
-          size="sm"
+    <div className="page">
+      <div className="header-row notifications-page__header">
+        <div className="page-title" style={{ fontSize: 26 }}>
+          NOTIFICHE
+        </div>
+        <button
+          type="button"
+          className="btn-secondary"
+          style={{ height: 36, padding: "0 13px", fontSize: 10.5 }}
           onClick={() => markAllAsRead()}
         >
-          Segna tutte come lette
-        </Button>
+          SEGNA TUTTE
+        </button>
       </div>
 
       {data?.content.length === 0 ? (
-        <p className="text-secondary text-center py-5">Non hai notifiche.</p>
+        <p className="empty-list-text">Non hai notifiche.</p>
       ) : (
-        <div
-          className="d-flex flex-column"
-          style={{ opacity: isFetching ? 0.6 : 1 }}
-        >
+        <div style={{ opacity: isFetching ? 0.6 : 1 }}>
           {data.content.map((n) => {
             const { Icon, color } =
               NOTIFICATION_ICONS[n.type] || NOTIFICATION_ICONS.SYSTEM
             const clickable = !!buildNotificationLink(
               n.referenceType,
               n.referenceId,
+              n.type,
             )
+
             return (
               <div
                 key={n.id}
+                role="button"
+                tabIndex={0}
+                className={`notification-row ${clickable ? "notification-row--clickable" : ""} ${!n.read ? "notification-row--unread" : ""}`}
                 onClick={() => handleClick(n)}
-                className="d-flex align-items-start gap-3 p-3 border-bottom border-secondary"
-                style={{
-                  cursor: clickable ? "pointer" : "default",
-                  backgroundColor: n.read
-                    ? "transparent"
-                    : "rgba(255,190,93,0.08)",
-                }}
               >
-                <Icon style={{ color, fontSize: "1.2rem", marginTop: "2px" }} />
-                <div className="flex-grow-1">
-                  <p className={`mb-1 ${n.read ? "" : "fw-semibold"}`}>
+                {n.actorProfilePicture ? (
+                  <img
+                    src={n.actorProfilePicture}
+                    alt=""
+                    className="notification-row__avatar"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      navigate(`/profile/${n.actorUsername}`)
+                    }}
+                  />
+                ) : (
+                  <div className="notification-row__icon-fallback">
+                    <Icon style={{ color }} size={17} />
+                  </div>
+                )}
+                <div className="notification-row__body">
+                  <p
+                    className={`notification-row__message ${!n.read ? "notification-row__message--unread" : ""}`}
+                  >
                     {n.message}
                   </p>
-                  <small className="text-secondary">
+                  <span className="notification-row__time">
                     {formatRelativeTime(n.createdAt)}
-                  </small>
+                  </span>
                 </div>
               </div>
             )
@@ -89,26 +109,36 @@ function NotificationsPage() {
       )}
 
       {data?.totalPages > 1 && (
-        <div className="d-flex justify-content-center align-items-center gap-3 mt-4">
-          <Button
-            variant="outline-light"
-            size="sm"
+        <div className="pagination-row">
+          <button
+            type="button"
+            className="btn-secondary"
+            style={{
+              height: 40,
+              padding: "0 16px",
+              opacity: data.first ? 0.4 : 1,
+            }}
             disabled={data.first || isFetching}
             onClick={() => setPage((p) => p - 1)}
           >
-            Precedente
-          </Button>
-          <span className="text-secondary">
+            PRECEDENTE
+          </button>
+          <span className="pagination-row__label">
             {data.number + 1} / {data.totalPages}
           </span>
-          <Button
-            variant="outline-light"
-            size="sm"
+          <button
+            type="button"
+            className="btn-secondary"
+            style={{
+              height: 40,
+              padding: "0 16px",
+              opacity: data.last ? 0.4 : 1,
+            }}
             disabled={data.last || isFetching}
             onClick={() => setPage((p) => p + 1)}
           >
-            Successiva
-          </Button>
+            SUCCESSIVA
+          </button>
         </div>
       )}
     </div>

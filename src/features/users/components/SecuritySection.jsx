@@ -8,7 +8,13 @@ import {
   useUpdateUsernameMutation,
 } from "../usersApi"
 import { logout } from "../../auth/authSlice"
-import { Button, Card, Form, Modal } from "react-bootstrap"
+import PasswordInput from "../../../components/PasswordInput"
+
+const feedbackColor = {
+  success: "#4ADE80",
+  danger: "var(--color-danger)",
+  warning: "var(--color-accent)",
+}
 
 function SecuritySection({ profile }) {
   const dispatch = useDispatch()
@@ -46,6 +52,8 @@ function SecuritySection({ profile }) {
     setUserForm({ currentPassword: "", newUsername: "" })
     setMailForm({ currentPassword: "", newEmail: "" })
   }
+
+  const toggle = (form) => setActiveForm((cur) => (cur === form ? null : form))
 
   const handlePassword = async (e) => {
     e.preventDefault()
@@ -113,270 +121,272 @@ function SecuritySection({ profile }) {
     }
   }
 
+  const handleLogout = () => {
+    dispatch(logout())
+    navigate("/login")
+  }
+
   return (
     <>
-      <Card className="bg-dark text-light border-secondary mb-4">
-        <Card.Body>
-          <Card.Title className="fs-6 mb-3">Account e sicurezza</Card.Title>
+      <div className="card section-card">
+        <div className="field-label section-card__label">
+          ACCOUNT E SICUREZZA
+        </div>
 
-          {feedback && (
-            <div className={`alert alert-${feedback.type} py-2`}>
-              {feedback.text}
+        {feedback && (
+          <div
+            style={{
+              fontFamily: "var(--font-body)",
+              fontSize: 13,
+              color: feedbackColor[feedback.type],
+              marginBottom: 14,
+            }}
+          >
+            {feedback.text}
+          </div>
+        )}
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div className="settings-row">
+            <div>
+              <div className="settings-row__label">Username</div>
+              <div className="settings-row__value">@{profile.username}</div>
             </div>
+            <button
+              type="button"
+              className="btn-secondary"
+              style={{ height: 34, padding: "0 13px", fontSize: 10 }}
+              onClick={() => toggle("username")}
+            >
+              MODIFICA
+            </button>
+          </div>
+
+          {activeForm === "username" && (
+            <form className="inline-edit-form" onSubmit={handleUsername}>
+              <div>
+                <div className="field-label" style={{ marginBottom: 6 }}>
+                  NUOVO USERNAME
+                </div>
+                <input
+                  type="text"
+                  className="input"
+                  style={{ height: 42 }}
+                  value={userForm.newUsername}
+                  onChange={(e) =>
+                    setUserForm({ ...userForm, newUsername: e.target.value })
+                  }
+                  required
+                />
+              </div>
+              <div>
+                <div className="field-label" style={{ marginBottom: 6 }}>
+                  PASSWORD ATTUALE
+                </div>
+                <PasswordInput
+                  value={userForm.currentPassword}
+                  onChange={(e) =>
+                    setUserForm({
+                      ...userForm,
+                      currentPassword: e.target.value,
+                    })
+                  }
+                  required
+                  style={{ height: 42 }}
+                />
+              </div>
+              <button
+                type="submit"
+                className="btn-accent-secondary"
+                disabled={isChangingUser}
+              >
+                {isChangingUser ? "..." : "CONFERMA"}
+              </button>
+            </form>
           )}
 
-          <div className="d-flex flex-column gap-3">
-            <div className="d-flex justify-content-between align-items-center">
-              <div>
-                <p className="mb-0">Username</p>
-                <small className="text-secondary">@{profile.username}</small>
-              </div>
-              <Button
-                variant="outline-light"
-                size="sm"
-                onClick={() =>
-                  setActiveForm(activeForm === "username" ? null : "username")
-                }
-              >
-                Modifica
-              </Button>
+          <div className="settings-row">
+            <div>
+              <div className="settings-row__label">Email</div>
+              <div className="settings-row__value">{profile.email}</div>
             </div>
-
-            {activeForm === "username" && (
-              <Form
-                onSubmit={handleUsername}
-                className="border-top border-secondary pt-3"
-              >
-                <Form.Group className="mb-2">
-                  <Form.Label className="small">Nuovo username</Form.Label>
-                  <Form.Control
-                    type="text"
-                    size="sm"
-                    className="bg-transparent text-light"
-                    value={userForm.newUsername}
-                    onChange={(e) =>
-                      setUserForm({ ...userForm, newUsername: e.target.value })
-                    }
-                    required
-                  />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label className="small">Password attuale</Form.Label>
-                  <Form.Control
-                    type="password"
-                    size="sm"
-                    className="bg-transparent text-light"
-                    value={userForm.currentPassword}
-                    onChange={(e) =>
-                      setUserForm({
-                        ...userForm,
-                        currentPassword: e.target.value,
-                      })
-                    }
-                    required
-                  />
-                </Form.Group>
-                <Button
-                  type="submit"
-                  size="sm"
-                  variant="warning"
-                  disabled={isChangingUser}
-                >
-                  {isChangingUser ? "Salvataggio..." : "Conferma"}
-                </Button>
-              </Form>
-            )}
-
-            <div className="d-flex justify-content-between align-items-center">
-              <div>
-                <p className="mb-0">Email</p>
-                <small className="text-secondary">{profile.email}</small>
-              </div>
-              <Button
-                variant="outline-light"
-                size="sm"
-                onClick={() =>
-                  setActiveForm(activeForm === "email" ? null : "email")
-                }
-              >
-                Modifica
-              </Button>
-            </div>
-
-            {activeForm === "email" && (
-              <Form
-                onSubmit={handleEmail}
-                className="border-top border-secondary pt-3"
-              >
-                <Form.Group className="mb-2">
-                  <Form.Label className="small">Nuova email</Form.Label>
-                  <Form.Control
-                    type="email"
-                    size="sm"
-                    className="bg-transparent text-light"
-                    value={mailForm.newEmail}
-                    onChange={(e) =>
-                      setMailForm({ ...mailForm, newEmail: e.target.value })
-                    }
-                    required
-                  />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label className="small">Password attuale</Form.Label>
-                  <Form.Control
-                    type="password"
-                    size="sm"
-                    className="bg-transparent text-light"
-                    value={mailForm.currentPassword}
-                    onChange={(e) =>
-                      setMailForm({
-                        ...mailForm,
-                        currentPassword: e.target.value,
-                      })
-                    }
-                    required
-                  />
-                </Form.Group>
-                <Button
-                  type="submit"
-                  size="sm"
-                  variant="warning"
-                  disabled={isChangingMail}
-                >
-                  {isChangingMail ? "Salvataggio..." : "Conferma"}
-                </Button>
-              </Form>
-            )}
-
-            <div className="d-flex justify-content-between align-items-center">
-              <div>
-                <p className="mb-0">Password</p>
-                <small className="text-secondary">••••••••</small>
-              </div>
-              <Button
-                variant="outline-light"
-                size="sm"
-                onClick={() =>
-                  setActiveForm(activeForm === "password" ? null : "password")
-                }
-              >
-                Modifica
-              </Button>
-            </div>
-
-            {activeForm === "password" && (
-              <Form
-                onSubmit={handlePassword}
-                className="border-top border-secondary pt-3"
-              >
-                <Form.Group className="mb-2">
-                  <Form.Label className="small">Password attuale</Form.Label>
-                  <Form.Control
-                    type="password"
-                    size="sm"
-                    className="bg-transparent text-light"
-                    value={pwForm.oldPassword}
-                    onChange={(e) =>
-                      setPwForm({ ...pwForm, oldPassword: e.target.value })
-                    }
-                    required
-                  />
-                </Form.Group>
-                <Form.Group className="mb-2">
-                  <Form.Label className="small">Nuova password</Form.Label>
-                  <Form.Control
-                    type="password"
-                    size="sm"
-                    minLength={8}
-                    className="bg-transparent text-light"
-                    value={pwForm.newPassword}
-                    onChange={(e) =>
-                      setPwForm({ ...pwForm, newPassword: e.target.value })
-                    }
-                    required
-                  />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label className="small">
-                    Conferma nuova password
-                  </Form.Label>
-                  <Form.Control
-                    type="password"
-                    size="sm"
-                    className="bg-transparent text-light"
-                    value={pwForm.confirm}
-                    onChange={(e) =>
-                      setPwForm({ ...pwForm, confirm: e.target.value })
-                    }
-                    required
-                  />
-                </Form.Group>
-                <Button
-                  type="submit"
-                  size="sm"
-                  variant="warning"
-                  disabled={isChangingPw}
-                >
-                  {isChangingPw ? "Salvataggio..." : "Conferma"}
-                </Button>
-              </Form>
-            )}
+            <button
+              type="button"
+              className="btn-secondary"
+              style={{ height: 34, padding: "0 13px", fontSize: 10 }}
+              onClick={() => toggle("email")}
+            >
+              MODIFICA
+            </button>
           </div>
-        </Card.Body>
-      </Card>
 
-      <Card className="bg-dark text-light border-danger mb-4">
-        <Card.Body>
-          <Card.Title className="fs-6 mb-2 text-danger">
-            Zona pericolosa
-          </Card.Title>
-          <p className="small text-secondary mb-3">
-            Disattivando l'account non potrai più accedere finché non verrà
-            riattivato da un amministratore. I tuoi contenuti non vengono
-            eliminati.
-          </p>
-          <Button
-            variant="outline-danger"
-            size="sm"
-            onClick={() => setShowDeactivate(true)}
+          {activeForm === "email" && (
+            <form className="inline-edit-form" onSubmit={handleEmail}>
+              <div>
+                <div className="field-label" style={{ marginBottom: 6 }}>
+                  NUOVA EMAIL
+                </div>
+                <input
+                  type="email"
+                  className="input"
+                  style={{ height: 42 }}
+                  value={mailForm.newEmail}
+                  onChange={(e) =>
+                    setMailForm({ ...mailForm, newEmail: e.target.value })
+                  }
+                  required
+                />
+              </div>
+              <div>
+                <div className="field-label" style={{ marginBottom: 6 }}>
+                  PASSWORD ATTUALE
+                </div>
+                <PasswordInput
+                  value={mailForm.currentPassword}
+                  onChange={(e) =>
+                    setMailForm({
+                      ...mailForm,
+                      currentPassword: e.target.value,
+                    })
+                  }
+                  required
+                  style={{ height: 42 }}
+                />
+              </div>
+              <button
+                type="submit"
+                className="btn-accent-secondary"
+                disabled={isChangingMail}
+              >
+                {isChangingMail ? "..." : "CONFERMA"}
+              </button>
+            </form>
+          )}
+
+          <div className="settings-row">
+            <div>
+              <div className="settings-row__label">Password</div>
+              <div className="settings-row__value">••••••••</div>
+            </div>
+            <button
+              type="button"
+              className="btn-secondary"
+              style={{ height: 34, padding: "0 13px", fontSize: 10 }}
+              onClick={() => toggle("password")}
+            >
+              MODIFICA
+            </button>
+          </div>
+
+          {activeForm === "password" && (
+            <form className="inline-edit-form" onSubmit={handlePassword}>
+              <div>
+                <div className="field-label" style={{ marginBottom: 6 }}>
+                  PASSWORD ATTUALE
+                </div>
+                <PasswordInput
+                  value={pwForm.oldPassword}
+                  onChange={(e) =>
+                    setPwForm({ ...pwForm, oldPassword: e.target.value })
+                  }
+                  required
+                  style={{ height: 42 }}
+                />
+              </div>
+              <div>
+                <div className="field-label" style={{ marginBottom: 6 }}>
+                  NUOVA PASSWORD
+                </div>
+                <PasswordInput
+                  value={pwForm.newPassword}
+                  onChange={(e) =>
+                    setPwForm({ ...pwForm, newPassword: e.target.value })
+                  }
+                  minLength={8}
+                  required
+                  style={{ height: 42 }}
+                />
+              </div>
+              <div>
+                <div className="field-label" style={{ marginBottom: 6 }}>
+                  CONFERMA NUOVA PASSWORD
+                </div>
+                <PasswordInput
+                  value={pwForm.confirm}
+                  onChange={(e) =>
+                    setPwForm({ ...pwForm, confirm: e.target.value })
+                  }
+                  required
+                  style={{ height: 42 }}
+                />
+              </div>
+              <button
+                type="submit"
+                className="btn-accent-secondary"
+                disabled={isChangingPw}
+              >
+                {isChangingPw ? "..." : "CONFERMA"}
+              </button>
+            </form>
+          )}
+
+          <button
+            type="button"
+            className="text-btn text-btn--secondary"
+            style={{ fontSize: 11, textAlign: "left", marginTop: 4 }}
+            onClick={handleLogout}
           >
-            Disattiva account
-          </Button>
-        </Card.Body>
-      </Card>
+            ESCI DALL'ACCOUNT
+          </button>
+        </div>
+      </div>
 
-      <Modal
-        show={showDeactivate}
-        onHide={() => setShowDeactivate(false)}
-        centered
-        data-bs-theme="dark"
-      >
-        <Modal.Header
-          closeButton
-          className="bg-dark text-light border-secondary"
+      <div className="card section-card section-card--danger">
+        <div className="field-label section-card__label section-card__label--danger">
+          ZONA PERICOLOSA
+        </div>
+        <p className="section-card__text">
+          Disattivando l'account non potrai più accedere finché non verrà
+          riattivato da un amministratore. I tuoi contenuti non vengono
+          eliminati.
+        </p>
+        <button
+          type="button"
+          className="btn-danger-sm"
+          onClick={() => setShowDeactivate(true)}
         >
-          <Modal.Title className="fs-5">Disattivare l'account?</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="bg-dark text-light">
-          Verrai disconnesso immediatamente e non potrai più accedere con queste
-          credenziali. Sei sicuro di voler procedere?
-        </Modal.Body>
-        <Modal.Footer className="bg-dark border-secondary">
-          <Button
-            variant="outline-light"
-            onClick={() => setShowDeactivate(false)}
-          >
-            Annulla
-          </Button>
-          <Button
-            variant="danger"
-            disabled={isDeactivating}
-            onClick={handleDeactivate}
-          >
-            {isDeactivating ? "Disattivazione..." : "Disattiva"}
-          </Button>
-        </Modal.Footer>
-      </Modal>
+          DISATTIVA ACCOUNT
+        </button>
+      </div>
+
+      {showDeactivate && (
+        <div className="modal-overlay" onClick={() => setShowDeactivate(false)}>
+          <div className="card modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-title">DISATTIVARE L'ACCOUNT?</div>
+            <p className="modal-text">
+              Verrai disconnesso immediatamente e non potrai più accedere con
+              queste credenziali. Sei sicuro di voler procedere?
+            </p>
+            <div className="modal-actions">
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => setShowDeactivate(false)}
+              >
+                ANNULLA
+              </button>
+              <button
+                type="button"
+                className="btn-danger"
+                disabled={isDeactivating}
+                onClick={handleDeactivate}
+              >
+                {isDeactivating ? "..." : "DISATTIVA"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }

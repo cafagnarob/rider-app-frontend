@@ -1,6 +1,6 @@
 import { useState } from "react"
-import { Spinner, Button } from "react-bootstrap"
 import { useParams, Link, useNavigate } from "react-router-dom"
+import { Spinner } from "react-bootstrap"
 import { FaArrowLeft } from "react-icons/fa"
 import {
   useGetFollowersQuery,
@@ -32,54 +32,52 @@ function FollowListPage({ type }) {
 
   if (isLoading) {
     return (
-      <div className="text-center py-5">
-        <Spinner animation="border" variant="light" />
+      <div className="centered-spinner">
+        <Spinner animation="border" style={{ color: "#FF7A2F" }} />
       </div>
     )
   }
 
   if (isError) {
     return (
-      <div className="alert alert-danger">Impossibile caricare la lista.</div>
+      <div className="empty-state" style={{ margin: 20 }}>
+        Impossibile caricare la lista.
+      </div>
     )
   }
 
   return (
-    <div style={{ maxWidth: "540px", margin: "0 auto" }}>
-      <div className="d-flex align-items-center gap-3 mb-4">
-        <Button variant="outline-light" size="sm" onClick={() => navigate(-1)}>
+    <div className="page">
+      <div className="page-header">
+        <button type="button" className="btn-icon" onClick={() => navigate(-1)}>
           <FaArrowLeft />
-        </Button>
+        </button>
         <div>
-          <h4 className="mb-0">{title}</h4>
-          <small className="text-secondary">@{username}</small>
+          <div className="page-header__title">{title}</div>
+          <div className="page-header__subtitle">@{username}</div>
         </div>
       </div>
 
       {data.content.length === 0 ? (
-        <p className="text-secondary text-center py-5">{emptyText}</p>
+        <p className="empty-list-text">{emptyText}</p>
       ) : (
-        <div
-          className="d-flex flex-column"
-          style={{ opacity: isFetching ? 0.6 : 1 }}
-        >
+        <div style={{ opacity: isFetching ? 0.6 : 1 }}>
           {data.content.map((user) => (
             <Link
               key={user.id}
               to={`/profile/${user.username}`}
-              className="d-flex align-items-center gap-3 p-3 border-bottom border-secondary text-decoration-none text-light"
+              className="user-row"
             >
               <img
                 src={user.profilePicture}
                 alt={user.username}
-                className="rounded-circle"
-                style={{ width: "48px", height: "48px", objectFit: "cover" }}
+                className="user-row__avatar"
               />
               <div>
-                <div className="fw-semibold">{user.username}</div>
-                <small className="text-secondary">
+                <div className="user-row__username">{user.username}</div>
+                <div className="user-row__fullname">
                   {user.name} {user.surname}
-                </small>
+                </div>
               </div>
             </Link>
           ))}
@@ -87,26 +85,36 @@ function FollowListPage({ type }) {
       )}
 
       {data.totalPages > 1 && (
-        <div className="d-flex justify-content-center align-items-center gap-3 mt-4">
-          <Button
-            variant="outline-light"
-            size="sm"
+        <div className="pagination-row">
+          <button
+            type="button"
+            className="btn-secondary"
+            style={{
+              height: 40,
+              padding: "0 16px",
+              opacity: data.first ? 0.4 : 1,
+            }}
             disabled={data.first || isFetching}
             onClick={() => setPage((p) => p - 1)}
           >
-            Precedente
-          </Button>
-          <span className="text-secondary">
+            PRECEDENTE
+          </button>
+          <span className="pagination-row__label">
             {data.number + 1} / {data.totalPages}
           </span>
-          <Button
-            variant="outline-light"
-            size="sm"
+          <button
+            type="button"
+            className="btn-secondary"
+            style={{
+              height: 40,
+              padding: "0 16px",
+              opacity: data.last ? 0.4 : 1,
+            }}
             disabled={data.last || isFetching}
             onClick={() => setPage((p) => p + 1)}
           >
-            Successiva
-          </Button>
+            SUCCESSIVA
+          </button>
         </div>
       )}
     </div>

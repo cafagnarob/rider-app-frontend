@@ -1,93 +1,126 @@
-import { Card, Button, Badge } from "react-bootstrap"
+import { useRef, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { FaHeart, FaRegHeart, FaRegComment } from "react-icons/fa"
-import { Link } from "react-router-dom"
 import { useToggleLikeMutation } from "../postsApi"
 import { formatRelativeTime } from "../../../utils/dateFormat"
+import PostMediaCarousel from "./PostMediaCarousel"
 
 function PostCard({ post }) {
+  const navigate = useNavigate()
+  const clickTimer = useRef(null)
   const [toggleLike] = useToggleLikeMutation()
 
+  const [justLiked, setJustLiked] = useState(false)
+
   const handleLike = () => {
+    const willLike = !post.likedByCurrentUser
     toggleLike({ postId: post.id, liked: post.likedByCurrentUser })
+    if (willLike) {
+      setJustLiked(true)
+      setTimeout(() => setJustLiked(false), 350)
+    }
   }
 
-  const cover = post.media?.[0]
+  const goToProfile = () => navigate(`/profile/${post.authorUsername}`)
+  const goToDetail = () => navigate(`/posts/${post.id}`)
+
+  const bikeLabel = post.vehicle
+    ? post.vehicle.nickname ||
+      `${post.vehicle.brandName} ${post.vehicle.modelName}`
+    : null
+
+  const handleImageClick = () => {
+    if (clickTimer.current) {
+      clearTimeout(clickTimer.current)
+      clickTimer.current = null
+      handleLike()
+    } else {
+      clickTimer.current = setTimeout(() => {
+        clickTimer.current = null
+      }, 260)
+    }
+  }
 
   return (
-    <Card className="bg-dark text-light border-secondary">
-      <Card.Header className="bg-dark border-secondary d-flex align-items-center gap-2">
+    <div className="post-card">
+      <div className="post-author-row">
         <img
           src={post.authorProfilePicture}
           alt={post.authorUsername}
-          className="rounded-circle"
-          style={{ width: "36px", height: "36px", objectFit: "cover" }}
+          className="post-author-row__avatar"
+          onClick={goToProfile}
         />
-        <div className="flex-grow-1">
-          <Link
-            to={`/profile/${post.authorUsername}`}
-            className="text-decoration-none text-light fw-semibold"
-          >
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <span className="post-author-row__name" onClick={goToProfile}>
             {post.authorUsername}
-          </Link>
-          <div className="text-secondary" style={{ fontSize: "0.75rem" }}>
+          </span>
+          <div className="post-author-row__meta">
+            {bikeLabel ? `${bikeLabel} · ` : ""}
             {formatRelativeTime(post.createdAt)}
           </div>
         </div>
-      </Card.Header>
+      </div>
 
-      {cover && (
-        <div className="ratio ratio-1x1">
-          <img src={cover.mediaUrl} alt="" style={{ objectFit: "cover" }} />
-        </div>
-      )}
-
-      {post.media?.length > 1 && (
-        <div className="text-center text-secondary small py-1">
-          +{post.media.length - 1} altre immagini
-        </div>
-      )}
-
-      <Card.Body>
-        <div className="d-flex align-items-center gap-3 mb-2">
-          <Button
-            variant="link"
-            className="p-0 text-decoration-none d-flex align-items-center gap-1"
-            style={{ color: post.likedByCurrentUser ? "#dc3545" : "#adb5bd" }}
-            onClick={handleLike}
-          >
-            {post.likedByCurrentUser ? <FaHeart /> : <FaRegHeart />}
-            <span className="small">{post.likeCount}</span>
-          </Button>
-
-          <Link
-            to={`/posts/${post.id}`}
-            className="text-decoration-none d-flex align-items-center gap-1 text-secondary"
-          >
-            <FaRegComment />
-            <span className="small">{post.commentCount}</span>
-          </Link>
-        </div>
-
-        {post.text && <p className="mb-2">{post.text}</p>}
-
+      <div className="post-ref-badges">
         {post.event && (
-          <Link
-            to={`/events/${post.event.id}`}
-            className="text-decoration-none"
+          <button
+            type="button"
+            className="post-ref-badge post-ref-badge--event"
+            onClick={goToDetail}
           >
-            <Badge bg="warning" text="dark">
-              Evento: {post.event.title}
-            </Badge>
-          </Link>
+            {post.event.title}
+          </button>
         )}
-
         {post.ride && (
-          <Badge bg="secondary" className="ms-2">
-            {post.ride.distanceKm?.toFixed(1)} km
-          </Badge>
+          <button
+            type="button"
+            className="post-ref-badge post-ref-badge--ride"
+            onClick={goToDetail}
+          >
+            {post.ride.title || "GIRO"} · {post.ride.distanceKm?.toFixed(1)} KM
+          </button>
         )}
-      </Card.Body>
-    </Card>
+      </div>
+
+      {post.media?.length > 0 && (
+        <div
+          style={{ marginTop: 12, cursor: "pointer" }}
+          onClick={handleImageClick}
+        >
+          <PostMediaCarousel media={post.media} />
+        </div>
+      )}
+
+      {post.text && (
+        <div className="post-text" onClick={goToDetail}>
+          {post.text}
+        </div>
+      )}
+
+      <div className="post-actions-row">
+        <button
+          type="button"
+          className={`post-action-btn ${post.likedByCurrentUser ? "post-action-btn--liked" : ""}`}
+          onClick={handleLike}
+        >
+          <span
+            className={`post-action-btn__icon ${justLiked ? "post-action-btn__icon--pop" : ""}`}
+          >
+            {post.likedByCurrentUser ? (
+              <FaHeart size={13} />
+            ) : (
+              <FaRegHeart size={13} />
+            )}
+          </span>
+          MI PIACE · {post.likeCount}
+        </button>
+
+        <button type="button" className="post-action-btn" onClick={goToDetail}>
+          <FaRegComment size={13} />
+          COMMENTI · {post.commentCount}
+        </button>
+      </div>
+    </div>
   )
 }
 

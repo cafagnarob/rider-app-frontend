@@ -1,10 +1,11 @@
 import { useState } from "react"
-import { Button, Form, Modal, Spinner } from "react-bootstrap"
+import { FaTimes, FaTrash } from "react-icons/fa"
 import {
-  useDeleteVehiclePhotoMutation,
   useUpdateVehicleMutation,
   useUpdateVehiclePhotoMutation,
+  useDeleteVehiclePhotoMutation,
 } from "../vehiclesApi"
+import "./VehicleEditModal.css"
 
 function VehicleEditModal({ vehicle, onClose }) {
   const [updateVehicle, { isLoading: isSaving }] = useUpdateVehicleMutation()
@@ -24,6 +25,9 @@ function VehicleEditModal({ vehicle, onClose }) {
   const [newPhoto, setNewPhoto] = useState(null)
   const [preview, setPreview] = useState(null)
   const [errorMsg, setErrorMsg] = useState("")
+
+  const set = (field) => (e) =>
+    setForm((prev) => ({ ...prev, [field]: e.target.value }))
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0]
@@ -83,158 +87,144 @@ function VehicleEditModal({ vehicle, onClose }) {
     }
   }
 
+  if (!vehicle) return null
+
   const isBusy = isSaving || isUploading || isRemoving
   const currentImage = preview || vehicle?.photoUrl
 
   return (
-    <Modal show={!!vehicle} onHide={onClose} centered data-bs-theme="dark">
-      {vehicle && (
-        <Form onSubmit={handleSubmit}>
-          <Modal.Header
-            closeButton
-            className="bg-dark text-light border-secondary"
-          >
-            <Modal.Title className="fs-5">
-              Modifica {vehicle.model.brand.name} {vehicle.model.name}
-            </Modal.Title>
-          </Modal.Header>
+    <div className="sheet-overlay" onClick={handleClose}>
+      <div className="sheet-panel" onClick={(e) => e.stopPropagation()}>
+        <form onSubmit={handleSubmit}>
+          <div className="sheet-header">
+            <button type="button" className="btn-icon" onClick={handleClose}>
+              <FaTimes />
+            </button>
+            <div className="sheet-header__title">
+              {vehicle.model.brand.name} {vehicle.model.name}
+            </div>
+            <button
+              type="submit"
+              className="sheet-save-btn"
+              disabled={isBusy}
+              style={{ opacity: isBusy ? 0.5 : 1 }}
+            >
+              {isSaving || isUploading ? "..." : "SALVA"}
+            </button>
+          </div>
 
-          <Modal.Body className="bg-dark text-light">
-            <div className="mb-3">
+          <div className="sheet-body">
+            <div>
+              <div className="field-label form-group__label">FOTO</div>
+
               {currentImage ? (
-                <div className="ratio ratio-16x9 mb-2">
-                  <img
-                    src={currentImage}
-                    alt="Foto veicolo"
-                    style={{ objectFit: "cover", borderRadius: "0.5rem" }}
-                  />
+                <div className="photo-field__preview">
+                  <img src={currentImage} alt="" />
                 </div>
               ) : (
-                <div
-                  className="d-flex align-items-center justify-content-center border border-secondary rounded mb-2"
-                  style={{ height: "140px" }}
-                >
-                  <span className="text-secondary small">Nessuna foto</span>
+                <div className="photo-field__placeholder">
+                  <span className="photo-field__placeholder-text">
+                    NESSUNA FOTO
+                  </span>
                 </div>
               )}
 
-              <div className="d-flex gap-2 align-items-center">
-                <Form.Control
-                  type="file"
-                  accept="image/*"
-                  size="sm"
-                  className="bg-transparent"
-                  onChange={handleFileChange}
-                />
+              <div className="photo-field__actions">
+                <label className="btn-secondary photo-field__change-label">
+                  {currentImage ? "CAMBIA FOTO" : "AGGIUNGI FOTO"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    onChange={handleFileChange}
+                  />
+                </label>
                 {vehicle.photoUrl && !newPhoto && (
-                  <Button
-                    variant="outline-danger"
-                    size="sm"
+                  <button
+                    type="button"
+                    className="photo-field__remove-btn"
                     disabled={isBusy}
+                    style={{ opacity: isBusy ? 0.5 : 1 }}
                     onClick={handleRemovePhoto}
                   >
-                    {isRemoving ? (
-                      <Spinner size="sm" animation="border" />
-                    ) : (
-                      "Rimuovi"
-                    )}
-                  </Button>
+                    <FaTrash size={10} /> {isRemoving ? "..." : "RIMUOVI"}
+                  </button>
                 )}
               </div>
+
               {preview && (
-                <Form.Text className="text-warning">
+                <div className="photo-field__hint">
                   Nuova foto selezionata — verrà caricata al salvataggio.
-                </Form.Text>
+                </div>
               )}
             </div>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Soprannome</Form.Label>
-              <Form.Control
+            <div>
+              <div className="field-label form-group__label">SOPRANNOME</div>
+              <input
                 type="text"
-                className="bg-transparent"
+                className="input"
                 value={form.nickname}
-                onChange={(e) => setForm({ ...form, nickname: e.target.value })}
+                onChange={set("nickname")}
               />
-            </Form.Group>
+            </div>
 
-            <div className="row">
-              <div className="col-6">
-                <Form.Group className="mb-3">
-                  <Form.Label>Anno</Form.Label>
-                  <Form.Control
-                    type="number"
-                    className="bg-transparent"
-                    value={form.year}
-                    min={vehicle.model.yearStart}
-                    max={vehicle.model.yearEnd || new Date().getFullYear()}
-                    onChange={(e) => setForm({ ...form, year: e.target.value })}
-                  />
-                </Form.Group>
+            <div className="field-row">
+              <div className="field-col">
+                <div className="field-label form-group__label">ANNO</div>
+                <input
+                  type="number"
+                  className="input"
+                  value={form.year}
+                  min={vehicle.model.yearStart}
+                  max={vehicle.model.yearEnd || new Date().getFullYear()}
+                  onChange={set("year")}
+                />
               </div>
-              <div className="col-6">
-                <Form.Group className="mb-3">
-                  <Form.Label>Colore</Form.Label>
-                  <Form.Control
-                    type="text"
-                    className="bg-transparent"
-                    value={form.color}
-                    onChange={(e) =>
-                      setForm({ ...form, color: e.target.value })
-                    }
-                  />
-                </Form.Group>
+              <div className="field-col">
+                <div className="field-label form-group__label">COLORE</div>
+                <input
+                  type="text"
+                  className="input"
+                  value={form.color}
+                  onChange={set("color")}
+                />
               </div>
             </div>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Targa</Form.Label>
-              <Form.Control
+            <div>
+              <div className="field-label form-group__label">TARGA</div>
+              <input
                 type="text"
-                className="bg-transparent text-uppercase"
+                className="input"
+                style={{ textTransform: "uppercase" }}
                 value={form.licensePlate}
-                onChange={(e) =>
-                  setForm({ ...form, licensePlate: e.target.value })
-                }
+                onChange={set("licensePlate")}
               />
-            </Form.Group>
+            </div>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Numero di telaio (VIN)</Form.Label>
-              <Form.Control
+            <div>
+              <div className="field-label form-group__label">
+                NUMERO DI TELAIO (VIN)
+              </div>
+              <input
                 type="text"
-                className="bg-transparent text-uppercase font-monospace"
+                className="input"
                 maxLength={17}
+                style={{
+                  textTransform: "uppercase",
+                  fontFamily: "var(--font-mono)",
+                }}
                 value={form.vin}
-                onChange={(e) => setForm({ ...form, vin: e.target.value })}
+                onChange={set("vin")}
               />
-            </Form.Group>
+            </div>
 
-            {errorMsg && (
-              <div className="alert alert-danger py-2">{errorMsg}</div>
-            )}
-          </Modal.Body>
-
-          <Modal.Footer className="bg-dark border-secondary">
-            <Button
-              variant="outline-light"
-              onClick={handleClose}
-              disabled={isBusy}
-            >
-              Annulla
-            </Button>
-            <Button
-              type="submit"
-              disabled={isBusy}
-              className="rounded-pill px-4 fw-bold border-0"
-              style={{ backgroundColor: "#FFBE5D", color: "#000" }}
-            >
-              {isBusy ? "Salvataggio..." : "Salva"}
-            </Button>
-          </Modal.Footer>
-        </Form>
-      )}
-    </Modal>
+            {errorMsg && <div className="error-text">{errorMsg}</div>}
+          </div>
+        </form>
+      </div>
+    </div>
   )
 }
 

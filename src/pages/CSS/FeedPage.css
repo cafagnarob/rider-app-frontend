@@ -1,0 +1,29 @@
+.feed-page__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+}
+
+.feed-page__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.feed-page__tabs {
+  padding: 18px 20px 0;
+  padding-bottom: 18px;
+}
+
+.feed-page__empty-text {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.feed-page__list {
+  margin-top: 4px;
+}

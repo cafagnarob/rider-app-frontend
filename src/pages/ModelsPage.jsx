@@ -1,12 +1,22 @@
 import { useRef, useState } from "react"
-import { Badge, Button, Card, Form, Spinner } from "react-bootstrap"
 import { useNavigate, useParams } from "react-router-dom"
+import { Spinner } from "react-bootstrap"
+import { FaArrowLeft, FaFilter, FaSortAmountDown } from "react-icons/fa"
 import ModelDetailModal from "../features/catalog/components/ModelDetailModal"
 import {
   useGetBrandsQuery,
   useGetModelsQuery,
 } from "../features/catalog/catalogApi"
+import { useGetMyVehiclesQuery } from "../features/vehicles/vehiclesApi"
 import { CATEGORY_LABELS, CC_RANGES } from "../utils/constants"
+import "../pages/CSS/ModelsPage.css"
+
+const ORDER_OPTIONS = [
+  { value: "name", label: "Nome" },
+  { value: "engineCc", label: "Cilindrata" },
+  { value: "yearStart", label: "Anno" },
+  { value: "horsePower", label: "Potenza" },
+]
 
 function ModelsPage() {
   const { brandId } = useParams()
@@ -14,6 +24,9 @@ function ModelsPage() {
 
   const [page, setPage] = useState(0)
   const [selectedModel, setSelectedModel] = useState(null)
+
+  const [showFilters, setShowFilters] = useState(false)
+  const [showSort, setShowSort] = useState(false)
 
   const [searchInput, setSearchInput] = useState("")
   const [search, setSearch] = useState("")
@@ -26,11 +39,6 @@ function ModelsPage() {
   const [minCc, maxCc] = ccRange
     ? ccRange.split("-").map((v) => (v === "" ? undefined : Number(v)))
     : [undefined, undefined]
-
-  const handleCcChange = (e) => {
-    setCcRange(e.target.value)
-    setPage(0)
-  }
 
   const {
     data: pageData,
@@ -47,18 +55,16 @@ function ModelsPage() {
     orderBy,
   })
 
-  const lastDataRef = useRef(null)
-  if (pageData) lastDataRef.current = pageData
-  const displayData = pageData ?? lastDataRef.current
-
   const { data: brands } = useGetBrandsQuery()
+  const { data: vehicles } = useGetMyVehiclesQuery()
 
+  const ownedModelIds = new Set((vehicles || []).map((v) => v.model.id))
   const brand = brands?.find((b) => b.id === brandId)
+  const hasActiveFilters = Boolean(ccRange || category)
 
   const handleSearchChange = (e) => {
     const value = e.target.value
     setSearchInput(value)
-
     clearTimeout(timerRef.current)
     timerRef.current = setTimeout(() => {
       setSearch(value)
@@ -71,147 +77,237 @@ function ModelsPage() {
     setPage(0)
   }
 
-  const handleOrderChange = (e) => {
-    setOrderBy(e.target.value)
+  const handleCcChange = (e) => {
+    setCcRange(e.target.value)
     setPage(0)
   }
 
-  if (!displayData && isLoading) {
+  const selectOrder = (value) => {
+    setOrderBy(value)
+    setPage(0)
+    setShowSort(false)
+  }
+
+  const clearFilters = () => {
+    setCcRange("")
+    setCategory("")
+    setPage(0)
+  }
+
+  if (isLoading) {
     return (
-      <div className="text-center py-5">
-        <Spinner animation="border" variant="light" />
+      <div className="centered-spinner">
+        <Spinner animation="border" style={{ color: "#FF7A2F" }} />
       </div>
     )
   }
 
   if (isError) {
     return (
-      <div className="alert alert-danger">Impossibile caricare i modelli.</div>
+      <div className="empty-state" style={{ margin: 20 }}>
+        Impossibile caricare i modelli.
+      </div>
     )
   }
 
   return (
-    <>
-      <div className="d-flex align-items-center gap-3 mb-4">
-        <Button
-          variant="outline-light"
-          size="sm"
+    <div className="page">
+      <div className="page-header models-page__header">
+        <button
+          type="button"
+          className="btn-icon"
           onClick={() => navigate("/catalog")}
         >
-          ← Indietro
-        </Button>
-        <h2 className="mb-0">{brand?.name || "Modelli"}</h2>
+          <FaArrowLeft />
+        </button>
+        <div className="page-header__title">{brand?.name || "Modelli"}</div>
       </div>
 
-      <div className="row g-2 mb-4">
-        <div className="col-12 col-md-4">
-          <Form.Control
-            type="search"
-            placeholder="Cerca modello..."
-            className="bg-transparent"
-            value={searchInput}
-            onChange={handleSearchChange}
-          />
-        </div>
-        <div className="col-6 col-md-3">
-          <Form.Select
-            className="bg-transparent"
-            value={ccRange}
-            onChange={handleCcChange}
+      <div className="models-page__toolbar">
+        <input
+          type="search"
+          className="input models-page__search-input"
+          style={{ height: 44 }}
+          placeholder="Cerca modello..."
+          value={searchInput}
+          onChange={handleSearchChange}
+        />
+
+        <div style={{ position: "relative" }}>
+          <button
+            type="button"
+            className={`btn-icon ${hasActiveFilters ? "btn-icon--active" : ""}`}
+            style={{ position: "relative" }}
+            onClick={() => {
+              setShowFilters((v) => !v)
+              setShowSort(false)
+            }}
           >
-            {CC_RANGES.map((r) => (
-              <option key={r.value} value={r.value}>
-                {r.label}
-              </option>
-            ))}
-          </Form.Select>
+            <FaFilter size={15} />
+            {hasActiveFilters && <span className="btn-icon__dot" />}
+          </button>
+
+          {showFilters && (
+            <>
+              <div
+                className="popover-overlay"
+                onClick={() => setShowFilters(false)}
+              />
+              <div className="card popover-panel filter-panel">
+                <div>
+                  <div className="field-label filter-panel__field-label">
+                    CILINDRATA
+                  </div>
+                  <select
+                    className="select select--compact"
+                    style={{ width: "100%" }}
+                    value={ccRange}
+                    onChange={handleCcChange}
+                  >
+                    {CC_RANGES.map((r) => (
+                      <option key={r.value} value={r.value}>
+                        {r.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <div className="field-label filter-panel__field-label">
+                    CATEGORIA
+                  </div>
+                  <select
+                    className="select select--compact"
+                    style={{ width: "100%" }}
+                    value={category}
+                    onChange={handleCategoryChange}
+                  >
+                    <option value="">Tutte</option>
+                    {Object.entries(CATEGORY_LABELS).map(([value, label]) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {hasActiveFilters && (
+                  <button
+                    type="button"
+                    className="filter-panel__clear-btn"
+                    onClick={clearFilters}
+                  >
+                    RIMUOVI FILTRI
+                  </button>
+                )}
+              </div>
+            </>
+          )}
         </div>
-        <div className="col-6 col-md-2">
-          <Form.Select
-            className="bg-transparent "
-            value={category}
-            onChange={handleCategoryChange}
+
+        <div style={{ position: "relative" }}>
+          <button
+            type="button"
+            className="btn-icon"
+            onClick={() => {
+              setShowSort((v) => !v)
+              setShowFilters(false)
+            }}
           >
-            <option value="">Tutte le categorie</option>
-            {Object.entries(CATEGORY_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </Form.Select>
-        </div>
-        <div className="col-6 col-md-2">
-          <Form.Select
-            className="bg-transparent "
-            value={orderBy}
-            onChange={handleOrderChange}
-          >
-            <option value="name">Nome</option>
-            <option value="engineCc">Cilindrata</option>
-            <option value="yearStart">Anno</option>
-            <option value="horsePower">Potenza</option>
-          </Form.Select>
+            <FaSortAmountDown size={15} />
+          </button>
+
+          {showSort && (
+            <>
+              <div
+                className="popover-overlay"
+                onClick={() => setShowSort(false)}
+              />
+              <div className="card popover-panel sort-panel">
+                {ORDER_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    className={`dropdown-option ${orderBy === opt.value ? "dropdown-option--active" : ""}`}
+                    onClick={() => selectOrder(opt.value)}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </div>
 
       {pageData.content.length === 0 ? (
-        <p className="text-secondary">
+        <p className="no-results-text">
           Nessun modello corrisponde ai criteri di ricerca.
         </p>
       ) : (
-        <div className="row g-3" style={{ opacity: isFetching ? 0.5 : 1 }}>
-          {pageData.content.map((model) => (
-            <div className="col-12 col-md-6 col-lg-4" key={model.id}>
-              <Card
-                className="bg-dark text-light h-100 border-secondary"
-                style={{ cursor: "pointer" }}
+        <div className="model-grid" style={{ opacity: isFetching ? 0.6 : 1 }}>
+          {pageData.content.map((model) => {
+            const isOwned = ownedModelIds.has(model.id)
+            return (
+              <div
+                key={model.id}
+                className="card model-card"
                 onClick={() => setSelectedModel(model)}
               >
-                {model.imageUrl && (
-                  <div className="ratio ratio-16x9">
-                    <img
-                      src={model.imageUrl}
-                      alt={model.name}
-                      style={{ objectFit: "cover" }}
-                    />
-                  </div>
+                {isOwned && (
+                  <span className="model-card__owned-badge">IN GARAGE</span>
                 )}
-                <Card.Body>
-                  <Card.Title className="fs-6">{model.name}</Card.Title>
-                  <div className="d-flex gap-2 flex-wrap">
-                    <Badge bg="secondary">{model.engineCc} cc</Badge>
-                    <Badge bg="secondary">
+                <div className="model-card__image">
+                  {model.imageUrl && (
+                    <img src={model.imageUrl} alt={model.name} />
+                  )}
+                </div>
+                <div className="model-card__info">
+                  <div className="model-card__name">{model.name}</div>
+                  <div className="model-card__badges">
+                    <span className="model-card__badge">
+                      {model.engineCc} CC
+                    </span>
+                    <span className="model-card__badge">
                       {CATEGORY_LABELS[model.category] || model.category}
-                    </Badge>
+                    </span>
                   </div>
-                </Card.Body>
-              </Card>
-            </div>
-          ))}
+                </div>
+              </div>
+            )
+          })}
         </div>
       )}
 
       {pageData.totalPages > 1 && (
-        <div className="d-flex justify-content-center align-items-center gap-3 mt-4">
-          <Button
-            variant="outline-light"
-            size="sm"
+        <div className="pagination-row">
+          <button
+            type="button"
+            className="btn-secondary"
+            style={{
+              height: 40,
+              padding: "0 16px",
+              opacity: pageData.first ? 0.4 : 1,
+            }}
             disabled={pageData.first || isFetching}
             onClick={() => setPage((p) => p - 1)}
           >
-            Precedente
-          </Button>
-          <span className="text-secondary">
-            Pagina {pageData.number + 1} di {pageData.totalPages}
+            PRECEDENTE
+          </button>
+          <span className="pagination-row__label">
+            {pageData.number + 1} / {pageData.totalPages}
           </span>
-          <Button
-            variant="outline-light"
-            size="sm"
+          <button
+            type="button"
+            className="btn-secondary"
+            style={{
+              height: 40,
+              padding: "0 16px",
+              opacity: pageData.last ? 0.4 : 1,
+            }}
             disabled={pageData.last || isFetching}
             onClick={() => setPage((p) => p + 1)}
           >
-            Successiva
-          </Button>
+            SUCCESSIVA
+          </button>
         </div>
       )}
 
@@ -219,7 +315,7 @@ function ModelsPage() {
         model={selectedModel}
         onClose={() => setSelectedModel(null)}
       />
-    </>
+    </div>
   )
 }
 

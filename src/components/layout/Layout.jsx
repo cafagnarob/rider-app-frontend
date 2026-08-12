@@ -1,14 +1,18 @@
 import { Outlet } from "react-router-dom"
-import Navbar from "./Navbar"
+import { useSelector } from "react-redux"
+import BottomNav from "./BottomNav"
+import ActiveRideBanner from "./ActiveRideBanner"
 
 function Layout() {
+  const rideId = useSelector((state) => state.ride.rideId)
+
   return (
-    <>
-      <Navbar />
-      <main className="container mt-4">
-        <Outlet />
-      </main>
-    </>
+    <div className={`layout ${rideId ? "layout--ride-active" : ""}`}>
+      <Outlet />
+      {rideId && <ActiveRideBanner />}
+      <BottomNav />
+    </div>
   )
 }
+
 export default Layout

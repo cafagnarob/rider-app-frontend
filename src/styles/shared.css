@@ -1,0 +1,2734 @@
+.card {
+  border-radius: var(--radius-xl);
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+}
+
+.field-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+}
+
+.input {
+  width: 100%;
+  height: 52px;
+  border-radius: var(--radius-md);
+  background: var(--color-card);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  padding: 0 15px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.input:focus {
+  border-color: var(--color-accent);
+}
+
+.input::placeholder {
+  color: var(--color-text-faint);
+}
+
+.btn-primary {
+  height: 56px;
+  border-radius: 15px;
+  background: var(--color-accent);
+  border: none;
+  color: var(--color-on-accent);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 19px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: var(--color-card);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text);
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+}
+
+.btn-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: var(--color-card-alt);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.page {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  min-height: 100%;
+  padding-top: 20px;
+  padding-bottom: 40px;
+}
+
+.px-20 {
+  padding: 0 20px;
+}
+
+.form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field-row {
+  display: flex;
+  gap: 12px;
+}
+
+.field-col {
+  flex: 1;
+  min-width: 0;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.form-group__label {
+  margin-bottom: 8px;
+}
+
+.error-text {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-danger);
+}
+
+.page-title {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.input--compact {
+  height: 46px;
+}
+
+.mb-16 {
+  margin-bottom: 16px;
+}
+
+.empty-state {
+  padding: 22px;
+  border-radius: var(--radius-lg);
+  background: var(--color-card);
+  border: 1px dashed var(--color-border-strong);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+}
+
+.no-results-text {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-faint);
+  text-align: center;
+  padding: 40px 20px;
+}
+
+/* promosse da AddVehicleWizardPage: ora condivise con BrandsPage */
+.brand-tile__image {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-card-alt);
+  padding: 14px;
+}
+
+.brand-tile__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.brand-tile__fallback {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 30px;
+  color: var(--color-text-faint);
+}
+
+.brand-tile__name {
+  padding: 9px 8px;
+  text-align: center;
+}
+
+.brand-tile__name span {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+/* --- selettore a card con stato attivo (usato due volte in questa pagina: tipo evento e visibilità) --- */
+
+.options-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.option-card {
+  text-align: left;
+  padding: 13px 15px;
+  border-radius: 13px;
+  cursor: pointer;
+  background: var(--color-card);
+  border: 1px solid var(--color-border-strong);
+}
+
+.option-card--active {
+  background: var(--color-accent-soft-bg);
+  border-color: var(--color-accent-soft-border);
+}
+
+.option-card__title {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--color-text);
+}
+
+.option-card--active .option-card__title {
+  color: var(--color-accent);
+}
+
+.option-card__hint {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+/* --- promosse da AddEventDayPage.css: ora servono anche qui, identiche --- */
+
+.textarea {
+  width: 100%;
+  border-radius: var(--radius-lg);
+  background: var(--color-card);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 12px;
+  outline: none;
+  resize: none;
+  box-sizing: border-box;
+}
+
+.duration-hint {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-text-faint);
+  margin-top: 6px;
+}
+
+.meeting-point {
+  margin-top: 12px;
+  position: relative;
+}
+
+.meeting-point__chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px;
+  border-radius: 12px;
+  background: var(--color-accent-soft-bg);
+  border: 1px solid var(--color-accent-soft-border);
+}
+
+.meeting-point__label {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-accent);
+}
+
+.meeting-point__change-btn {
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 6px;
+  z-index: 10;
+  overflow: hidden;
+}
+
+.search-results__item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 11px 13px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--color-border-soft);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.pb-100 {
+  padding-bottom: 100px;
+}
+
+.centered-spinner {
+  text-align: center;
+  padding: 60px 0;
+}
+
+/* --- testo ed etichette ricorrenti --- */
+.screen-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+}
+
+.section-title {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 21px;
+  letter-spacing: 0.02em;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.prose {
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* --- griglia statistiche (Ritrovo/Posti/Percorso/Visibilità e simili) --- */
+.stat-grid {
+  display: grid;
+  gap: 1px;
+  background: var(--color-border-soft);
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.stat-cell {
+  background: var(--color-card);
+  padding: 14px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.stat-cell--link {
+  text-decoration: none;
+}
+
+.stat-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+}
+
+.stat-value {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 21px;
+  line-height: 1;
+}
+
+/* --- pillole generiche (badge tipo, distanza/durata, ecc.) --- */
+.pill {
+  padding: 5px 11px;
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.pill--accent {
+  background: var(--color-accent-soft-bg);
+  border: 1px solid var(--color-accent-soft-border);
+  color: var(--color-accent);
+}
+
+.pill--neutral {
+  background: var(--color-card-alt);
+  border: 1px solid var(--color-border-soft);
+  color: var(--color-text-secondary);
+}
+
+/* --- pulsanti aggiuntivi --- */
+.btn-link-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  padding: 0 18px;
+}
+
+.btn-danger {
+  height: 48px;
+  border-radius: 15px;
+  background: var(--color-danger);
+  border: none;
+  color: #fff;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.text-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 0;
+}
+
+.text-btn--danger {
+  color: var(--color-danger);
+}
+.text-btn--accent {
+  color: var(--color-accent);
+}
+
+/* --- modale di conferma generico */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 6, 7, 0.72);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.modal-card {
+  padding: 22px;
+  width: 100%;
+  max-width: 340px;
+}
+
+.modal-title {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.modal-text {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin-bottom: 18px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.modal-actions > * {
+  flex: 1;
+}
+
+/* --- tab a pillola orizzontali (Feed, EventsList, Search...) --- */
+.tab-pills {
+  display: flex;
+  gap: 8px;
+}
+
+.tab-pill {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 11px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tab-pill--active {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+/* --- chip rimovibile (filtro attivo tipo "vicino a X") --- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 9px;
+  background: var(--color-accent-soft-bg);
+  border: 1px solid var(--color-accent-soft-border);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--color-accent);
+}
+
+.chip__remove-btn {
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+}
+
+/* --- pulsante piccolo accento (usato negli header: + CREA, + POST, ecc.) --- */
+.btn-accent-sm {
+  height: 40px;
+  padding: 0 15px;
+  border-radius: 12px;
+  background: var(--color-accent);
+  border: none;
+  color: var(--color-on-accent);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.04em;
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* --- riga evento in lista (data box + info + badge): Home, EventsList, Search --- */
+.event-row {
+  padding: 16px;
+  cursor: pointer;
+  display: flex;
+  gap: 13px;
+}
+
+.event-row__date-box {
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-soft);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  color: var(--color-accent);
+}
+
+.event-row__date-day {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.event-row__date-month {
+  font-size: 9px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+.event-row__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.event-row__title-line {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 4px;
+}
+
+.event-row__title {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 1.1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.event-row__lock-icon {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.event-row__meta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-text-muted);
+  margin-bottom: 8px;
+}
+
+.event-row__badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* --- badge piccoli generici --- */
+.badge-sm {
+  padding: 3px 9px;
+  border-radius: 8px;
+  background: var(--color-card-alt);
+  border: 1px solid var(--color-border-soft);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--color-text-secondary);
+}
+
+.badge-sm--accent {
+  color: var(--color-accent);
+}
+
+.badge-sm--own {
+  padding: 2px 8px;
+  border-radius: 7px;
+  background: var(--color-accent-soft-bg);
+  border: 1px solid var(--color-accent-soft-border);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.badge-sm--status-accepted {
+  padding: 3px 9px;
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  background: #173323;
+  border: 1px solid rgba(52, 199, 89, 0.35);
+  color: #4ade80;
+}
+
+.badge-sm--status-pending {
+  padding: 3px 9px;
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  background: var(--color-accent-soft-bg);
+  border: 1px solid var(--color-accent-soft-border);
+  color: var(--color-accent);
+}
+
+/* --- riga di paginazione --- */
+.pagination-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  padding: 24px 20px;
+}
+
+.pagination-row__label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+/* --- messaggio "lista vuota" (diverso da "nessun risultato per la ricerca") --- */
+.empty-list-text {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-faint);
+  text-align: center;
+  padding: 60px 20px;
+}
+
+/* --- header di pagina con pulsante indietro + titolo/sottotitolo --- */
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px 18px;
+}
+
+.page-header__title {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 22px;
+}
+
+.page-header__subtitle {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+/* --- riga utente in lista (follower/seguiti, ricerca motociclisti) --- */
+.user-row {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 13px 20px;
+  border-bottom: 1px solid var(--color-border-soft);
+  text-decoration: none;
+}
+
+.user-row__avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--color-surface-raised);
+  flex-shrink: 0;
+}
+
+.user-row__username {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--color-text);
+}
+
+.user-row__fullname {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+/* --- riga header con titolo a sinistra, azioni a destra: EventsList/Feed la duplicavano identica --- */
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px 18px;
+}
+
+/* --- stato vuoto "eroe": titolo + testo + CTA, centrato --- */
+.empty-hero {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.empty-hero__title {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 22px;
+  margin-bottom: 10px;
+}
+
+.empty-hero__text {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-bottom: 22px;
+}
+
+.empty-hero__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 32px;
+  text-decoration: none;
+}
+
+.flex-gap-10 {
+  display: flex;
+  gap: 10px;
+}
+
+/* --- schermate di autenticazione: Login e Register condividono questa struttura --- */
+.auth-page {
+  min-height: 100vh;
+  background: var(--color-bg);
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-page__hero {
+  position: relative;
+  height: 250px;
+  flex-shrink: 0;
+  background-color: #0e0f12;
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.045) 0 8px,
+    transparent 8px 16px
+  );
+  border-bottom: 1px solid var(--color-border-soft);
+}
+
+.auth-page__hero-caption {
+  position: absolute;
+  left: 20px;
+  bottom: 16px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--color-text-muted);
+}
+
+.auth-page__body {
+  padding: 26px 20px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex: 1;
+}
+
+.auth-page__brand-title {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 42px;
+  line-height: 0.95;
+  letter-spacing: 0.01em;
+}
+
+.auth-page__brand-subtitle {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--color-accent);
+  margin-top: 9px;
+}
+
+.auth-page__form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.auth-page__remember-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.auth-page__link {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--color-text-secondary);
+}
+
+.auth-page__footer-note {
+  margin-top: auto;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-text-faint);
+}
+
+/* --- popover a icona: pulsante che apre un pannello posizionato, chiudibile cliccando fuori --- */
+.popover-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 19;
+}
+
+.popover-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 20;
+}
+
+.btn-icon--active {
+  border-color: var(--color-accent-soft-border);
+  color: var(--color-accent);
+}
+
+.btn-icon__dot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+
+/* --- lista opzioni cliccabili dentro un popover  --- */
+.dropdown-option {
+  text-align: left;
+  padding: 9px 10px;
+  border-radius: 9px;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 13px;
+}
+
+.dropdown-option--active {
+  background: var(--color-accent-soft-bg);
+  color: var(--color-accent);
+}
+
+.select--compact {
+  height: 40px;
+  font-size: 13px;
+}
+
+/* --- pulsanti di azione compatti: accetta/rifiuta (inviti, richieste) --- */
+.btn-success {
+  height: 36px;
+  padding: 0 15px;
+  border-radius: 11px;
+  background: #173323;
+  border: 1px solid rgba(52, 199, 89, 0.35);
+  color: #4ade80;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  cursor: pointer;
+}
+
+.btn-danger-sm {
+  height: 36px;
+  padding: 0 15px;
+  border-radius: 11px;
+  background: var(--color-danger-bg);
+  border: 1px solid var(--color-danger-border);
+  color: var(--color-danger);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  cursor: pointer;
+}
+
+/* --- header minimale: solo pulsante indietro, azione opzionale a destra --- */
+.icon-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px 16px;
+}
+
+.ml-auto {
+  margin-left: auto;
+}
+
+.icon-btn--danger {
+  color: var(--color-danger);
+}
+
+/* --- riga contatori follower/seguiti: la ritroverai identica in PublicProfilePage --- */
+.stats-row {
+  display: flex;
+  gap: 20px;
+}
+
+.stat-link {
+  text-decoration: none;
+  color: var(--color-text);
+}
+
+.stat-count {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.stat-label {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--color-text-muted);
+}
+
+/* --- righe informative chiave/valore: Località, Data di nascita, Iscritto dal --- */
+.info-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-body);
+  font-size: 13px;
+}
+
+.info-row__label {
+  color: var(--color-text-muted);
+}
+
+/* --- menu voce con freccia (liste di navigazione tipo "Il mio account") --- */
+.menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.menu-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 13px 15px;
+  border-radius: 13px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  text-decoration: none;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+/* --- badge numerico circolare (conteggio inviti/notifiche) --- */
+.count-badge {
+  min-width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+/* --- griglia post a 3 colonne, senza gap visibile (stile Instagram) --- */
+.post-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 3px;
+  padding: 0 3px;
+}
+
+.post-grid__item {
+  aspect-ratio: 1;
+  background: var(--color-card-alt);
+  display: block;
+}
+
+.post-grid__item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* --- pulsante segui/smetti di seguire --- */
+.follow-btn {
+  height: 34px;
+  padding: 0 16px;
+  border-radius: 11px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.follow-btn--follow {
+  background: var(--color-accent);
+  border: 1px solid var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.follow-btn--unfollow {
+  background: var(--color-card);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text-secondary);
+}
+
+/* --- riga icone social --- */
+.social-links-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.social-links-row a {
+  color: var(--color-text-secondary);
+}
+
+/* --- box di conferma positiva: registrazione avvenuta, richiesta reset inviata --- */
+.success-box {
+  padding: 22px;
+  border-radius: var(--radius-lg);
+  background: var(--color-card);
+  border: 1px solid var(--color-accent-soft-border);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+}
+
+.success-box--narrow {
+  max-width: 360px;
+  text-align: center;
+}
+
+.link-accent {
+  color: var(--color-accent);
+}
+
+/* --- pagina centrata a schermo intero, senza hero (reset password, verifica email) --- */
+.centered-page {
+  min-height: 100vh;
+  background: var(--color-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+/* --- titolo di pagina isolato: seconda occorrenza dopo ForgotPasswordPage --- */
+.page-heading {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 30px;
+  margin-bottom: 30px;
+}
+
+/* --- variante stretta e centrata per empty-state/success-box, dentro schermate auth --- */
+.empty-state--narrow {
+  max-width: 360px;
+  text-align: center;
+}
+
+/* --- testo di avviso non bloccante (diverso da error-text: qui il colore è l'accento, non il rosso) --- */
+.warning-text {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-accent);
+}
+
+/* --- badge meta compatto: terza variante di pillola, leggermente diversa da badge-sm e pill --- */
+.meta-badge {
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: var(--color-card-alt);
+  border: 1px solid var(--color-border-soft);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--color-text-secondary);
+}
+
+.meta-badge--accent {
+  background: var(--color-accent-soft-bg);
+  border-color: var(--color-accent-soft-border);
+  color: var(--color-accent);
+}
+
+/* --- variante a 3 colonne per la griglia statistiche (di base è generica, il numero di colonne va specificato) --- */
+.stat-grid--cols-3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+/* --- terza occorrenza identica: header con azioni a destra (notifica + pulsante) --- */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* --- variante danger per i badge meta (es. "in corso") --- */
+.meta-badge--danger {
+  background: var(--color-danger-bg);
+  border-color: var(--color-danger-border);
+  color: var(--color-danger);
+}
+
+/* --- card "cronometro live": numero enorme centrato + righe di statistiche sotto --- */
+.tracker-card {
+  border-color: var(--color-accent-soft-border);
+  padding: 22px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.tracker-badge {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 9px;
+  margin-bottom: 16px;
+  background: var(--color-danger-bg);
+  border: 1px solid var(--color-danger-border);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-danger);
+}
+
+.tracker-hero-value {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 52px;
+  line-height: 1;
+}
+
+.tracker-hero-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-bottom: 26px;
+}
+
+.tracker-stat-row {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+}
+
+.tracker-stat-row--divider {
+  padding-top: 18px;
+  border-top: 1px solid var(--color-border-soft);
+  margin-bottom: 0;
+}
+
+.tracker-stat-value {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 22px;
+}
+
+.tracker-stat-value--sm {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.tracker-stat-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--color-text-muted);
+  margin-top: 3px;
+}
+
+/* --- pulsante pieno rosso, a blocco: azione distruttiva primaria (termina/elimina definitivamente) --- */
+.btn-danger-block {
+  width: 100%;
+  height: 56px;
+  border-radius: 15px;
+  background: var(--color-danger);
+  border: none;
+  color: #fff;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+/* --- pulsante testuale a blocco, discreto (azione secondaria/annulla) --- */
+.btn-text-block {
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 8px;
+}
+
+.mb-20 {
+  margin-bottom: 20px;
+}
+
+/* --- pulsante indietro sovrapposto a una mappa/hero: seconda occorrenza, ora condivisa --- */
+.map-back-btn {
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  background: rgba(10, 10, 12, 0.8);
+}
+
+/* --- pulsante outline compatto con icona (usato per azioni secondarie tipo export) --- */
+.btn-outline-sm {
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 11px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* --- riga tappa/waypoint: pallino numerato colorato per ruolo + etichetta --- */
+.waypoint-row {
+  padding: 11px 13px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.waypoint-row__number {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  background: var(--color-card-alt);
+  color: var(--color-text-secondary);
+}
+
+.waypoint-row__number--start {
+  background: #173323;
+  color: #4ade80;
+}
+
+.waypoint-row__number--end {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+.waypoint-row__label {
+  font-family: var(--font-body);
+  font-size: 13.5px;
+}
+
+/* --- contenitore mappa inset con bordo arrotondato: seconda occorrenza, ora generico --- */
+.map-frame {
+  position: relative;
+  height: 360px;
+  margin: 0 20px 18px;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+}
+
+/* --- input di ricerca con icona sovrapposta a destra --- */
+.search-input-wrap {
+  position: relative;
+}
+
+.search-input-wrap .input {
+  padding-right: 44px;
+}
+
+.search-input-wrap__icon {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+}
+
+/* --- pulsante icona minimale: riga waypoint editabile, riordino/eliminazione --- */
+.icon-btn-plain {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.icon-btn-plain--muted {
+  color: var(--color-text-muted);
+}
+
+.icon-btn-plain--danger {
+  color: var(--color-danger);
+}
+
+.icon-btn-plain:disabled {
+  opacity: 0.3;
+}
+
+/* --- riga waypoint editabile: cerchio numerato + input inline + azioni --- */
+.waypoint-edit-row {
+  padding: 9px 11px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.waypoint-edit-row__number {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.waypoint-edit-row__input {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: none;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 13px;
+  outline: none;
+}
+
+/* --- riepilogo numerico inline: distanza/durata affiancate --- */
+.inline-stats-row {
+  display: flex;
+  gap: 20px;
+}
+
+.inline-stats-row__value {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.inline-stats-row__unit {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-text-muted);
+  margin-left: 5px;
+}
+
+.checkbox-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* --- coppia di pulsanti azione compatti dentro una card (GPX/ELIMINA): quarta variante di dimensione, la più piccola vista finora --- */
+.btn-outline-xs {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 9px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.btn-danger-xs {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 9px;
+  background: var(--color-danger-bg);
+  border: 1px solid var(--color-danger-border);
+  color: var(--color-danger);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* --- checkbox con etichetta, spinta a destra dentro una riga di azioni --- */
+.importable-toggle {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+/* --- promosse da AddVehicleWizardPage: riquadro modello con immagine+nome+meta, ora condiviso --- */
+.model-tile__image {
+  aspect-ratio: 16/10;
+  background: var(--color-card-alt);
+}
+
+.model-tile__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.model-tile__info {
+  padding: 10px 11px;
+}
+
+.model-tile__name {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.model-tile__meta {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--color-text-muted);
+  margin-top: 4px;
+}
+
+/* --- riga risultato ricerca: avatar/icona + testo, in una card cliccabile --- */
+.result-row {
+  padding: 13px;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.result-row__avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--color-surface-raised);
+}
+
+.result-row__title {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--color-text);
+}
+
+.result-row__subtitle {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+/* --- coppia di pulsanti azione media taglia, altezza 38px: quinta variante di dimensione --- */
+.action-btn {
+  height: 38px;
+  padding: 0 15px;
+  border-radius: 11px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.action-btn--toggle-active {
+  background: var(--color-accent);
+  border: 1px solid var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.action-btn--toggle-inactive {
+  background: var(--color-card);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text-secondary);
+}
+
+/* --- riga percorso in stile "mini card": titolo+meta a sinistra, pillola a destra --- */
+.mini-list-row {
+  padding: 13px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-decoration: none;
+  color: var(--color-text);
+}
+
+.mini-list-row__title {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.mini-list-row__meta {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+/* --- griglia post con angoli arrotondati (diversa da post-grid: qui non è full-bleed) --- */
+.rounded-post-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.rounded-post-grid__item {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--color-card-alt);
+}
+
+.rounded-post-grid__item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* --- contenitore centrato con testo allineato al centro: variante di centered-page --- */
+.centered-page--text {
+  text-align: center;
+}
+
+/* --- blocco di caricamento verticale: spinner + testo sotto --- */
+.loading-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.loading-block__text {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+/* --- variante danger per empty-state (bordo rosso invece che neutro) --- */
+.empty-state--danger {
+  border-color: var(--color-danger-border);
+}
+
+.mt-20 {
+  margin-top: 20px;
+}
+
+/* --- modale a foglio dal basso: overlay + pannello con header sticky (chiudi/titolo/salva) --- */
+.sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 6, 7, 0.72);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.sheet-panel {
+  width: 100%;
+  max-width: 480px;
+  max-height: 92vh;
+  overflow-y: auto;
+  background: var(--color-bg);
+  border-radius: 24px 24px 0 0;
+  border: 1px solid var(--color-border-soft);
+  border-bottom: none;
+}
+
+.sheet-header {
+  position: sticky;
+  top: 0;
+  background: var(--color-bg);
+  z-index: 2;
+  border-bottom: 1px solid var(--color-border-soft);
+  padding: 20px 20px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sheet-header__title {
+  flex: 1;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1.15;
+}
+
+.sheet-save-btn {
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 13px;
+  background: var(--color-accent);
+  border: none;
+  color: var(--color-on-accent);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+}
+
+.sheet-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* --- card generica come sezione di pagina (profilo, pannelli): padding 18 + margine sotto --- */
+.section-card {
+  padding: 18px;
+  margin-bottom: 16px;
+}
+
+.section-card__label {
+  margin-bottom: 14px;
+}
+
+/* --- riga link social: icona + url troncato + elimina --- */
+.link-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.link-row__url {
+  flex: 1;
+  min-width: 0;
+  color: var(--color-accent);
+  font-family: var(--font-body);
+  font-size: 13px;
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.link-row__delete {
+  background: none;
+  border: none;
+  color: var(--color-danger);
+  cursor: pointer;
+  padding: 4px;
+  flex-shrink: 0;
+}
+
+/* --- form inline compatto: select + input + pulsante sulla stessa riga --- */
+.inline-add-form {
+  display: flex;
+  gap: 8px;
+}
+
+/* --- variante section-card con bordo di allerta (zona pericolosa) --- */
+.section-card--danger {
+  border-color: var(--color-danger-border);
+}
+
+.section-card__label--danger {
+  color: var(--color-danger);
+}
+
+.section-card__text {
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+
+/* --- pulsante "secondario" riempito d'accento: variante per conferme dentro form inline --- */
+.btn-accent-secondary {
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: var(--color-accent);
+  border: none;
+  color: var(--color-on-accent);
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+}
+
+/* --- riga etichetta/valore + pulsante modifica, e il form che si apre sotto --- */
+.settings-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.settings-row__label {
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+.settings-row__value {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+.inline-edit-form {
+  padding-top: 14px;
+  border-top: 1px solid var(--color-border-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.text-btn--secondary {
+  color: var(--color-text-secondary);
+}
+
+/* --- contatore caratteri --- */
+.char-counter {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-text-faint);
+}
+
+/* --- griglia upload foto: tile con pulsante rimuovi overlay + tile "aggiungi" --- */
+.photo-upload-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+
+.photo-upload-grid__item {
+  position: relative;
+  aspect-ratio: 1;
+}
+
+.photo-upload-grid__item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 13px;
+}
+
+.photo-upload-grid__remove {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(10, 10, 12, 0.85);
+  border: none;
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.photo-upload-grid__add-tile {
+  aspect-ratio: 1;
+  border-radius: 13px;
+  background: var(--color-card);
+  border: 1px dashed var(--color-border-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-family: var(--font-heading);
+  font-size: 26px;
+  color: var(--color-text-faint);
+}
+
+/* --- pillola "collega" con stato attivo/vuoto e pulsante di rimozione inline --- */
+.link-chip {
+  padding: 11px 14px;
+  border-radius: 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text-secondary);
+}
+
+.link-chip--picked {
+  background: var(--color-accent-soft-bg);
+  border-color: var(--color-accent-soft-border);
+  color: var(--color-accent);
+}
+
+.link-chips-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* --- riga selezionabile in un picker: stessa forma di search-results__item, contesto diverso --- */
+.picker-row {
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border-soft);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.picker-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.picker-empty-text {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-faint);
+}
+
+/* --- carosello autoplay: cornice statica, gli stili di scorrimento restano inline (calcolati a runtime) --- */
+.auto-carousel {
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+  border: 1px solid var(--color-border-soft);
+  touch-action: pan-y;
+}
+
+.auto-carousel__track {
+  display: flex;
+  height: 100%;
+}
+
+.auto-carousel__slide {
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.auto-carousel__slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.auto-carousel__dots {
+  position: absolute;
+  bottom: 12px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+}
+
+.auto-carousel__dot {
+  height: 5px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.35);
+  transition: width 0.25s ease;
+}
+
+.auto-carousel__dot--active {
+  background: var(--color-accent);
+}
+
+@keyframes heartPop {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.35);
+  }
+  60% {
+    transform: scale(0.92);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* --- riga autore post: avatar + nome + meta, cliccabili verso il profilo --- */
+.post-author-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.post-author-row__avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--color-surface-raised);
+  cursor: pointer;
+}
+
+.post-author-row__name {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.post-author-row__meta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-text-muted);
+  margin-top: 3px;
+}
+
+/* --- badge riferimento post: evento (accento) o ride (neutro) --- */
+.post-ref-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.post-ref-badge {
+  padding: 6px 11px;
+  border-radius: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  cursor: pointer;
+  border: none;
+}
+
+.post-ref-badge--event {
+  background: var(--color-accent-soft-bg);
+  border: 1px solid var(--color-accent-soft-border);
+  color: var(--color-accent);
+}
+
+.post-ref-badge--ride {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+}
+
+/* --- testo post cliccabile verso il dettaglio --- */
+.post-text {
+  font-size: 14px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.86);
+  margin-top: 12px;
+  cursor: pointer;
+}
+
+/* --- riga azioni post: mi piace + commenti --- */
+.post-actions-row {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.post-action-btn {
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 12px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.post-action-btn--liked {
+  background: var(--color-accent-soft-bg);
+  color: var(--color-accent);
+}
+
+.post-action-btn__icon {
+  display: inline-flex;
+}
+
+.post-action-btn__icon--pop {
+  animation: heartPop 0.35s ease-out;
+}
+
+.post-card {
+  border-top: 1px solid var(--color-border-soft);
+  padding: 16px 20px 4px;
+}
+
+/* --- carosello feed: scroll nativo con snap, cornice statica + pallini indicatore --- */
+.media-carousel {
+  position: relative;
+}
+
+.media-carousel__scroll {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  border-radius: 16px;
+  border: 1px solid var(--color-border-soft);
+  scrollbar-width: none;
+}
+
+.media-carousel__scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.media-carousel__slide {
+  flex: 0 0 100%;
+  scroll-snap-align: center;
+  height: 210px;
+}
+
+.media-carousel__slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.media-carousel__dots {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+}
+
+.media-carousel__dot {
+  height: 5px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.35);
+  transition: width 0.2s ease;
+}
+
+.media-carousel__dot--active {
+  background: var(--color-accent);
+}
+
+/* --- grafico ride: titolo sezione (grafico velocità/altimetria) --- */
+.chart-section-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: 10px;
+}
+
+.chart-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* --- pannello dropdown ampio con header + lista scrollabile + footer link (notifiche) --- */
+.dropdown-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 50;
+  width: 320px;
+  max-height: 420px;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.dropdown-panel__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 13px 15px;
+  border-bottom: 1px solid var(--color-border-soft);
+}
+
+.dropdown-panel__title {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.dropdown-panel__footer-link {
+  display: block;
+  text-align: center;
+  padding: 11px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.dropdown-empty {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-faint);
+  text-align: center;
+  padding: 24px 0;
+}
+
+/* --- badge numerico sovrapposto a un'icona (campanella con conteggio) --- */
+.icon-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 15px;
+  height: 15px;
+  border-radius: 8px;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+}
+
+/* --- riga notifica dentro il dropdown: avatar/icona + testo + puntino non letto --- */
+.notif-dropdown-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  padding: 11px 15px;
+  border: none;
+  border-bottom: 1px solid var(--color-border-soft);
+  cursor: pointer;
+  background: transparent;
+}
+
+.notif-dropdown-row--unread {
+  background: rgba(255, 122, 47, 0.06);
+}
+
+.notif-dropdown-row__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--color-surface-raised);
+  flex-shrink: 0;
+}
+
+.notif-dropdown-row__icon-fallback {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-card-alt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.notif-dropdown-row__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.notif-dropdown-row__message {
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  color: var(--color-text);
+  line-height: 1.35;
+}
+
+.notif-dropdown-row__message--unread {
+  font-weight: 600;
+}
+
+.notif-dropdown-row__time {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--color-text-faint);
+  margin-top: 3px;
+}
+
+.notif-dropdown-row__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+/* --- riquadro che mostra un codice/token in evidenza (monospace, letter-spacing largo) --- */
+.code-display-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.code-display-box {
+  flex: 1;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--color-card-alt);
+  border: 1px solid var(--color-border-soft);
+  font-family: var(--font-mono);
+  font-size: 18px;
+  letter-spacing: 0.15em;
+  color: var(--color-accent);
+}
+
+.code-copy-btn {
+  height: 46px;
+  padding: 0 14px;
+}
+
+.code-hint-text {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-bottom: 8px;
+}
+
+/* --- badge di stato invito: tre varianti (in attesa/accettato/rifiutato) --- */
+.invite-status-badge {
+  padding: 4px 9px;
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+}
+
+.invite-status-badge--pending {
+  background: var(--color-accent-soft-bg);
+  color: var(--color-accent);
+}
+
+.invite-status-badge--accepted {
+  background: #173323;
+  color: #4ade80;
+}
+
+.invite-status-badge--rejected {
+  background: var(--color-card-alt);
+  color: var(--color-text-muted);
+}
+
+/* --- pulsante piccolo pieno accento (invita/reinvita in una lista contatti) --- */
+.btn-accent-xs {
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 9px;
+  background: var(--color-accent);
+  border: none;
+  color: var(--color-on-accent);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  cursor: pointer;
+}
+
+/* --- riga contatto in una lista di invito/selezione --- */
+.contact-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 11px;
+  border-radius: 11px;
+  background: var(--color-card-alt);
+  border: 1px solid var(--color-border-soft);
+}
+
+.contact-row__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--color-surface-raised);
+}
+
+.contact-row__name {
+  flex: 1;
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+.contact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+/* --- riga contatto selezionabile (checkbox inline): variante di contact-row per selezione multipla --- */
+.selectable-contact-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 11px;
+  border-radius: 11px;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  background: var(--color-card-alt);
+  border: 1px solid var(--color-border-soft);
+}
+
+.selectable-contact-row--selected {
+  background: var(--color-accent-soft-bg);
+  border-color: var(--color-accent-soft-border);
+}
+
+.selectable-contact-row__name {
+  flex: 1;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text);
+}
+
+.selectable-contact-row__checkbox {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-on-accent);
+  background: transparent;
+  border: 1px solid var(--color-border-strong);
+}
+
+.selectable-contact-row__checkbox--checked {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.selection-count {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-text-muted);
+  margin-top: 8px;
+}
+
+/* --- riga richiesta (partecipazione/codice) con azioni accetta/rifiuta: forma condivisa --- */
+.request-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--color-card-alt);
+  border: 1px solid var(--color-border-soft);
+}
+
+.request-row__name {
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+.request-row__identity {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.request-row__avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--color-surface-raised);
+}
+
+.request-row__actions {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-approve {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 9px;
+  background: #173323;
+  border: 1px solid rgba(52, 199, 89, 0.35);
+  color: #4ade80;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.btn-reject {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 9px;
+  background: var(--color-danger-bg);
+  border: 1px solid var(--color-danger-border);
+  color: var(--color-danger);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.request-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.request-section-empty {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-faint);
+  margin: 0 0 16px;
+}
+
+.request-section-empty--tight {
+  margin: 0;
+}
+
+/* --- lista pillole "confermati": username in badge neutri affiancati --- */
+.confirmed-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.confirmed-pill {
+  padding: 5px 10px;
+  border-radius: 9px;
+  background: var(--color-card-alt);
+  border: 1px solid var(--color-border-soft);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-text-secondary);
+}
+
+/* --- footer sticky con azioni, ancorato in fondo a un foglio modale --- */
+.sheet-footer {
+  position: sticky;
+  bottom: 0;
+  background: var(--color-bg);
+  border-top: 1px solid var(--color-border-soft);
+  padding: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+/* --- banner fisso "registrazione in corso": overlay non interattivo + pulsante interno cliccabile --- */
+.ride-banner-wrap {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 100px;
+  z-index: 65;
+  padding: 0 12px;
+  pointer-events: none;
+}
+
+.ride-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 540px;
+  margin: 0 auto;
+  height: 52px;
+  border-radius: 16px;
+  background: rgba(12, 12, 14, 0.92);
+  border: 1px solid var(--color-danger-border);
+  backdrop-filter: blur(8px);
+  padding: 0 16px;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.ride-banner__dot-wrap {
+  position: relative;
+  width: 9px;
+  height: 9px;
+  flex-shrink: 0;
+}
+
+.ride-banner__dot {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--color-danger);
+}
+
+.ride-banner__dot-pulse {
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  background: var(--color-danger);
+  animation: qjpulse 1.8s ease-out infinite;
+}
+
+.ride-banner__label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-danger);
+  letter-spacing: 0.04em;
+}
+
+.ride-banner__distance {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--color-text);
+  margin-left: auto;
+}
+
+/* --- bottom nav: wrapper fisso con gradiente di dissolvenza + griglia pulsanti --- */
+.bottom-nav-wrap {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 70;
+  padding: 0 12px 26px;
+  background: linear-gradient(to top, var(--color-bg) 62%, rgba(11, 11, 12, 0));
+  pointer-events: none;
+}
+
+.bottom-nav {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 2px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  padding: 6px;
+  pointer-events: auto;
+  max-width: 540px;
+  margin: 0 auto;
+}
+
+.bottom-nav__item {
+  height: 52px;
+  border: none;
+  border-radius: 13px;
+  background: transparent;
+  color: var(--color-text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.bottom-nav__item--active {
+  background: #1e2027;
+  color: var(--color-text);
+}
+
+.bottom-nav__dot {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.16);
+  transition: width 0.2s ease;
+}
+
+.bottom-nav__dot--active {
+  background: var(--color-accent);
+}
+
+.bottom-nav__label {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.06em;
+}
+/* --- layout radice: sfondo pieno + spazio in fondo per bottom nav (più il banner ride, se attivo) --- */
+.layout {
+  min-height: 100vh;
+  background: var(--color-bg);
+  padding-bottom: 104px;
+}
+
+.layout--ride-active {
+  padding-bottom: 164px;
+}
+
+/* --- input password con pulsante mostra/nascondi integrato --- */
+.password-input-wrap {
+  position: relative;
+}
+
+.password-input-wrap .input {
+  padding-right: 46px;
+}
+
+.password-input-wrap__toggle {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}

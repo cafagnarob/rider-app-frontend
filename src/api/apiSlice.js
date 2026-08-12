@@ -31,6 +31,11 @@ export const apiSlice = createApi({
     "Model",
     "Comment",
     "Follow",
+    "Ride",
+    "Route",
+    "Participation",
+    "Invite",
+    "MyInvites",
   ],
   endpoints: () => ({}),
 })

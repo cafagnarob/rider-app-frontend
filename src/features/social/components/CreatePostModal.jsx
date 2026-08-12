@@ -1,9 +1,11 @@
 import { useState } from "react"
-import { Modal, Button, Form, Spinner } from "react-bootstrap"
 import { FaTimes } from "react-icons/fa"
 import { useCreatePostMutation } from "../postsApi"
+import { useGetMyRidesQuery } from "../../rides/ridesApi"
+import { useGetParticipatingEventsQuery } from "../../events/eventsApi"
+import { useGetMyVehiclesQuery } from "../../vehicles/vehiclesApi"
 
-const MAX_FILES = 5
+const MAX_FILES = 6
 const MAX_SIZE = 5 * 1024 * 1024
 
 function CreatePostModal({ show, onClose }) {
@@ -13,6 +15,23 @@ function CreatePostModal({ show, onClose }) {
   const [items, setItems] = useState([])
   const [errorMsg, setErrorMsg] = useState("")
 
+  const [linkType, setLinkType] = useState(null)
+  const [rideId, setRideId] = useState(null)
+  const [eventId, setEventId] = useState(null)
+  const [vehicleId, setVehicleId] = useState(null)
+
+  const { data: ridesPage } = useGetMyRidesQuery(
+    { page: 0, size: 10 },
+    { skip: linkType !== "ride" },
+  )
+  const { data: eventsPage } = useGetParticipatingEventsQuery(
+    { page: 0, size: 10 },
+    { skip: linkType !== "event" },
+  )
+  const { data: vehicles } = useGetMyVehiclesQuery(undefined, {
+    skip: linkType !== "vehicle",
+  })
+
   const revokeAll = (list) =>
     list.forEach((i) => URL.revokeObjectURL(i.preview))
 
@@ -21,6 +40,10 @@ function CreatePostModal({ show, onClose }) {
     setItems([])
     setText("")
     setErrorMsg("")
+    setLinkType(null)
+    setRideId(null)
+    setEventId(null)
+    setVehicleId(null)
     onClose()
   }
 
@@ -74,8 +97,9 @@ function CreatePostModal({ show, onClose }) {
       await createPost({
         data: {
           text: text.trim() || null,
-          eventId: null,
-          rideId: null,
+          eventId: eventId || null,
+          rideId: rideId || null,
+          vehicleId: vehicleId || null,
           includeRoutePhoto: false,
         },
         files: items.map((i) => i.file),
@@ -86,109 +110,201 @@ function CreatePostModal({ show, onClose }) {
     }
   }
 
-  return (
-    <Modal show={show} onHide={handleClose} centered data-bs-theme="dark">
-      <Form onSubmit={handleSubmit}>
-        <Modal.Header
-          closeButton
-          className="bg-dark text-light border-secondary"
-        >
-          <Modal.Title className="fs-5">Nuovo post</Modal.Title>
-        </Modal.Header>
+  if (!show) return null
 
-        <Modal.Body className="bg-dark text-light">
-          {items.length > 0 && (
-            <div className="d-flex gap-2 flex-wrap mb-3">
+  const selectedRide = ridesPage?.content.find((r) => r.id === rideId)
+  const selectedEvent = eventsPage?.content.find((ev) => ev.id === eventId)
+  const selectedVehicle = vehicles?.find((v) => v.id === vehicleId)
+
+  const pillLabel = (type) => {
+    if (type === "ride")
+      return selectedRide
+        ? `RIDE · ${selectedRide.title || "Senza titolo"}`
+        : "+ RIDE"
+    if (type === "event")
+      return selectedEvent ? `EVENTO · ${selectedEvent.title}` : "+ EVENTO"
+    return selectedVehicle
+      ? `MOTO · ${selectedVehicle.nickname || selectedVehicle.brandName}`
+      : "+ MOTO"
+  }
+
+  const isPicked = (type) =>
+    (type === "ride" && rideId) ||
+    (type === "event" && eventId) ||
+    (type === "vehicle" && vehicleId)
+
+  const togglePicker = (type) =>
+    setLinkType((cur) => (cur === type ? null : type))
+
+  const clearLink = (type) => {
+    if (type === "ride") setRideId(null)
+    if (type === "event") setEventId(null)
+    if (type === "vehicle") setVehicleId(null)
+  }
+
+  return (
+    <div className="sheet-overlay" onClick={handleClose}>
+      <div className="sheet-panel" onClick={(e) => e.stopPropagation()}>
+        <div className="sheet-header">
+          <button type="button" className="btn-icon" onClick={handleClose}>
+            <FaTimes />
+          </button>
+          <div className="sheet-header__title">NUOVO POST</div>
+          <button
+            type="button"
+            className="sheet-save-btn"
+            disabled={isLoading || items.length === 0}
+            style={{ opacity: isLoading || items.length === 0 ? 0.5 : 1 }}
+            onClick={handleSubmit}
+          >
+            {isLoading ? "..." : "PUBBLICA"}
+          </button>
+        </div>
+
+        <div className="sheet-body">
+          <textarea
+            className="textarea"
+            style={{ minHeight: 130, fontSize: 15 }}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            maxLength={1000}
+            placeholder="Com'è andata l'uscita?"
+          />
+          <div className="char-counter">{text.length}/1000</div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
+            <span className="field-label">FOTO · FINO A {MAX_FILES}</span>
+            <div className="photo-upload-grid">
               {items.map((item) => (
-                <div key={item.id} className="position-relative">
-                  <img
-                    src={item.preview}
-                    alt=""
-                    style={{
-                      width: "90px",
-                      height: "90px",
-                      objectFit: "cover",
-                      borderRadius: "0.5rem",
-                    }}
-                  />
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    className="position-absolute top-0 end-0 p-0 d-flex align-items-center justify-content-center"
-                    style={{
-                      width: "22px",
-                      height: "22px",
-                      borderRadius: "50%",
-                    }}
+                <div key={item.id} className="photo-upload-grid__item">
+                  <img src={item.preview} alt="" />
+                  <button
+                    type="button"
+                    className="photo-upload-grid__remove"
                     onClick={() => handleRemove(item.id)}
                   >
                     <FaTimes size={11} />
-                  </Button>
+                  </button>
                 </div>
               ))}
+              {items.length < MAX_FILES && (
+                <label className="photo-upload-grid__add-tile">
+                  +
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    hidden
+                    onChange={handleFileChange}
+                  />
+                </label>
+              )}
             </div>
-          )}
-
-          <div className="mb-3">
-            <label className="btn btn-outline-light btn-sm mb-0">
-              {items.length === 0 ? "Scegli immagini" : "Aggiungi altre"}
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                hidden
-                disabled={items.length >= MAX_FILES}
-                onChange={handleFileChange}
-              />
-            </label>
-            <Form.Text className="text-secondary ms-2">
-              {items.length}/{MAX_FILES}
-            </Form.Text>
           </div>
 
-          <Form.Group>
-            <Form.Control
-              as="textarea"
-              rows={3}
-              maxLength={1000}
-              className="bg-transparent text-light"
-              placeholder="Scrivi qualcosa..."
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-            />
-          </Form.Group>
+          <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
+            <span className="field-label">COLLEGA</span>
+            <div className="link-chips-row">
+              {["ride", "event", "vehicle"].map((type) => (
+                <button
+                  key={type}
+                  type="button"
+                  className={`link-chip ${isPicked(type) ? "link-chip--picked" : ""}`}
+                  onClick={() => togglePicker(type)}
+                >
+                  {pillLabel(type)}
+                  {isPicked(type) && (
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        clearLink(type)
+                      }}
+                      style={{ display: "flex" }}
+                    >
+                      <FaTimes size={10} />
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
 
-          {errorMsg && (
-            <div className="alert alert-danger py-2 mt-3 mb-0">{errorMsg}</div>
-          )}
-        </Modal.Body>
-
-        <Modal.Footer className="bg-dark border-secondary">
-          <Button
-            variant="outline-light"
-            onClick={handleClose}
-            disabled={isLoading}
-          >
-            Annulla
-          </Button>
-          <Button
-            type="submit"
-            disabled={isLoading || items.length === 0}
-            className="rounded-pill px-4 fw-bold border-0"
-            style={{ backgroundColor: "#FFBE5D", color: "#000" }}
-          >
-            {isLoading ? (
-              <>
-                <Spinner size="sm" animation="border" className="me-2" />
-                Pubblicazione...
-              </>
-            ) : (
-              "Pubblica"
+            {linkType === "ride" && (
+              <div className="picker-list">
+                {ridesPage?.content.length === 0 && (
+                  <span className="picker-empty-text">
+                    Nessun giro registrato.
+                  </span>
+                )}
+                {ridesPage?.content.map((r) => (
+                  <button
+                    key={r.id}
+                    type="button"
+                    className="picker-row"
+                    onClick={() => {
+                      setRideId(r.id)
+                      setLinkType(null)
+                    }}
+                  >
+                    {r.title || "Giro senza titolo"} ·{" "}
+                    {r.distanceKm?.toFixed(1)} km
+                  </button>
+                ))}
+              </div>
             )}
-          </Button>
-        </Modal.Footer>
-      </Form>
-    </Modal>
+
+            {linkType === "event" && (
+              <div className="picker-list">
+                {eventsPage?.content.length === 0 && (
+                  <span className="picker-empty-text">
+                    Non partecipi a nessun evento.
+                  </span>
+                )}
+                {eventsPage?.content.map((ev) => (
+                  <button
+                    key={ev.id}
+                    type="button"
+                    className="picker-row"
+                    onClick={() => {
+                      setEventId(ev.id)
+                      setLinkType(null)
+                    }}
+                  >
+                    {ev.title}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {linkType === "vehicle" && (
+              <div className="picker-list">
+                {vehicles?.length === 0 && (
+                  <span className="picker-empty-text">
+                    Il tuo garage è vuoto.
+                  </span>
+                )}
+                {vehicles?.map((v) => (
+                  <button
+                    key={v.id}
+                    type="button"
+                    className="picker-row"
+                    onClick={() => {
+                      setVehicleId(v.id)
+                      setLinkType(null)
+                    }}
+                  >
+                    {v.nickname || `${v.model.brand.name} ${v.model.name}`}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {errorMsg && <div className="error-text">{errorMsg}</div>}
+        </div>
+      </div>
+    </div>
   )
 }
 

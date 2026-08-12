@@ -1,5 +1,7 @@
+import { useParams, Link, Navigate } from "react-router-dom"
+import { Spinner } from "react-bootstrap"
 import { FaFacebook, FaGlobe, FaTiktok, FaYoutube } from "react-icons/fa"
-import { Link, Navigate, useParams } from "react-router-dom"
+import { FaInstagram } from "react-icons/fa6"
 import {
   useGetCurrentUserQuery,
   useGetPublicProfileQuery,
@@ -9,8 +11,7 @@ import {
   useToggleFollowMutation,
 } from "../features/social/followApi"
 import { useGetUserPostsQuery } from "../features/social/postsApi"
-import { Badge, Button, Card, Spinner } from "react-bootstrap"
-import { FaInstagram } from "react-icons/fa6"
+import "../pages/CSS/PublicProfilePage.css"
 
 const PLATFORM_ICONS = {
   INSTAGRAM: FaInstagram,
@@ -43,120 +44,117 @@ function PublicProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="text-center py-5">
-        <Spinner animation="border" variant="light" />
+      <div className="centered-spinner">
+        <Spinner animation="border" style={{ color: "#FF7A2F" }} />
       </div>
     )
   }
 
   if (isError) {
-    return <div className="alert alert-danger">Utente non trovato.</div>
+    return (
+      <div className="empty-state" style={{ margin: 20 }}>
+        Utente non trovato.
+      </div>
+    )
   }
 
   const isFollowing = stats?.isFollowedByCurrentUser
 
   return (
-    <div style={{ maxWidth: "640px", margin: "0 auto" }}>
-      <Card className="bg-dark text-light border-secondary mb-4">
-        <Card.Body>
-          <div className="d-flex align-items-center gap-3 mb-3">
-            <img
-              src={profile.profilePicture}
-              alt={profile.username}
-              className="rounded-circle"
-              style={{ width: "88px", height: "88px", objectFit: "cover" }}
-            />
-            <div className="flex-grow-1">
-              <h4 className="mb-1">
-                {profile.name} {profile.surname}
-              </h4>
-              <p className="text-secondary mb-2">@{profile.username}</p>
-              <Button
-                size="sm"
-                variant={isFollowing ? "outline-light" : "warning"}
-                disabled={isToggling}
-                onClick={() => toggleFollow({ username, isFollowing })}
-                className="rounded-pill px-3 fw-semibold"
-              >
-                {isFollowing ? "Smetti di seguire" : "Segui"}
-              </Button>
+    <div className="page">
+      <div className="px-20">
+        <div className="public-profile-page__header-row">
+          <img
+            src={profile.profilePicture}
+            alt={profile.username}
+            className="public-profile-page__avatar"
+          />
+          <div className="public-profile-page__info">
+            <div className="public-profile-page__fullname">
+              {profile.name} {profile.surname}
             </div>
-          </div>
-
-          <div className="d-flex gap-4 mb-3">
-            <Link
-              to={`/users/${username}/followers`}
-              className="text-decoration-none text-light"
-            >
-              <strong>{stats?.followersCount ?? 0}</strong>{" "}
-              <span className="text-secondary small">follower</span>
-            </Link>
-            <Link
-              to={`/users/${username}/following`}
-              className="text-decoration-none text-light"
-            >
-              <strong>{stats?.followingCount ?? 0}</strong>{" "}
-              <span className="text-secondary small">seguiti</span>
-            </Link>
-            <span>
-              <strong>{posts?.totalElements ?? 0}</strong>{" "}
-              <span className="text-secondary small">post</span>
-            </span>
-          </div>
-
-          {profile.description && <p className="mb-2">{profile.description}</p>}
-          {profile.location && (
-            <p className="text-secondary small mb-2">{profile.location}</p>
-          )}
-
-          {profile.currentVehicle && (
-            <Badge bg="warning" text="dark" className="mb-2">
-              {profile.currentVehicle.nickname ||
-                `${profile.currentVehicle.brandName} ${profile.currentVehicle.modelName}`}
-            </Badge>
-          )}
-
-          {profile.links?.length > 0 && (
-            <div className="d-flex gap-3 mt-2">
-              {profile.links.map((link) => {
-                const Icon = PLATFORM_ICONS[link.platform] || FaGlobe
-                return (
-                  <a
-                    key={link.id}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ color: "#FFBE5D" }}
-                  >
-                    <Icon className="fs-5" />
-                  </a>
-                )
-              })}
+            <div className="public-profile-page__username">
+              @{profile.username}
             </div>
-          )}
-        </Card.Body>
-      </Card>
+            <button
+              type="button"
+              className={`follow-btn ${isFollowing ? "follow-btn--unfollow" : "follow-btn--follow"}`}
+              disabled={isToggling}
+              onClick={() => toggleFollow({ username, isFollowing })}
+            >
+              {isFollowing ? "SMETTI DI SEGUIRE" : "SEGUI"}
+            </button>
+          </div>
+        </div>
 
-      <h5 className="mb-3">Post</h5>
+        <div className="stats-row public-profile-page__stats">
+          <Link to={`/users/${username}/followers`} className="stat-link">
+            <span className="stat-count">{stats?.followersCount ?? 0}</span>{" "}
+            <span className="stat-label">FOLLOWER</span>
+          </Link>
+          <Link to={`/users/${username}/following`} className="stat-link">
+            <span className="stat-count">{stats?.followingCount ?? 0}</span>{" "}
+            <span className="stat-label">SEGUITI</span>
+          </Link>
+          <span>
+            <span className="stat-count">{posts?.totalElements ?? 0}</span>{" "}
+            <span className="stat-label">POST</span>
+          </span>
+        </div>
+
+        {profile.description && (
+          <p className="public-profile-page__description">
+            {profile.description}
+          </p>
+        )}
+        {profile.location && (
+          <p className="public-profile-page__location">{profile.location}</p>
+        )}
+
+        {profile.currentVehicle && (
+          <span className="pill pill--accent public-profile-page__vehicle-badge">
+            {profile.currentVehicle.nickname ||
+              `${profile.currentVehicle.brandName} ${profile.currentVehicle.modelName}`}
+          </span>
+        )}
+
+        {profile.links?.length > 0 && (
+          <div className="social-links-row">
+            {profile.links.map((link) => {
+              const Icon = PLATFORM_ICONS[link.platform] || FaGlobe
+              return (
+                <a
+                  key={link.id}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Icon size={19} />
+                </a>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      <div className="public-profile-page__posts-header">
+        <div className="section-title">POST</div>
+      </div>
 
       {posts?.content.length === 0 ? (
-        <p className="text-secondary">
+        <p className="no-results-text">
           Questo utente non ha ancora pubblicato nulla.
         </p>
       ) : (
-        <div className="row g-1">
+        <div className="post-grid">
           {posts?.content.map((post) => (
-            <div className="col-4" key={post.id}>
-              <Link to={`/posts/${post.id}`}>
-                <div className="ratio ratio-1x1">
-                  <img
-                    src={post.media?.[0]?.mediaUrl}
-                    alt=""
-                    style={{ objectFit: "cover" }}
-                  />
-                </div>
-              </Link>
-            </div>
+            <Link
+              key={post.id}
+              to={`/posts/${post.id}`}
+              className="post-grid__item"
+            >
+              {post.media?.[0] && <img src={post.media[0].mediaUrl} alt="" />}
+            </Link>
           ))}
         </div>
       )}

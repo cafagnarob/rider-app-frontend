@@ -1,8 +1,15 @@
 import { useState } from "react"
-import { Nav, Spinner, Button } from "react-bootstrap"
+import { Spinner } from "react-bootstrap"
 import { useGetFeedQuery } from "../features/social/postsApi"
+import NotificationBell from "../features/notification/components/NotificationBell"
 import PostCard from "../features/social/components/PostCard"
 import CreatePostModal from "../features/social/components/CreatePostModal"
+import "../pages/CSS/FeedPage.css"
+
+const TABS = [
+  { key: "FOLLOWING", label: "SEGUITI" },
+  { key: "EXPLORE", label: "ESPLORA" },
+]
 
 function FeedPage() {
   const [type, setType] = useState("FOLLOWING")
@@ -24,48 +31,54 @@ function FeedPage() {
   const [showCreate, setShowCreate] = useState(false)
 
   return (
-    <>
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h2 className="mb-0">Feed</h2>
-        <Button
-          className="rounded-pill px-3 fw-bold border-0"
-          style={{ backgroundColor: "#FFBE5D", color: "#000" }}
-          onClick={() => setShowCreate(true)}
-        >
-          + Nuovo post
-        </Button>
+    <div className="page">
+      <div className="feed-page__header">
+        <div className="page-title" style={{ fontSize: 28 }}>
+          FEED
+        </div>
+
+        <div className="feed-page__header-actions">
+          <NotificationBell />
+          <button
+            type="button"
+            className="btn-accent-sm"
+            onClick={() => setShowCreate(true)}
+          >
+            + POST
+          </button>
+        </div>
       </div>
-      <Nav variant="tabs" activeKey={type} className="mb-4">
-        <Nav.Item>
-          <Nav.Link
-            eventKey="FOLLOWING"
-            onClick={() => handleTabChange("FOLLOWING")}
-          >
-            Seguiti
-          </Nav.Link>
-        </Nav.Item>
-        <Nav.Item>
-          <Nav.Link
-            eventKey="EXPLORE"
-            onClick={() => handleTabChange("EXPLORE")}
-          >
-            Esplora
-          </Nav.Link>
-        </Nav.Item>
-      </Nav>
+
+      <div className="tab-pills feed-page__tabs">
+        {TABS.map((tab) => {
+          const active = type === tab.key
+          return (
+            <button
+              key={tab.key}
+              type="button"
+              className={`tab-pill ${active ? "tab-pill--active" : ""}`}
+              onClick={() => handleTabChange(tab.key)}
+            >
+              {tab.label}
+            </button>
+          )
+        })}
+      </div>
 
       {isLoading && (
-        <div className="text-center py-5">
-          <Spinner animation="border" variant="light" />
+        <div className="centered-spinner">
+          <Spinner animation="border" style={{ color: "#FF7A2F" }} />
         </div>
       )}
 
       {isError && (
-        <div className="alert alert-danger">Impossibile caricare il feed.</div>
+        <div className="empty-state" style={{ margin: 20 }}>
+          Impossibile caricare il feed.
+        </div>
       )}
 
       {feed && feed.content.length === 0 && (
-        <p className="text-secondary text-center py-5">
+        <p className="feed-page__empty-text">
           {type === "FOLLOWING"
             ? "Non ci sono ancora post dagli utenti che segui."
             : "Nessun post da esplorare al momento."}
@@ -74,12 +87,8 @@ function FeedPage() {
 
       {feed && feed.content.length > 0 && (
         <div
-          className="d-flex flex-column gap-4"
-          style={{
-            opacity: isFetching ? 0.6 : 1,
-            maxWidth: "540px",
-            margin: "0 auto",
-          }}
+          className="feed-page__list"
+          style={{ opacity: isFetching ? 0.6 : 1 }}
         >
           {feed.content.map((post) => (
             <PostCard key={post.id} post={post} />
@@ -88,31 +97,41 @@ function FeedPage() {
       )}
 
       {feed && feed.totalPages > 1 && (
-        <div className="d-flex justify-content-center align-items-center gap-3 mt-4">
-          <Button
-            variant="outline-light"
-            size="sm"
+        <div className="pagination-row">
+          <button
+            type="button"
+            className="btn-secondary"
+            style={{
+              height: 40,
+              padding: "0 16px",
+              opacity: feed.first ? 0.4 : 1,
+            }}
             disabled={feed.first || isFetching}
             onClick={() => setPage((p) => p - 1)}
           >
-            Precedente
-          </Button>
-          <span className="text-secondary">
+            PRECEDENTE
+          </button>
+          <span className="pagination-row__label">
             {feed.number + 1} / {feed.totalPages}
           </span>
-          <Button
-            variant="outline-light"
-            size="sm"
+          <button
+            type="button"
+            className="btn-secondary"
+            style={{
+              height: 40,
+              padding: "0 16px",
+              opacity: feed.last ? 0.4 : 1,
+            }}
             disabled={feed.last || isFetching}
             onClick={() => setPage((p) => p + 1)}
           >
-            Successiva
-          </Button>
+            SUCCESSIVA
+          </button>
         </div>
       )}
 
       <CreatePostModal show={showCreate} onClose={() => setShowCreate(false)} />
-    </>
+    </div>
   )
 }
 
