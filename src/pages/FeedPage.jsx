@@ -38,7 +38,9 @@ function FeedPage() {
         </div>
 
         <div className="feed-page__header-actions">
-          <NotificationBell />
+          <div className="mobile-only">
+            <NotificationBell />
+          </div>
           <button
             type="button"
             className="btn-accent-sm"

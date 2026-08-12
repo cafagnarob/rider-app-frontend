@@ -33,7 +33,9 @@ function RidesHistoryPage() {
           I MIEI GIRI
         </div>
         <div className="header-actions">
-          <NotificationBell />
+          <div className="mobile-only">
+            <NotificationBell />
+          </div>
           <Link
             to="/rides/new"
             className="btn-accent-sm"

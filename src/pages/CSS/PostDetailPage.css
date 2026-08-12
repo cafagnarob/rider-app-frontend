@@ -62,6 +62,7 @@
 }
 
 .post-detail-page__media {
+  aspect-ratio: 4 / 5;
   margin-bottom: 14px;
 }
 
@@ -177,4 +178,56 @@
   color: var(--color-text-faint);
   cursor: pointer;
   padding: 4px;
+}
+
+/* DESKTOP */
+
+@media (min-width: 1024px) {
+  .post-detail-page__section {
+    width: min(100%, 1100px);
+    margin: 0 auto;
+    padding: 0 30px;
+  }
+
+  /* Area autore */
+  .post-detail-page__author-row {
+    margin-bottom: 18px;
+  }
+
+  .post-detail-page__avatar {
+    width: 46px;
+    height: 46px;
+  }
+
+  .post-detail-page__author-name {
+    font-size: 20px;
+  }
+
+  /* Foto */
+  .post-detail-page__media {
+    width: 100%;
+    max-width: 850px;
+    margin: 0 auto 20px;
+  }
+
+  /* Testo */
+  .post-detail-page__text {
+    max-width: 850px;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 15px;
+  }
+
+  /* Like */
+  .post-detail-page__like-btn {
+    margin-left: auto;
+  }
+
+  /* Commenti */
+  .post-detail-page__comment-list,
+  .post-detail-page__comment-form {
+    max-width: 850px;
+    margin-left: auto;
+    margin-right: auto;
+  }
 }

@@ -46,3 +46,30 @@
   display: flex;
   gap: 8px;
 }
+
+/* DESK */
+
+@media (min-width: 1024px) {
+  .my-invites-page__title-block {
+    padding: 0 32px 24px;
+  }
+
+  .invite-list {
+    padding: 0 32px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .invite-card__title-link {
+    font-size: 18px;
+  }
+
+  .invite-card__received {
+    margin-bottom: 16px;
+  }
+
+  .invite-card__actions {
+    gap: 10px;
+  }
+}

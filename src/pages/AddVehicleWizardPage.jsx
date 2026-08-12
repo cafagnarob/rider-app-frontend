@@ -95,7 +95,7 @@ function AddVehicleWizardPage() {
   }
 
   return (
-    <div className="page">
+    <div className="page wizard-page">
       <div className="wizard-header">
         <button type="button" className="btn-icon" onClick={goBack}>
           <FaArrowLeft />

@@ -111,7 +111,7 @@ function ModelsPage() {
   }
 
   return (
-    <div className="page">
+    <div className="page models-page">
       <div className="page-header models-page__header">
         <button
           type="button"

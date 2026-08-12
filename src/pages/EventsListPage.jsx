@@ -85,7 +85,9 @@ function EventsListPage() {
           EVENTI
         </div>
         <div className="events-list-page__header-actions">
-          <NotificationBell />
+          <div className="mobile-only">
+            <NotificationBell />
+          </div>
           <Link to="/events/new" className="btn-accent-sm">
             + CREA
           </Link>

@@ -147,154 +147,163 @@ function HomePage() {
 
   return (
     <div className="page" style={{ paddingBottom: 0 }}>
-      <div className="header-row">
-        <div>
-          <div className="screen-label">
-            CIAO, {(me?.name || me?.username || "").toUpperCase()}
-          </div>
-          <div className="page-title home-page__greeting-title">QJ RIDERS</div>
-        </div>
-        <div className="flex-gap-10">
-          <NotificationBell />
-          <Link to="/profile">
-            <img
-              src={me?.profilePicture}
-              alt=""
-              className="home-page__avatar"
-            />
-          </Link>
-        </div>
-      </div>
-
-      <div className="home-page__search-section">
-        <button
-          type="button"
-          className="home-page__search-btn"
-          onClick={() => navigate("/search")}
-        >
-          Cerca motociclisti, moto, luoghi
-        </button>
-      </div>
-
-      <div className="home-page__map-section">
-        <div className="home-page__map-card">
-          <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
-
-          <div className="home-page__map-badge">
-            {isLoadingMap ? "CARICAMENTO..." : `${mapEvents.length} EVENTI`}
-          </div>
-
-          {nextEvent && (
-            <div className="home-page__next-event">
-              <div className="home-page__next-event-date">
-                <span className="home-page__next-event-day">
-                  {new Date(nextEvent.startDateTime)
-                    .getDate()
-                    .toString()
-                    .padStart(2, "0")}
-                </span>
-                <span className="home-page__next-event-month">
-                  {new Date(nextEvent.startDateTime)
-                    .toLocaleDateString("it-IT", { month: "short" })
-                    .toUpperCase()}
-                </span>
+      <div className="home-page__content-shell">
+        <div className="header-row">
+          <div>
+            <div className="mobile-only">
+              <div className="screen-label">
+                CIAO, {(me?.name || me?.username || "").toUpperCase()}
               </div>
-              <div className="home-page__next-event-info">
-                <div className="home-page__next-event-title">
-                  {nextEvent.title}
-                </div>
-                <div className="home-page__next-event-meta">
-                  {new Date(nextEvent.startDateTime).toLocaleTimeString(
-                    "it-IT",
-                    { hour: "2-digit", minute: "2-digit" },
-                  )}
-                  {" · "}
-                  {nextEvent.currentParticipants}/{nextEvent.maxParticipants}{" "}
-                  ISCRITTI
-                </div>
+              <div className="page-title home-page__greeting-title">
+                QJ RIDERS
               </div>
-              <button
-                type="button"
-                className="home-page__next-event-btn"
-                onClick={() => navigate(`/events/${nextEvent.id}`)}
-              >
-                APRI
-              </button>
             </div>
-          )}
-        </div>
-      </div>
-
-      {communityPhotos.length > 0 && (
-        <div className="home-page__community-section">
-          <div className="section-header home-page__community-header">
-            <div className="section-title">DALLA COMMUNITY</div>
-            <Link to="/feed" className="text-btn text-btn--accent">
-              FEED
+          </div>
+          <div className="flex-gap-10">
+            <div className="mobile-only">
+              <NotificationBell />
+            </div>
+            <Link to="/profile" className="mobile-only">
+              <img
+                src={me?.profilePicture}
+                alt=""
+                className="home-page__avatar"
+              />
             </Link>
           </div>
-          <div className="home-page__community-scroll">
-            {communityPhotos.map((post) => (
-              <Link
-                key={post.id}
-                to={`/posts/${post.id}`}
-                className="home-page__community-item"
-              >
-                <img src={post.media[0].mediaUrl} alt="" />
+        </div>
+
+        <div className="home-page__search-section">
+          <button
+            type="button"
+            className="home-page__search-btn"
+            onClick={() => navigate("/search")}
+          >
+            Cerca motociclisti, moto, luoghi
+          </button>
+        </div>
+
+        <div className="home-page__map-section">
+          <div className="home-page__map-card">
+            <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
+
+            <div className="home-page__map-badge">
+              {isLoadingMap ? "CARICAMENTO..." : `${mapEvents.length} EVENTI`}
+            </div>
+
+            {nextEvent && (
+              <div className="home-page__next-event">
+                <div className="home-page__next-event-date">
+                  <span className="home-page__next-event-day">
+                    {new Date(nextEvent.startDateTime)
+                      .getDate()
+                      .toString()
+                      .padStart(2, "0")}
+                  </span>
+                  <span className="home-page__next-event-month">
+                    {new Date(nextEvent.startDateTime)
+                      .toLocaleDateString("it-IT", { month: "short" })
+                      .toUpperCase()}
+                  </span>
+                </div>
+                <div className="home-page__next-event-info">
+                  <div className="home-page__next-event-title">
+                    {nextEvent.title}
+                  </div>
+                  <div className="home-page__next-event-meta">
+                    {new Date(nextEvent.startDateTime).toLocaleTimeString(
+                      "it-IT",
+                      { hour: "2-digit", minute: "2-digit" },
+                    )}
+                    {" · "}
+                    {nextEvent.currentParticipants}/{nextEvent.maxParticipants}{" "}
+                    ISCRITTI
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="home-page__next-event-btn"
+                  onClick={() => navigate(`/events/${nextEvent.id}`)}
+                >
+                  APRI
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="home-page__lower-grid">
+          {communityPhotos.length > 0 && (
+            <div className="home-page__community-section">
+              <div className="section-header home-page__community-header">
+                <div className="section-title">DALLA COMMUNITY</div>
+                <Link to="/feed" className="text-btn text-btn--accent">
+                  FEED
+                </Link>
+              </div>
+              <div className="home-page__community-scroll">
+                {communityPhotos.slice(0, 4).map((post) => (
+                  <Link
+                    key={post.id}
+                    to={`/posts/${post.id}`}
+                    className="home-page__community-item"
+                  >
+                    <img src={post.media[0].mediaUrl} alt="" />
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="home-page__nearby-section">
+            <div className="section-header">
+              <div className="section-title">USCITE IN ZONA</div>
+              <Link to="/events" className="text-btn text-btn--accent">
+                TUTTE
               </Link>
+            </div>
+
+            {nearbyEvents.length === 0 && !isLoadingMap && (
+              <div className="empty-state">
+                Nessun evento nelle vicinanze al momento.
+              </div>
+            )}
+
+            {nearbyEvents.slice(0, 5).map((ev) => (
+              <div
+                key={ev.id}
+                className="home-event-row"
+                onClick={() => navigate(`/events/${ev.id}`)}
+              >
+                <div className="event-row__date-box">
+                  <span className="event-row__date-day">
+                    {new Date(ev.startDateTime)
+                      .getDate()
+                      .toString()
+                      .padStart(2, "0")}
+                  </span>
+                  <span className="event-row__date-month">
+                    {new Date(ev.startDateTime)
+                      .toLocaleDateString("it-IT", { month: "short" })
+                      .toUpperCase()}
+                  </span>
+                </div>
+                <div className="home-event-row__info">
+                  <div className="home-event-row__title">{ev.title}</div>
+                  <div className="home-event-row__meta">
+                    {ev.type !== "STANDARD" && (
+                      <span style={{ color: "var(--color-accent)" }}>
+                        {EVENT_TYPE_LABELS[ev.type]} ·{" "}
+                      </span>
+                    )}
+                    {ev.organizerUsername} · {ev.currentParticipants}/
+                    {ev.maxParticipants}
+                  </div>
+                </div>
+                <span className="home-event-row__chevron">{">"}</span>
+              </div>
             ))}
           </div>
         </div>
-      )}
-
-      <div className="home-page__nearby-section">
-        <div className="section-header">
-          <div className="section-title">USCITE IN ZONA</div>
-          <Link to="/events" className="text-btn text-btn--accent">
-            TUTTE
-          </Link>
-        </div>
-
-        {nearbyEvents.length === 0 && !isLoadingMap && (
-          <div className="empty-state">
-            Nessun evento nelle vicinanze al momento.
-          </div>
-        )}
-
-        {nearbyEvents.slice(0, 5).map((ev) => (
-          <div
-            key={ev.id}
-            className="home-event-row"
-            onClick={() => navigate(`/events/${ev.id}`)}
-          >
-            <div className="event-row__date-box">
-              <span className="event-row__date-day">
-                {new Date(ev.startDateTime)
-                  .getDate()
-                  .toString()
-                  .padStart(2, "0")}
-              </span>
-              <span className="event-row__date-month">
-                {new Date(ev.startDateTime)
-                  .toLocaleDateString("it-IT", { month: "short" })
-                  .toUpperCase()}
-              </span>
-            </div>
-            <div className="home-event-row__info">
-              <div className="home-event-row__title">{ev.title}</div>
-              <div className="home-event-row__meta">
-                {ev.type !== "STANDARD" && (
-                  <span style={{ color: "var(--color-accent)" }}>
-                    {EVENT_TYPE_LABELS[ev.type]} ·{" "}
-                  </span>
-                )}
-                {ev.organizerUsername} · {ev.currentParticipants}/
-                {ev.maxParticipants}
-              </div>
-            </div>
-            <span className="home-event-row__chevron">{">"}</span>
-          </div>
-        ))}
       </div>
     </div>
   )

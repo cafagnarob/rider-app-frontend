@@ -18,7 +18,7 @@ function BottomNav() {
   const navigate = useNavigate()
 
   return (
-    <div className="bottom-nav-wrap">
+    <div className="bottom-nav-wrap mobile-only">
       <div className="bottom-nav">
         {TABS.map((tab) => {
           const active = matchTab(location.pathname, tab.path)

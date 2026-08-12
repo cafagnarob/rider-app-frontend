@@ -31,7 +31,7 @@ function BrandsPage() {
   }
 
   return (
-    <div className="page">
+    <div className="page brands-page">
       <div className="brands-page__header">
         <div className="page-title brands-page__title">CATALOGO</div>
         <input

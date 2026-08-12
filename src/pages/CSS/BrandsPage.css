@@ -5,3 +5,19 @@
 .brands-page__title {
   margin-bottom: 14px;
 }
+
+/* DESK */
+@media (min-width: 1024px) {
+  .brands-page .brands-page__header,
+  .brands-page .px-20 {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+
+  .brands-page .grid-3 {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 16px;
+  }
+}

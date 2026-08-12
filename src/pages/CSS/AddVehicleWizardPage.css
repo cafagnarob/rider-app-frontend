@@ -112,3 +112,31 @@
   align-items: center;
   cursor: pointer;
 }
+
+/* DESK */
+
+@media (min-width: 1024px) {
+  .wizard-page .wizard-header,
+  .wizard-page .wizard-steps,
+  .wizard-page .px-20 {
+    max-width: 900px;
+    margin: 0 auto;
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+
+  .wizard-page .grid-3 {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+  }
+
+  .wizard-page .grid-2 {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+
+  .wizard-page .form-stack.px-20 {
+    max-width: 480px;
+    margin: 0 auto;
+  }
+}

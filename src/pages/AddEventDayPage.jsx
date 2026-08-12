@@ -234,210 +234,217 @@ function AddEventDayPage() {
         </div>
       </div>
 
-      {trip.children?.length > 0 && (
-        <div className="add-day-page__days-section">
-          <div className="field-label form-group__label">
-            GIORNI GIÀ AGGIUNTI
-          </div>
-          <div className="add-day-page__days-list">
-            {trip.children.map((day, index) => (
-              <div key={day.id} className="card day-item">
-                <span className="day-item__badge">{index + 1}</span>
-                <div className="day-item__info">
-                  <div className="day-item__title">{day.title}</div>
-                  <div className="day-item__meta">
-                    {new Date(day.startDateTime).toLocaleDateString("it-IT", {
-                      day: "numeric",
-                      month: "short",
-                    })}
-                    {" · "}
-                    {day.type === "RADUNO" ? "SOSTA" : "TAPPA"}
+      <div
+        className={`add-day-page__body ${trip.children?.length > 0 ? "add-day-page__body--split" : ""}`}
+      >
+        {trip.children?.length > 0 && (
+          <div className="add-day-page__days-section">
+            <div className="field-label form-group__label">
+              GIORNI GIÀ AGGIUNTI
+            </div>
+            <div className="add-day-page__days-list">
+              {trip.children.map((day, index) => (
+                <div key={day.id} className="card day-item">
+                  <span className="day-item__badge">{index + 1}</span>
+                  <div className="day-item__info">
+                    <div className="day-item__title">{day.title}</div>
+                    <div className="day-item__meta">
+                      {new Date(day.startDateTime).toLocaleDateString("it-IT", {
+                        day: "numeric",
+                        month: "short",
+                      })}
+                      {" · "}
+                      {day.type === "RADUNO" ? "SOSTA" : "TAPPA"}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <form className="add-day-page__form" onSubmit={handleAddDay}>
-        <div className="field-label">GIORNO {dayNumber}</div>
-
-        <div>
-          <div className="type-options">
-            {DAY_TYPE_OPTIONS.map((opt) => {
-              const active = dayForm.type === opt.value
-              return (
-                <button
-                  key={opt.value}
-                  type="button"
-                  className={`type-option ${active ? "type-option--active" : ""}`}
-                  onClick={() => handleTypeChange(opt.value)}
-                >
-                  <div className="type-option__label">{opt.label}</div>
-                  <div className="type-option__hint">{opt.hint}</div>
-                </button>
-              )
-            })}
-          </div>
-        </div>
-
-        <div>
-          <div className="field-label form-group__label">TITOLO DEL GIORNO</div>
-          <input
-            type="text"
-            className="input"
-            placeholder={
-              dayForm.type === "RADUNO"
-                ? "Sosta ad Assisi"
-                : "Roma verso Firenze"
-            }
-            value={dayForm.title}
-            onChange={set("title")}
-            required
-          />
-        </div>
-
-        <div>
-          <div className="field-label form-group__label">DESCRIZIONE</div>
-          <textarea
-            className="textarea"
-            value={dayForm.description}
-            onChange={set("description")}
-            required
-            rows={2}
-          />
-        </div>
-
-        <div>
-          <div className="field-label form-group__label">
-            PERCORSO {dayForm.type === "RADUNO" ? "(OPZIONALE)" : ""}
-          </div>
-          {isLoadingRoutes ? (
-            <Spinner
-              size="sm"
-              animation="border"
-              style={{ color: "#FF7A2F" }}
-            />
-          ) : (
-            <>
-              <select
-                className="select"
-                value={dayForm.routeId}
-                onChange={set("routeId")}
-              >
-                <option value="">
-                  {dayForm.type === "RADUNO"
-                    ? "Nessun percorso"
-                    : "Seleziona un percorso"}
-                </option>
-                {routesPage?.content?.map((r) => (
-                  <option key={r.id} value={r.id}>
-                    {r.name} (
-                    {(r.distanceMeters / 1000).toFixed(1).replace(".", ",")} km)
-                  </option>
-                ))}
-              </select>
-              <div className="helper-text">
-                Non trovi quello che cerchi?{" "}
-                <Link
-                  to="/routes/new"
-                  state={{
-                    returnTo: `/events/${tripId}/days/new`,
-                    resumeDraft: true,
-                  }}
-                  onClick={saveDraft}
-                  className="helper-text__link"
-                >
-                  Crea un nuovo percorso
-                </Link>
-              </div>
-            </>
-          )}
-
-          {dayForm.type === "RADUNO" && !dayForm.routeId && (
-            <div className="meeting-point">
-              {dayForm.meetingPointLabel ? (
-                <div className="meeting-point__chip">
-                  <span className="meeting-point__label">
-                    {dayForm.meetingPointLabel}
-                  </span>
-                  <button
-                    type="button"
-                    className="meeting-point__change-btn"
-                    onClick={clearMeetingPoint}
-                  >
-                    CAMBIA
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <input
-                    type="text"
-                    className="input"
-                    placeholder="Cerca una città o un luogo..."
-                    value={placeSearch}
-                    onChange={handlePlaceSearchChange}
-                  />
-                  {placeResults.length > 0 && (
-                    <div className="card search-results">
-                      {placeResults.map((r) => (
-                        <button
-                          key={r.id}
-                          type="button"
-                          className="search-results__item"
-                          onClick={() => handlePickPlace(r)}
-                        >
-                          {r.name}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </>
-              )}
+              ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
-        <div className="date-row">
-          <div className="date-group">
-            <div className="field-label form-group__label">INIZIO</div>
+        <form className="add-day-page__form" onSubmit={handleAddDay}>
+          <div className="field-label">GIORNO {dayNumber}</div>
+
+          <div>
+            <div className="type-options">
+              {DAY_TYPE_OPTIONS.map((opt) => {
+                const active = dayForm.type === opt.value
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    className={`type-option ${active ? "type-option--active" : ""}`}
+                    onClick={() => handleTypeChange(opt.value)}
+                  >
+                    <div className="type-option__label">{opt.label}</div>
+                    <div className="type-option__hint">{opt.hint}</div>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          <div>
+            <div className="field-label form-group__label">
+              TITOLO DEL GIORNO
+            </div>
             <input
-              type="datetime-local"
+              type="text"
               className="input"
-              value={dayForm.startDateTime}
-              onChange={set("startDateTime")}
+              placeholder={
+                dayForm.type === "RADUNO"
+                  ? "Sosta ad Assisi"
+                  : "Roma verso Firenze"
+              }
+              value={dayForm.title}
+              onChange={set("title")}
               required
             />
           </div>
-          <div className="date-group">
-            <div className="field-label form-group__label">FINE</div>
-            <input
-              type="datetime-local"
-              className="input"
-              value={dayForm.endDateTime}
-              onChange={set("endDateTime")}
+
+          <div>
+            <div className="field-label form-group__label">DESCRIZIONE</div>
+            <textarea
+              className="textarea"
+              value={dayForm.description}
+              onChange={set("description")}
               required
+              rows={2}
             />
-            {selectedRoute && (
-              <div className="duration-hint">
-                Durata stimata: {Math.ceil(selectedRoute.durationSeconds / 60)}{" "}
-                min
+          </div>
+
+          <div>
+            <div className="field-label form-group__label">
+              PERCORSO {dayForm.type === "RADUNO" ? "(OPZIONALE)" : ""}
+            </div>
+            {isLoadingRoutes ? (
+              <Spinner
+                size="sm"
+                animation="border"
+                style={{ color: "#FF7A2F" }}
+              />
+            ) : (
+              <>
+                <select
+                  className="select"
+                  value={dayForm.routeId}
+                  onChange={set("routeId")}
+                >
+                  <option value="">
+                    {dayForm.type === "RADUNO"
+                      ? "Nessun percorso"
+                      : "Seleziona un percorso"}
+                  </option>
+                  {routesPage?.content?.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {r.name} (
+                      {(r.distanceMeters / 1000).toFixed(1).replace(".", ",")}{" "}
+                      km)
+                    </option>
+                  ))}
+                </select>
+                <div className="helper-text">
+                  Non trovi quello che cerchi?{" "}
+                  <Link
+                    to="/routes/new"
+                    state={{
+                      returnTo: `/events/${tripId}/days/new`,
+                      resumeDraft: true,
+                    }}
+                    onClick={saveDraft}
+                    className="helper-text__link"
+                  >
+                    Crea un nuovo percorso
+                  </Link>
+                </div>
+              </>
+            )}
+
+            {dayForm.type === "RADUNO" && !dayForm.routeId && (
+              <div className="meeting-point">
+                {dayForm.meetingPointLabel ? (
+                  <div className="meeting-point__chip">
+                    <span className="meeting-point__label">
+                      {dayForm.meetingPointLabel}
+                    </span>
+                    <button
+                      type="button"
+                      className="meeting-point__change-btn"
+                      onClick={clearMeetingPoint}
+                    >
+                      CAMBIA
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <input
+                      type="text"
+                      className="input"
+                      placeholder="Cerca una città o un luogo..."
+                      value={placeSearch}
+                      onChange={handlePlaceSearchChange}
+                    />
+                    {placeResults.length > 0 && (
+                      <div className="card search-results">
+                        {placeResults.map((r) => (
+                          <button
+                            key={r.id}
+                            type="button"
+                            className="search-results__item"
+                            onClick={() => handlePickPlace(r)}
+                          >
+                            {r.name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
             )}
           </div>
-        </div>
 
-        {errorMsg && <div className="error-text">{errorMsg}</div>}
+          <div className="date-row">
+            <div className="date-group">
+              <div className="field-label form-group__label">INIZIO</div>
+              <input
+                type="datetime-local"
+                className="input"
+                value={dayForm.startDateTime}
+                onChange={set("startDateTime")}
+                required
+              />
+            </div>
+            <div className="date-group">
+              <div className="field-label form-group__label">FINE</div>
+              <input
+                type="datetime-local"
+                className="input"
+                value={dayForm.endDateTime}
+                onChange={set("endDateTime")}
+                required
+              />
+              {selectedRoute && (
+                <div className="duration-hint">
+                  Durata stimata:{" "}
+                  {Math.ceil(selectedRoute.durationSeconds / 60)} min
+                </div>
+              )}
+            </div>
+          </div>
 
-        <button type="submit" className="btn-secondary" disabled={isSaving}>
-          {isSaving ? "..." : `AGGIUNGI GIORNO ${dayNumber}`}
-        </button>
+          {errorMsg && <div className="error-text">{errorMsg}</div>}
 
-        <Link to={`/events/${tripId}`} className="finish-link">
-          HO FINITO · VAI AL VIAGGIO
-        </Link>
-      </form>
+          <button type="submit" className="btn-secondary" disabled={isSaving}>
+            {isSaving ? "..." : `AGGIUNGI GIORNO ${dayNumber}`}
+          </button>
+
+          <Link to={`/events/${tripId}`} className="finish-link">
+            HO FINITO · VAI AL VIAGGIO
+          </Link>
+        </form>
+      </div>
     </div>
   )
 }

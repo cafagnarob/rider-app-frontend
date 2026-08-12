@@ -239,3 +239,97 @@
   color: var(--color-text-faint);
   margin: 0;
 }
+
+@media (min-width: 1024px) {
+  .event-detail-page__map-wrapper {
+    width: 100%;
+    height: 420px;
+  }
+
+  .event-detail-page__content {
+    width: min(100% - 80px, 1000px);
+    margin: 0 auto;
+    padding: 40px 0 80px;
+  }
+
+  .event-detail-page__map-back-btn {
+    left: 30px;
+    top: 30px;
+  }
+
+  .event-detail-page__cancel-btn {
+    right: 30px;
+    top: 30px;
+  }
+
+  .event-detail-page__parent-link {
+    margin-bottom: 20px;
+  }
+
+  .event-detail-page__status-row {
+    margin-bottom: 14px;
+  }
+
+  .event-detail-page__title {
+    font-size: 46px;
+    line-height: 1.05;
+    margin-bottom: 12px;
+  }
+
+  .event-detail-page__meta {
+    font-size: 12px;
+    margin-bottom: 24px;
+  }
+
+  .event-detail-page__description {
+    max-width: 760px;
+    font-size: 15px;
+    line-height: 1.65;
+    margin-bottom: 30px;
+  }
+
+  .event-detail-page__stats {
+    grid-template-columns: repeat(4, 1fr);
+    margin-bottom: 30px;
+  }
+
+  .event-detail-page__maps-link {
+    width: auto;
+    display: inline-flex;
+    margin-bottom: 30px;
+  }
+
+  .event-detail-page__days-section {
+    margin-bottom: 30px;
+  }
+
+  .event-detail-page__days-header {
+    margin-bottom: 14px;
+  }
+
+  .trip-day-row {
+    padding: 16px 18px;
+  }
+
+  .trip-day-row__number {
+    width: 36px;
+    height: 36px;
+  }
+
+  .trip-day-row__title {
+    font-size: 16px;
+  }
+
+  .event-detail-page__participants {
+    margin-bottom: 30px;
+  }
+
+  .participation-card {
+    padding: 22px;
+    margin-bottom: 30px;
+  }
+
+  .event-detail-page__child-notice {
+    margin-bottom: 30px;
+  }
+}

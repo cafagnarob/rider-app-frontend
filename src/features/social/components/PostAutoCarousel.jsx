@@ -5,7 +5,7 @@ const RESUME_DELAY = 5000
 const SWIPE_THRESHOLD = 40
 const TAP_THRESHOLD = 8
 
-function PostAutoCarousel({ media, height = 320, onDoubleClick }) {
+function PostAutoCarousel({ media, height, onDoubleClick }) {
   const [index, setIndex] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
   const [isDragging, setIsDragging] = useState(false)

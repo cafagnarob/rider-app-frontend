@@ -27,3 +27,50 @@
 .feed-page__list {
   margin-top: 4px;
 }
+
+/* DESK */
+@media (min-width: 1024px) {
+  .feed-page__header {
+    width: calc(100% - 48px);
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0;
+  }
+
+  .feed-page__header .page-title {
+    font-size: 34px !important;
+  }
+
+  .feed-page__header-actions {
+    gap: 12px;
+  }
+
+  .feed-page__tabs {
+    width: calc(100% - 48px);
+    max-width: 1400px;
+    margin: 0 auto;
+
+    padding: 24px 0;
+  }
+
+  .feed-page__list {
+    width: min(100% - 48px, 600px);
+
+    margin: 0 auto;
+
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .feed-page__empty-text {
+    padding: 100px 20px;
+  }
+
+  .feed-page__list + .pagination-row {
+    width: min(100% - 48px, 720px);
+
+    margin: 30px auto 0;
+    padding-bottom: 60px;
+  }
+}

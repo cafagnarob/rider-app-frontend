@@ -206,3 +206,46 @@
   color: var(--color-text-faint);
   font-size: 20px;
 }
+
+/* DESK */
+@media (min-width: 1024px) {
+  .home-page__content-shell {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  .home-page__content-shell .header-row,
+  .home-page__content-shell .home-page__search-section,
+  .home-page__content-shell .home-page__map-section,
+  .home-page__content-shell .home-page__community-header,
+  .home-page__content-shell .home-page__community-scroll,
+  .home-page__content-shell .home-page__nearby-section {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .home-page__map-card {
+    height: 420px;
+  }
+
+  .home-page__lower-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    align-items: start;
+    margin-top: 26px;
+  }
+
+  .home-page__nearby-section {
+    margin-top: 0;
+    padding-bottom: 0;
+    max-height: 480px;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+
+  .home-page__community-section {
+    margin-top: 0;
+  }
+}

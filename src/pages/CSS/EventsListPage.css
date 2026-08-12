@@ -29,3 +29,160 @@
   gap: 12px;
   padding: 18px 20px 0;
 }
+
+/* DESK */
+
+@media (min-width: 1024px) {
+  .events-list-page__header {
+    width: calc(100% - 48px);
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0;
+  }
+
+  .events-list-page__header .page-title {
+    font-size: 34px !important;
+  }
+
+  .events-list-page__tabs {
+    width: calc(100% - 48px);
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px 0 0;
+  }
+
+  .events-list-page__search {
+    width: calc(100% - 48px);
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px 0 0;
+  }
+
+  .events-list-page__search .input {
+    max-width: 420px;
+  }
+
+  .events-list-page__filter-chip-wrap {
+    width: calc(100% - 48px);
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 12px 0 0;
+  }
+
+  .events-list-page__list {
+    width: calc(100% - 48px);
+    max-width: 1400px;
+
+    margin: 0 auto;
+
+    padding: 24px 0 0;
+
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .events-list-page__list .event-row {
+    aspect-ratio: 1 / 1;
+
+    min-width: 0;
+
+    padding: 16px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: space-between;
+
+    cursor: pointer;
+
+    overflow: hidden;
+
+    transition:
+      transform 0.15s ease,
+      border-color 0.15s ease,
+      background-color 0.15s ease;
+  }
+
+  .events-list-page__list .event-row:hover {
+    transform: translateY(-3px);
+    border-color: var(--color-border);
+    background: var(--color-card-alt);
+  }
+
+  .event-row__date-box {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+  }
+
+  .event-row__info {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    flex: 1;
+  }
+
+  .event-row__title-line {
+    min-width: 0;
+
+    display: flex;
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .event-row__title {
+    font-size: 17px;
+
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+
+    overflow: hidden;
+  }
+
+  .event-row__meta {
+    margin-top: 6px;
+
+    font-size: 10px;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .event-row__badges {
+    margin-top: auto;
+
+    padding-top: 12px;
+
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+
+    gap: 5px;
+  }
+
+  .event-row__badges .badge-sm {
+    max-width: 100%;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .event-row__lock-icon {
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+
+  .pagination-row {
+    width: calc(100% - 48px);
+    max-width: 1400px;
+
+    margin: 30px auto 0;
+    padding: 0 0 60px;
+  }
+}

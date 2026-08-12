@@ -200,63 +200,78 @@ function RideTrackerPage() {
   return (
     <div className="page">
       <div className="px-20">
-        <div className="page-title mb-20">REGISTRA UN'USCITA</div>
+        <div className="mobile-only">
+          <div className="page-title mb-20">REGISTRA UN'USCITA</div>
 
-        <form className="form-stack" onSubmit={handleStart}>
-          <div>
-            <div className="field-label form-group__label">MOTO</div>
-            <select
-              className="select"
-              value={form.vehicleId}
-              onChange={(e) => setForm({ ...form, vehicleId: e.target.value })}
+          <form className="form-stack" onSubmit={handleStart}>
+            <div>
+              <div className="field-label form-group__label">MOTO</div>
+              <select
+                className="select"
+                value={form.vehicleId}
+                onChange={(e) =>
+                  setForm({ ...form, vehicleId: e.target.value })
+                }
+              >
+                <option value="">Nessuna moto</option>
+                {vehicles?.map((v) => (
+                  <option key={v.id} value={v.id}>
+                    {v.nickname || `${v.model.brand.name} ${v.model.name}`}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <div className="field-label form-group__label">TITOLO</div>
+              <input
+                type="text"
+                className="input"
+                maxLength={100}
+                placeholder="Giro al Passo dello Stelvio"
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <div className="field-label form-group__label">TIPO</div>
+              <select
+                className="select"
+                value={form.type}
+                onChange={(e) => setForm({ ...form, type: e.target.value })}
+              >
+                {Object.entries(RIDE_TYPE_LABELS).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {errorMsg && <div className="error-text">{errorMsg}</div>}
+
+            <button
+              type="submit"
+              className="btn-primary"
+              disabled={isStarting}
+              style={{ opacity: isStarting ? 0.6 : 1 }}
             >
-              <option value="">Nessuna moto</option>
-              {vehicles?.map((v) => (
-                <option key={v.id} value={v.id}>
-                  {v.nickname || `${v.model.brand.name} ${v.model.name}`}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <div className="field-label form-group__label">TITOLO</div>
-            <input
-              type="text"
-              className="input"
-              maxLength={100}
-              placeholder="Giro al Passo dello Stelvio"
-              value={form.title}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
-            />
-          </div>
-
-          <div>
-            <div className="field-label form-group__label">TIPO</div>
-            <select
-              className="select"
-              value={form.type}
-              onChange={(e) => setForm({ ...form, type: e.target.value })}
-            >
-              {Object.entries(RIDE_TYPE_LABELS).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {errorMsg && <div className="error-text">{errorMsg}</div>}
-
-          <button
-            type="submit"
-            className="btn-primary"
-            disabled={isStarting}
-            style={{ opacity: isStarting ? 0.6 : 1 }}
+              {isStarting ? "..." : "INIZIA"}
+            </button>
+          </form>
+        </div>
+        <div className="desktop-only ride-tracker-page__desktop-notice">
+          <div
+            className="empty-state"
+            style={{ maxWidth: 420, textAlign: "center" }}
           >
-            {isStarting ? "..." : "INIZIA"}
-          </button>
-        </form>
+            La registrazione di una nuova uscita richiede il GPS del tuo
+            smartphone — apri l'app da mobile per iniziare.
+            {"\n\n"}Se hai già un giro in corso avviato da mobile, puoi seguirlo
+            anche da qui.
+          </div>
+        </div>
       </div>
     </div>
   )

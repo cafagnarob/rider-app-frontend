@@ -181,3 +181,36 @@
 .empty-state-margin {
   margin: 20px;
 }
+
+/* DESK */
+
+@media (min-width: 1024px) {
+  .add-day-page__header {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+
+  .add-day-page__body {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  .add-day-page__body--split {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 32px;
+    align-items: start;
+    max-width: 1000px;
+  }
+
+  .add-day-page__days-section {
+    padding: 0;
+  }
+
+  .add-day-page__form {
+    padding: 0;
+  }
+}
