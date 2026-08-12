@@ -25,6 +25,11 @@ function HomePage() {
 
   const { data: me } = useGetCurrentUserQuery()
 
+  const { data: allEventsPage, isLoading: isLoadingMap } = useSearchEventsQuery(
+    { page: 0, size: 50 },
+  )
+
+  // "Uscite in zona": filtrata per vicinanza se la posizione è disponibile, altrimenti stessi dati della mappa
   const nearbyQuery = useSearchEventsQuery(
     {
       lat: position?.latitude,
@@ -35,13 +40,9 @@ function HomePage() {
     },
     { skip: !position },
   )
-  const fallbackQuery = useSearchEventsQuery(
-    { page: 0, size: 20 },
-    { skip: !!position },
-  )
-  const { data: eventsPage, isLoading: isLoadingEvents } = position
-    ? nearbyQuery
-    : fallbackQuery
+
+  const mapEvents = allEventsPage?.content || []
+  const nearbyEvents = position ? nearbyQuery.data?.content || [] : mapEvents
 
   const { data: participating } = useGetParticipatingEventsQuery({
     page: 0,
@@ -53,9 +54,7 @@ function HomePage() {
     size: 8,
   })
 
-  const events = eventsPage?.content || []
-  const nextEvent = participating?.content?.[0] || events[0] || null
-
+  const nextEvent = participating?.content?.[0] || nearbyEvents[0] || null
   const communityPhotos = useMemo(
     () =>
       explore?.content?.filter((p) => p.media?.length > 0).slice(0, 6) || [],
@@ -115,8 +114,7 @@ function HomePage() {
 
     markersRef.current.forEach((m) => m.remove())
     markersRef.current = []
-
-    events
+    mapEvents
       .filter((ev) => ev.meetingPointLat != null && ev.meetingPointLng != null)
       .forEach((ev) => {
         const isNext = nextEvent && ev.id === nextEvent.id
@@ -145,7 +143,7 @@ function HomePage() {
         el.addEventListener("click", () => navigate(`/events/${ev.id}`))
         markersRef.current.push(marker)
       })
-  }, [events, nextEvent, navigate])
+  }, [mapEvents, nextEvent, navigate])
 
   return (
     <div className="page" style={{ paddingBottom: 0 }}>
@@ -183,9 +181,7 @@ function HomePage() {
           <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
 
           <div className="home-page__map-badge">
-            {isLoadingEvents
-              ? "CARICAMENTO..."
-              : `${events.length} EVENTI ${position ? `ENTRO ${RADIUS_KM} KM` : "TROVATI"}`}
+            {isLoadingMap ? "CARICAMENTO..." : `${mapEvents.length} EVENTI`}
           </div>
 
           {nextEvent && (
@@ -259,13 +255,13 @@ function HomePage() {
           </Link>
         </div>
 
-        {events.length === 0 && !isLoadingEvents && (
+        {nearbyEvents.length === 0 && !isLoadingMap && (
           <div className="empty-state">
             Nessun evento nelle vicinanze al momento.
           </div>
         )}
 
-        {events.slice(0, 5).map((ev) => (
+        {nearbyEvents.slice(0, 5).map((ev) => (
           <div
             key={ev.id}
             className="home-event-row"
