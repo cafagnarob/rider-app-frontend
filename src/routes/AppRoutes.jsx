@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom"
+import { Navigate, Route, Routes } from "react-router-dom"
 import Layout from "../components/layout/Layout"
 import HomePage from "../pages/HomePage"
 import LoginPage from "../pages/LoginPage"
@@ -30,6 +30,10 @@ import VehicleDetailPage from "../pages/VehicleDetailPage"
 import SearchPage from "../pages/SearchPage"
 import AddVehicleWizardPage from "../pages/AddVehicleWizardPage"
 import AddEventDayPage from "../pages/AddEventDayPage"
+import AdminRoute from "../pages/AdminRoute"
+import AdminLayout from "../pages/AdminLayout"
+import AdminUsersPage from "../pages/AdminUsersPage"
+import AdminCatalogPage from "../pages/AdminCatalogPage"
 
 function AppRoutes() {
   return (
@@ -77,6 +81,13 @@ function AppRoutes() {
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/verify-email" element={<VerifyEmailPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route element={<AdminRoute />}>
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<Navigate to="/admin/users" replace />} />
+          <Route path="users" element={<AdminUsersPage />} />
+          <Route path="catalog" element={<AdminCatalogPage />} />
+        </Route>
+      </Route>
     </Routes>
   )
 }
