@@ -1,0 +1,54 @@
+.admin-users-page__header {
+  margin-bottom: 20px;
+}
+
+.admin-user-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-user-row {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.admin-user-row__info {
+  min-width: 160px;
+}
+
+.admin-user-row__username {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.admin-user-row__email {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+.admin-user-row__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+}
+
+.admin-user-row__meta-item {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--color-text-faint);
+}
+
+.admin-user-row__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
