@@ -1,7 +1,15 @@
 import { configureStore } from "@reduxjs/toolkit"
 import { apiSlice } from "../api/apiSlice"
-import authReducer from "../features/auth/authSlice"
+import authReducer, { logout } from "../features/auth/authSlice"
 import rideReducer from "../features/rides/rideSlice"
+
+const resetApiCacheOnLogout = (storeAPI) => (next) => (action) => {
+  const result = next(action)
+  if (action.type === logout.type) {
+    storeAPI.dispatch(apiSlice.util.resetApiState())
+  }
+  return result
+}
 
 export const store = configureStore({
   reducer: {
@@ -9,5 +17,6 @@ export const store = configureStore({
     ride: rideReducer,
     [apiSlice.reducerPath]: apiSlice.reducer,
   },
-  middleware: (getDefault) => getDefault().concat(apiSlice.middleware),
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(apiSlice.middleware, resetApiCacheOnLogout),
 })
