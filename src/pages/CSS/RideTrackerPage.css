@@ -1,3 +1,80 @@
 .ride-tracker-page__notes {
   margin-bottom: 16px;
 }
+
+@media (min-width: 1024px) {
+  .ride-tracker-page__desktop-notice {
+    display: flex;
+    justify-content: center;
+    padding: 80px 32px;
+  }
+
+  .ride-tracker-page__desktop-notice .empty-state {
+    max-width: 520px !important;
+    padding: 28px 32px;
+    line-height: 1.6;
+  }
+
+  .tracker-card {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px !important;
+  }
+
+  .tracker-badge {
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  .tracker-hero-value {
+    font-size: 72px;
+    line-height: 0.95;
+    text-align: center;
+  }
+
+  .tracker-hero-label {
+    text-align: center;
+    margin-top: 8px;
+    margin-bottom: 36px;
+  }
+
+  .tracker-stat-row {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .tracker-stat-row--divider {
+    margin-top: 28px;
+    padding-top: 28px;
+  }
+
+  .ride-tracker-page__notes {
+    display: block;
+    max-width: 900px;
+    margin: 18px auto 16px;
+  }
+
+  .ride-tracker-page__notes {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .ride-tracker-page__notes + .error-text {
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .btn-danger-block {
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .btn-text-block {
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
