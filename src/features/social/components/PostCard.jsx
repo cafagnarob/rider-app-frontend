@@ -80,6 +80,19 @@ function PostCard({ post }) {
             {post.ride.title || "GIRO"} · {post.ride.distanceKm?.toFixed(1)} KM
           </button>
         )}
+        {post.routeId && (
+          <button
+            type="button"
+            className="post-ref-badge post-ref-badge--ride"
+            onClick={() => navigate(`/routes/${post.routeId}`)}
+          >
+            {post.routeName || "PERCORSO"} ·{" "}
+            {post.routeDistanceMeters != null
+              ? (post.routeDistanceMeters / 1000).toFixed(1).replace(".", ",")
+              : "—"}{" "}
+            KM
+          </button>
+        )}
       </div>
 
       {post.media?.length > 0 && (
