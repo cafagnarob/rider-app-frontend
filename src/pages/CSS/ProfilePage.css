@@ -84,3 +84,31 @@
 .profile-page__menu {
   margin-bottom: 28px;
 }
+
+@media (min-width: 1024px) {
+  .profile-page__desktop-columns {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 40px;
+    margin-top: 10px;
+  }
+
+  .profile-page__account-column,
+  .profile-page__settings-column {
+    min-width: 0;
+  }
+
+  .profile-page__settings-column {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .profile-page__account-label {
+    margin-bottom: 10px;
+  }
+
+  .profile-page__menu {
+    margin-bottom: 0;
+  }
+}
