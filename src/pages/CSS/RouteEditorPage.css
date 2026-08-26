@@ -8,3 +8,101 @@
   color: var(--color-text-muted);
   margin-bottom: 14px;
 }
+
+@media (min-width: 1024px) {
+  .route-editor-page {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(380px, 0.85fr);
+    grid-template-rows: auto 1fr;
+    column-gap: 24px;
+    padding: 0 32px 40px;
+    max-width: 1500px;
+    margin: 0 auto;
+  }
+
+  .route-editor-page__intro {
+    grid-column: 1 / -1;
+    padding: 0 0 20px;
+  }
+
+  .route-editor-page__intro .page-title {
+    font-size: 30px !important;
+  }
+
+  .route-editor-page__hint {
+    font-size: 10.5px;
+    margin-bottom: 0;
+  }
+
+  .route-editor-page .map-frame {
+    grid-column: 1;
+    height: calc(100vh - 180px);
+    min-height: 600px;
+    max-height: 850px;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    position: sticky;
+    top: 20px;
+  }
+
+  .route-editor-page > .form-stack {
+    grid-column: 2;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    min-width: 0;
+  }
+
+  .route-editor-page > .form-stack .form-group__label {
+    margin-bottom: 7px;
+  }
+
+  .route-editor-page > .form-stack .input,
+  .route-editor-page > .form-stack .select {
+    width: 100%;
+  }
+
+  .route-editor-page .search-results {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    z-index: 20;
+    margin-top: 4px;
+    max-height: 260px;
+    overflow-y: auto;
+  }
+
+  .route-editor-page .waypoint-edit-row {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .route-editor-page .waypoint-edit-row__input {
+    min-width: 0;
+  }
+
+  .route-editor-page .checkbox-stack {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 16px;
+    padding: 4px 0;
+  }
+
+  .route-editor-page .inline-stats-row {
+    padding: 14px 16px;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    background: var(--color-card);
+  }
+
+  .route-editor-page > .form-stack > .card {
+    padding: 16px !important;
+  }
+
+  .route-editor-page > .form-stack > .btn-primary {
+    margin-top: 2px;
+  }
+}
