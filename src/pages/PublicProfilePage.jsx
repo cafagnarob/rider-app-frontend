@@ -12,6 +12,8 @@ import {
 } from "../features/social/followApi"
 import { useGetUserPostsQuery } from "../features/social/postsApi"
 import "../pages/CSS/PublicProfilePage.css"
+import { useGetUserRoutesQuery } from "../features/routesMap/routesApi"
+import { useState } from "react"
 
 const PLATFORM_ICONS = {
   INSTAGRAM: FaInstagram,
@@ -23,6 +25,12 @@ const PLATFORM_ICONS = {
 
 function PublicProfilePage() {
   const { username } = useParams()
+
+  const [tab, setTab] = useState("posts")
+  const { data: routesPage } = useGetUserRoutesQuery(
+    { username },
+    { skip: tab !== "routes" },
+  )
 
   const { data: me } = useGetCurrentUserQuery()
   const {
@@ -61,7 +69,7 @@ function PublicProfilePage() {
   const isFollowing = stats?.isFollowedByCurrentUser
 
   return (
-    <div className="page">
+    <div className="page" key={username}>
       <div className="px-20">
         <div className="public-profile-page__header-row">
           <img
@@ -137,25 +145,85 @@ function PublicProfilePage() {
         )}
       </div>
 
-      <div className="public-profile-page__posts-header">
-        <div className="section-title">POST</div>
+      <div
+        className="public-profile-page__posts-header"
+        style={{ paddingBottom: 0 }}
+      >
+        <div className="tab-pills">
+          <button
+            type="button"
+            className={`tab-pill ${tab === "posts" ? "tab-pill--active" : ""}`}
+            onClick={() => setTab("posts")}
+          >
+            POST
+          </button>
+          <button
+            type="button"
+            className={`tab-pill ${tab === "routes" ? "tab-pill--active" : ""}`}
+            onClick={() => setTab("routes")}
+          >
+            PERCORSI
+          </button>
+        </div>
       </div>
 
-      {posts?.content.length === 0 ? (
-        <p className="no-results-text">
-          Questo utente non ha ancora pubblicato nulla.
-        </p>
+      {tab === "posts" ? (
+        posts?.content.length === 0 ? (
+          <p className="no-results-text">
+            Questo utente non ha ancora pubblicato nulla.
+          </p>
+        ) : (
+          <div className="post-grid">
+            {posts?.content.map((post) => (
+              <Link
+                key={post.id}
+                to={`/posts/${post.id}`}
+                className="post-grid__item"
+              >
+                {post.media?.[0] && <img src={post.media[0].mediaUrl} alt="" />}
+              </Link>
+            ))}
+          </div>
+        )
       ) : (
-        <div className="post-grid">
-          {posts?.content.map((post) => (
-            <Link
-              key={post.id}
-              to={`/posts/${post.id}`}
-              className="post-grid__item"
-            >
-              {post.media?.[0] && <img src={post.media[0].mediaUrl} alt="" />}
-            </Link>
-          ))}
+        <div className="px-20" style={{ paddingTop: 16 }}>
+          {routesPage?.content.length === 0 ? (
+            <p className="no-results-text">Nessun percorso condiviso.</p>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {routesPage?.content.map((route) => (
+                <Link
+                  key={route.id}
+                  to={`/routes/${route.id}`}
+                  className="card"
+                  style={{
+                    padding: 16,
+                    textDecoration: "none",
+                    color: "var(--color-text)",
+                    display: "block",
+                  }}
+                >
+                  <div
+                    className="route-card__name"
+                    style={{ marginBottom: 10 }}
+                  >
+                    {route.name}
+                  </div>
+                  <div className="route-card__badges">
+                    <span className="meta-badge">
+                      {(route.distanceMeters / 1000)
+                        .toFixed(1)
+                        .replace(".", ",")}{" "}
+                      KM
+                    </span>
+                    <span className="meta-badge">
+                      {Math.round(route.durationSeconds / 60)} MIN
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
