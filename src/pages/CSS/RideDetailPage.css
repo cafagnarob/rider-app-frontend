@@ -43,3 +43,40 @@
   line-height: 1.5;
   color: rgba(255, 255, 255, 0.85);
 }
+
+@media (min-width: 1024px) {
+  .icon-header {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .ride-detail-page__hero {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+  }
+
+  .ride-detail-page__map-frame {
+    width: 75%;
+    margin-bottom: 20px;
+    border-radius: 0;
+  }
+
+  .ride-detail-page__content {
+    width: min(calc(100% - 80px), 1000px);
+    margin: 0 auto;
+    padding: 40px 0 80px;
+  }
+
+  .ride-detail-page__title {
+    font-size: 46px;
+  }
+
+  .ride-detail-page__stats .stat-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .ride-detail-page__chart-card {
+    width: 30%;
+  }
+}
