@@ -149,6 +149,19 @@ function PostDetailPage() {
           </div>
         )}
 
+        {post.routeId && (
+          <Link
+            to={`/routes/${post.routeId}`}
+            className={`post-detail-page__event-badge ${post.event || post.ride ? "post-detail-page__ride-badge--after-event" : ""}`}
+          >
+            {post.routeName || "PERCORSO"} ·{" "}
+            {post.routeDistanceMeters != null
+              ? (post.routeDistanceMeters / 1000).toFixed(1).replace(".", ",")
+              : "—"}{" "}
+            KM
+          </Link>
+        )}
+
         {post.media?.length > 0 && (
           <div className="post-detail-page__media">
             <PostAutoCarousel media={post.media} onDoubleClick={handleLike} />
