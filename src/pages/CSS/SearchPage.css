@@ -131,3 +131,142 @@
   font-size: 14px;
   color: var(--color-text);
 }
+
+@media (min-width: 1024px) {
+  .search-page__header {
+    padding: 0 32px 20px;
+    gap: 16px;
+  }
+
+  .search-page__search-wrap {
+    max-width: 700px;
+  }
+
+  .search-page__tabs {
+    padding: 0 32px 22px;
+    gap: 10px;
+    overflow-x: visible;
+  }
+
+  .search-tab-pill {
+    height: 36px;
+    padding: 0 16px;
+    font-size: 10.5px;
+    border-radius: 10px;
+    transition:
+      background-color 0.2s ease,
+      border-color 0.2s ease,
+      color 0.2s ease;
+  }
+
+  .search-tab-pill:not(.search-tab-pill--active):hover {
+    border-color: var(--color-accent-soft-border);
+    color: var(--color-text);
+  }
+
+  .search-page__prompt {
+    padding: 70px 32px;
+    font-size: 14px;
+  }
+
+  .search-page__tab-content {
+    padding: 0 32px;
+  }
+
+  .search-result-empty {
+    padding: 50px 20px;
+  }
+
+  .search-page__tab-content > div[style*="flex-direction: column"] {
+    gap: 12px !important;
+  }
+
+  .search-page__tab-content .result-row {
+    padding: 16px 18px;
+    transition:
+      border-color 0.2s ease,
+      background-color 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .search-page__tab-content .result-row:hover {
+    border-color: var(--color-accent-soft-border);
+    background: var(--color-card-alt);
+    transform: translateY(-1px);
+  }
+
+  .search-page__tab-content .grid-2 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .search-page__tab-content .grid-2 .card {
+    transition:
+      border-color 0.2s ease,
+      background-color 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .search-page__tab-content .grid-2 .card:hover {
+    border-color: var(--color-accent-soft-border);
+    background: var(--color-card-alt);
+    transform: translateY(-2px);
+  }
+
+  .search-event-row {
+    padding: 16px 18px;
+    gap: 14px;
+    transition:
+      border-color 0.2s ease,
+      background-color 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .search-event-row:hover {
+    border-color: var(--color-accent-soft-border);
+    background: var(--color-card-alt);
+    transform: translateY(-1px);
+  }
+
+  .search-event-row__date {
+    width: 46px;
+    height: 46px;
+    border-radius: 11px;
+  }
+
+  .search-event-row__day {
+    font-size: 14px;
+  }
+
+  .search-event-row__month {
+    font-size: 8.5px;
+  }
+
+  .search-event-row__title {
+    font-size: 16px;
+  }
+
+  .search-event-row__meta {
+    font-size: 10px;
+    margin-top: 4px;
+  }
+
+  .place-result-btn {
+    padding: 16px 18px;
+    gap: 14px;
+    transition:
+      border-color 0.2s ease,
+      background-color 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .place-result-btn:hover {
+    border-color: var(--color-accent-soft-border);
+    background: var(--color-card-alt);
+    transform: translateY(-1px);
+  }
+
+  .place-result-btn__label {
+    font-size: 14px;
+  }
+}
