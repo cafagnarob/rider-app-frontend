@@ -69,7 +69,7 @@ function ProfilePage() {
   }
 
   return (
-    <div className="page">
+    <div className="page profile-page">
       <div className="px-20">
         <div className="profile-page__header-row">
           <div className="profile-page__avatar-wrap">
@@ -176,31 +176,44 @@ function ProfilePage() {
         >
           MODIFICA PROFILO
         </button>
-
-        <div className="field-label profile-page__account-label">
-          IL MIO ACCOUNT
-        </div>
-        <div className="menu-list profile-page__menu">
-          {MENU_ITEMS.map((item) => (
-            <Link key={item.to} to={item.to} className="menu-list-item">
-              {item.label}
-              <FaChevronRight size={11} color="var(--color-text-faint)" />
-            </Link>
-          ))}
-
-          <Link to="/invites" className="menu-list-item">
-            <span>Inviti ricevuti</span>
-            <div className="flex-gap-10" style={{ gap: 8 }}>
-              {myInvites?.length > 0 && (
-                <span className="count-badge">{myInvites.length}</span>
-              )}
-              <FaChevronRight size={11} color="var(--color-text-faint)" />
+        <div className="profile-page__desktop-columns">
+          <div className="profile-page__account-column">
+            <div className="field-label profile-page__account-label">
+              IL MIO ACCOUNT
             </div>
-          </Link>
-        </div>
+            <div className="menu-list profile-page__menu">
+              {MENU_ITEMS.map((item) => (
+                <Link key={item.to} to={item.to} className="menu-list-item">
+                  {item.label}
+                  <FaChevronRight size={11} color="var(--color-text-faint)" />
+                </Link>
+              ))}
 
-        <ProfileLinksSection links={profile.links || []} />
-        <SecuritySection profile={profile} />
+              <Link to="/invites" className="menu-list-item">
+                <span>Inviti ricevuti</span>
+                <div className="flex-gap-10" style={{ gap: 8 }}>
+                  {myInvites?.length > 0 && (
+                    <span className="count-badge">{myInvites.length}</span>
+                  )}
+                  <FaChevronRight size={11} color="var(--color-text-faint)" />
+                </div>
+              </Link>
+            </div>
+            {profile?.role === "ADMIN" && (
+              <Link
+                to="/admin/users"
+                className="menu-list-item"
+                style={{ marginTop: 8 }}
+              >
+                Area amministratore
+                <FaChevronRight size={11} color="var(--color-text-faint)" />
+              </Link>
+            )}
+          </div>
+
+          <ProfileLinksSection links={profile.links || []} />
+          <SecuritySection profile={profile} />
+        </div>
       </div>
 
       <ProfileEditModal
