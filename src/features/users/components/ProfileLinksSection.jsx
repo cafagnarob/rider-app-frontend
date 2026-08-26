@@ -56,7 +56,7 @@ function ProfileLinksSection({ links }) {
   }
 
   return (
-    <div className="card section-card">
+    <div className="card section-card " style={{ marginTop: "25px" }}>
       <div className="field-label section-card__label">LINK SOCIAL</div>
 
       {links.length === 0 ? (
