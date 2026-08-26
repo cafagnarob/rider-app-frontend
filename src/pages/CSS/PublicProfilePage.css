@@ -60,3 +60,82 @@
 .public-profile-page__posts-header {
   padding: 20px 20px 10px;
 }
+
+@media (min-width: 1024px) {
+  .public-profile-page {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .public-profile-page > .px-20 {
+    padding: 0 32px;
+  }
+
+  .public-profile-page__header-row {
+    gap: 24px;
+    margin-bottom: 20px;
+  }
+
+  .public-profile-page__avatar {
+    width: 120px;
+    height: 120px;
+  }
+
+  .public-profile-page__fullname {
+    font-size: 28px;
+  }
+
+  .public-profile-page__username {
+    font-size: 12px;
+    margin-bottom: 14px;
+  }
+
+  .public-profile-page__stats {
+    gap: 30px;
+    margin-bottom: 20px;
+  }
+
+  .public-profile-page__description {
+    max-width: 700px;
+    font-size: 15px;
+  }
+
+  .public-profile-page__location {
+    margin-bottom: 16px;
+  }
+
+  .public-profile-page__posts-header {
+    max-width: 1200px;
+    margin: 30px auto 0;
+    padding: 20px 32px 12px;
+  }
+
+  .public-profile-page .post-grid {
+    padding: 0 32px 30px;
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .public-profile-page .post-grid__item {
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: 10px;
+  }
+
+  .public-profile-page .post-grid__item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.25s ease;
+  }
+
+  .public-profile-page .post-grid__item:hover img {
+    transform: scale(1.03);
+  }
+
+  .public-profile-page .social-links-row {
+    margin-top: 8px;
+  }
+}
