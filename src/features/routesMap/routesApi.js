@@ -49,6 +49,10 @@ export const routesApi = apiSlice.injectEndpoints({
         body,
       }),
     }),
+    getUserRoutes: builder.query({
+      query: ({ username, page = 0, size = 20 }) =>
+        `/routes/user/${username}?page=${page}&size=${size}`,
+    }),
   }),
 })
 
@@ -60,4 +64,5 @@ export const {
   useSetImportableMutation,
   useImportRouteMutation,
   usePreviewRouteMutation,
+  useGetUserRoutesQuery,
 } = routesApi
