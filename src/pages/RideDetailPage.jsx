@@ -50,7 +50,7 @@ function RideDetailPage() {
 
   return (
     <div className="page">
-      <div className="icon-header">
+      <div className="icon-header ">
         <button type="button" className="btn-icon" onClick={() => navigate(-1)}>
           <FaArrowLeft />
         </button>
@@ -72,12 +72,14 @@ function RideDetailPage() {
         </button>
       </div>
 
-      <div className="ride-detail-page__map-frame">
-        <RideMap points={ride.points} />
-      </div>
+      <div className="ride-detail-page__hero">
+        <div className="ride-detail-page__map-frame">
+          <RideMap points={ride.points} />
+        </div>
 
-      <div className="card ride-detail-page__chart-card">
-        <RideCharts points={ride.points} />
+        <div className="card ride-detail-page__chart-card">
+          <RideCharts points={ride.points} />
+        </div>
       </div>
 
       <div className="px-20">
