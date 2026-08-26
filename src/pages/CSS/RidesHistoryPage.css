@@ -40,3 +40,65 @@
   gap: 6px;
   flex-wrap: wrap;
 }
+
+@media (min-width: 1024px) {
+  .rides-history-page__header {
+    padding: 0 32px 24px;
+  }
+
+  .rides-history-page__header .page-title {
+    font-size: 30px !important;
+  }
+
+  .ride-list {
+    padding: 0 32px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .ride-card-link {
+    display: block;
+    height: 100%;
+  }
+
+  .ride-card-link .card {
+    padding: 20px !important;
+    transition:
+      border-color 0.2s ease,
+      background-color 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .ride-card-link:hover .card {
+    border-color: var(--color-accent-soft-border);
+    background: var(--color-card-alt);
+    transform: translateY(-2px);
+  }
+
+  .ride-card__top {
+    margin-bottom: 14px;
+  }
+
+  .ride-card__title {
+    font-size: 19px;
+  }
+
+  .ride-card__date {
+    font-size: 10.5px;
+    margin-top: 5px;
+  }
+
+  .ride-card__badges {
+    gap: 8px;
+  }
+
+  .pagination-row {
+    margin-top: 28px;
+  }
+
+  .empty-list-text {
+    margin-left: 32px;
+    margin-right: 32px;
+  }
+}
