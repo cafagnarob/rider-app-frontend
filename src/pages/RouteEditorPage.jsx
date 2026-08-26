@@ -352,7 +352,7 @@ function RouteEditorPage() {
   }
 
   return (
-    <div className="page" style={{ paddingBottom: 40 }}>
+    <div className="page  route-editor-page" style={{ paddingBottom: 40 }}>
       <div className="route-editor-page__intro">
         <div className="page-title" style={{ fontSize: 26, marginBottom: 4 }}>
           NUOVO PERCORSO
