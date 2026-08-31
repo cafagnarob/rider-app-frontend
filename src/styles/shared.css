@@ -1127,6 +1127,7 @@
 
 /* --- griglia post a 3 colonne, senza gap visibile (stile Instagram) --- */
 .post-grid {
+  margin-top: 30px;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 3px;
