@@ -2,8 +2,12 @@ import { useState } from "react"
 import { FaTimes } from "react-icons/fa"
 import { useCreatePostMutation } from "../postsApi"
 import { useGetMyRidesQuery } from "../../rides/ridesApi"
-import { useGetParticipatingEventsQuery } from "../../events/eventsApi"
+import {
+  useGetParticipatingEventsQuery,
+  useGetOrganizedEventsQuery,
+} from "../../events/eventsApi"
 import { useGetMyVehiclesQuery } from "../../vehicles/vehiclesApi"
+import { useGetMyRoutesQuery } from "../../routesMap/routesApi"
 
 const MAX_FILES = 6
 const MAX_SIZE = 5 * 1024 * 1024
@@ -20,17 +24,39 @@ function CreatePostModal({ show, onClose }) {
   const [eventId, setEventId] = useState(null)
   const [vehicleId, setVehicleId] = useState(null)
 
+  const [routeId, setRouteId] = useState(null)
+
+  const { data: routesPage } = useGetMyRoutesQuery(
+    { page: 0, size: 10 },
+    { skip: linkType !== "route" },
+  )
+
+  const { data: participatingPage } = useGetParticipatingEventsQuery(
+    { page: 0, size: 10 },
+    { skip: linkType !== "event" },
+  )
+  const { data: organizedPage } = useGetOrganizedEventsQuery(
+    { page: 0, size: 10 },
+    { skip: linkType !== "event" },
+  )
+
   const { data: ridesPage } = useGetMyRidesQuery(
     { page: 0, size: 10 },
     { skip: linkType !== "ride" },
   )
-  const { data: eventsPage } = useGetParticipatingEventsQuery(
-    { page: 0, size: 10 },
-    { skip: linkType !== "event" },
-  )
+
   const { data: vehicles } = useGetMyVehiclesQuery(undefined, {
     skip: linkType !== "vehicle",
   })
+
+  const eventOptions = Array.from(
+    new Map(
+      [
+        ...(organizedPage?.content || []),
+        ...(participatingPage?.content || []),
+      ].map((ev) => [ev.id, ev]),
+    ).values(),
+  )
 
   const revokeAll = (list) =>
     list.forEach((i) => URL.revokeObjectURL(i.preview))
@@ -44,6 +70,7 @@ function CreatePostModal({ show, onClose }) {
     setRideId(null)
     setEventId(null)
     setVehicleId(null)
+    setRouteId(null)
     onClose()
   }
 
@@ -100,6 +127,7 @@ function CreatePostModal({ show, onClose }) {
           eventId: eventId || null,
           rideId: rideId || null,
           vehicleId: vehicleId || null,
+          routeId: routeId || null,
           includeRoutePhoto: false,
         },
         files: items.map((i) => i.file),
@@ -113,8 +141,9 @@ function CreatePostModal({ show, onClose }) {
   if (!show) return null
 
   const selectedRide = ridesPage?.content.find((r) => r.id === rideId)
-  const selectedEvent = eventsPage?.content.find((ev) => ev.id === eventId)
+  const selectedEvent = eventOptions.find((ev) => ev.id === eventId)
   const selectedVehicle = vehicles?.find((v) => v.id === vehicleId)
+  const selectedRoute = routesPage?.content.find((r) => r.id === routeId)
 
   const pillLabel = (type) => {
     if (type === "ride")
@@ -123,6 +152,8 @@ function CreatePostModal({ show, onClose }) {
         : "+ RIDE"
     if (type === "event")
       return selectedEvent ? `EVENTO · ${selectedEvent.title}` : "+ EVENTO"
+    if (type === "route")
+      return selectedRoute ? `PERCORSO · ${selectedRoute.name}` : "+ PERCORSO"
     return selectedVehicle
       ? `MOTO · ${selectedVehicle.nickname || selectedVehicle.brandName}`
       : "+ MOTO"
@@ -131,6 +162,7 @@ function CreatePostModal({ show, onClose }) {
   const isPicked = (type) =>
     (type === "ride" && rideId) ||
     (type === "event" && eventId) ||
+    (type === "route" && routeId) ||
     (type === "vehicle" && vehicleId)
 
   const togglePicker = (type) =>
@@ -139,6 +171,7 @@ function CreatePostModal({ show, onClose }) {
   const clearLink = (type) => {
     if (type === "ride") setRideId(null)
     if (type === "event") setEventId(null)
+    if (type === "route") setRouteId(null)
     if (type === "vehicle") setVehicleId(null)
   }
 
@@ -205,7 +238,7 @@ function CreatePostModal({ show, onClose }) {
           <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
             <span className="field-label">COLLEGA</span>
             <div className="link-chips-row">
-              {["ride", "event", "vehicle"].map((type) => (
+              {["ride", "event", "route", "vehicle"].map((type) => (
                 <button
                   key={type}
                   type="button"
@@ -256,12 +289,12 @@ function CreatePostModal({ show, onClose }) {
 
             {linkType === "event" && (
               <div className="picker-list">
-                {eventsPage?.content.length === 0 && (
+                {eventOptions.length === 0 && (
                   <span className="picker-empty-text">
-                    Non partecipi a nessun evento.
+                    Nessun evento disponibile.
                   </span>
                 )}
-                {eventsPage?.content.map((ev) => (
+                {eventOptions.map((ev) => (
                   <button
                     key={ev.id}
                     type="button"
@@ -272,6 +305,7 @@ function CreatePostModal({ show, onClose }) {
                     }}
                   >
                     {ev.title}
+                    {ev.organizer && " (TUO)"}
                   </button>
                 ))}
               </div>
@@ -295,6 +329,30 @@ function CreatePostModal({ show, onClose }) {
                     }}
                   >
                     {v.nickname || `${v.model.brand.name} ${v.model.name}`}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {linkType === "route" && (
+              <div className="picker-list">
+                {routesPage?.content.length === 0 && (
+                  <span className="picker-empty-text">
+                    Nessun percorso salvato.
+                  </span>
+                )}
+                {routesPage?.content.map((r) => (
+                  <button
+                    key={r.id}
+                    type="button"
+                    className="picker-row"
+                    onClick={() => {
+                      setRouteId(r.id)
+                      setLinkType(null)
+                    }}
+                  >
+                    {r.name} ·{" "}
+                    {(r.distanceMeters / 1000).toFixed(1).replace(".", ",")} km
                   </button>
                 ))}
               </div>
