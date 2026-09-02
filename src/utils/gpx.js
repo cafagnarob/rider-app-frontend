@@ -11,7 +11,7 @@ export function generateGpx(route) {
     .join("\n")
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<gpx version="1.1" creator="QJ Riders" xmlns="http://www.topografix.com/GPX/1/1">
+<gpx version="1.1" creator="FlowRides" xmlns="http://www.topografix.com/GPX/1/1">
   <trk>
     <name>${escapeXml(route.name)}</name>
     <trkseg>
