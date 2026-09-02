@@ -8,6 +8,7 @@ import {
 } from "react-icons/fa"
 import { useGetCurrentUserQuery } from "../../features/users/usersApi"
 import NotificationBell from "../../features/notification/components/NotificationBell"
+import Avatar from "../Avatar"
 
 const TABS = [
   { key: "home", label: "HOME", path: "/", icon: FaHome },
@@ -30,13 +31,13 @@ function SideNav() {
     <nav className="side-nav desktop-only">
       <div className="side-nav__top">
         <div>
-          <div className="side-nav__brand">QJ RIDERS</div>
+          <div className="side-nav__brand">FlowRides</div>
           <div className="screen-label">
             CIAO, {(me?.name || me?.username || "").toUpperCase()}
           </div>
           <div className="side-nav__top-actions">
             <Link to="/profile" className="side-nav__avatar-link">
-              <img
+              <Avatar
                 src={me?.profilePicture}
                 alt=""
                 className="side-nav__avatar"
