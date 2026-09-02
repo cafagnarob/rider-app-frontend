@@ -5,6 +5,7 @@ import {
 } from "../../social/followApi"
 import { useGetCurrentUserQuery } from "../../users/usersApi"
 import { useInviteUserMutation } from "../invitesApi"
+import Avatar from "../../../components/Avatar"
 
 const STATUS_CLASSES = {
   PENDING: "invite-status-badge--pending",
@@ -87,7 +88,7 @@ function InvitePeoplePicker({ eventId, existingInvites }) {
 
           return (
             <div key={contact.username} className="contact-row">
-              <img
+              <Avatar
                 src={contact.profilePicture}
                 alt={contact.username}
                 className="contact-row__avatar"
