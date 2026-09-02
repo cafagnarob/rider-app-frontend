@@ -3052,6 +3052,24 @@
   color: #4ade80;
 }
 
+.tab-pill--avatar {
+  padding: 0;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+}
+
+.feed-page__mine-tab-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
 img.avatar--preset {
   border-radius: 0 !important;
   object-fit: contain !important;
