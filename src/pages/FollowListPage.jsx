@@ -6,6 +6,7 @@ import {
   useGetFollowersQuery,
   useGetFollowingQuery,
 } from "../features/social/followApi"
+import Avatar from "../components/Avatar"
 
 function FollowListPage({ type }) {
   const { username } = useParams()
@@ -68,7 +69,7 @@ function FollowListPage({ type }) {
               to={`/profile/${user.username}`}
               className="user-row"
             >
-              <img
+              <Avatar
                 src={user.profilePicture}
                 alt={user.username}
                 className="user-row__avatar"
