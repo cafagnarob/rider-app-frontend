@@ -4,6 +4,7 @@ import { FaHeart, FaRegHeart, FaRegComment } from "react-icons/fa"
 import { useToggleLikeMutation } from "../postsApi"
 import { formatRelativeTime } from "../../../utils/dateFormat"
 import PostMediaCarousel from "./PostMediaCarousel"
+import Avatar from "../../../components/Avatar"
 
 function PostCard({ post }) {
   const navigate = useNavigate()
@@ -44,7 +45,7 @@ function PostCard({ post }) {
   return (
     <div className="post-card">
       <div className="post-author-row">
-        <img
+        <Avatar
           src={post.authorProfilePicture}
           alt={post.authorUsername}
           className="post-author-row__avatar"
