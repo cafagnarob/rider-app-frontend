@@ -31,6 +31,7 @@ import {
   useAcceptInviteMutation,
   useRejectInviteMutation,
 } from "../features/events/invitesApi"
+import Avatar from "../components/Avatar"
 
 function EventDetailPage() {
   const { eventId } = useParams()
@@ -666,7 +667,7 @@ function EventDetailPage() {
             </div>
             <div className="avatar-stack">
               {participants.slice(0, 3).map((p) => (
-                <img
+                <Avatar
                   key={p.id}
                   src={p.profilePicture}
                   alt={p.username}
