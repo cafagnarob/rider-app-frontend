@@ -14,6 +14,7 @@ import { useGetUserPostsQuery } from "../features/social/postsApi"
 import "../pages/CSS/PublicProfilePage.css"
 import { useGetUserRoutesQuery } from "../features/routesMap/routesApi"
 import { useState } from "react"
+import Avatar from "../components/Avatar"
 
 const PLATFORM_ICONS = {
   INSTAGRAM: FaInstagram,
@@ -72,7 +73,7 @@ function PublicProfilePage() {
     <div className="page" key={username}>
       <div className="px-20">
         <div className="public-profile-page__header-row">
-          <img
+          <Avatar
             src={profile.profilePicture}
             alt={profile.username}
             className="public-profile-page__avatar"
