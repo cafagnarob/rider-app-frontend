@@ -11,6 +11,7 @@ import {
   useRejectAccessCodeRequestMutation,
 } from "../eventsApi"
 import InvitePeoplePicker from "./InvitePeoplePicker"
+import Avatar from "../../../components/Avatar"
 
 function OrganizerPanel({ eventId, visibility }) {
   const { data: pending } = useGetPendingParticipantsQuery(eventId)
@@ -88,7 +89,7 @@ function OrganizerPanel({ eventId, visibility }) {
             {accessRequests?.map((req) => (
               <div key={req.id} className="request-row">
                 <div className="request-row__identity">
-                  <img
+                  <Avatar
                     src={req.requesterProfilePicture}
                     alt={req.requesterUsername}
                     className="request-row__avatar"
