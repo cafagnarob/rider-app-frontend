@@ -18,7 +18,7 @@ function AdminSideNav() {
   return (
     <nav className="admin-side-nav">
       <div className="admin-side-nav__brand">
-        <span style={{ color: "var(--color-accent)" }}>QJ</span> ADMIN
+        <span style={{ color: "var(--color-accent)" }}>FlowRides</span> ADMIN
       </div>
       <div className="side-nav__items">
         {TABS.map((tab) => {
