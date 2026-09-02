@@ -13,6 +13,7 @@ import {
   EVENT_TYPE_LABELS,
 } from "../utils/constants"
 import "../pages/CSS/SearchPage.css"
+import Avatar from "../components/Avatar"
 
 const TABS = [
   { key: "people", label: "MOTOCICLISTI" },
@@ -139,7 +140,7 @@ function SearchPage() {
                   to={`/profile/${u.username}`}
                   className="card result-row"
                 >
-                  <img
+                  <Avatar
                     src={u.profilePicture}
                     alt={u.username}
                     className="result-row__avatar"
