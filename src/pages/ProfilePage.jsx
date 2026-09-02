@@ -1,18 +1,15 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
-import { Spinner } from "react-bootstrap"
 import { FaChevronRight } from "react-icons/fa"
-import {
-  useGetCurrentUserQuery,
-  useUpdateProfilePictureMutation,
-} from "../features/users/usersApi"
+import { useGetCurrentUserQuery } from "../features/users/usersApi"
 import { useGetMyInvitesQuery } from "../features/events/invitesApi"
-import { useGetFollowStatsQuery } from "../features/social/followApi"
 import ProfileEditModal from "../features/users/components/ProfileEditModal"
 import ProfileLinksSection from "../features/users/components/ProfileLinksSection"
 import SecuritySection from "../features/users/components/SecuritySection"
+import Avatar from "../components/Avatar"
 import "../pages/CSS/ProfilePage.css"
-
+import { Spinner } from "react-bootstrap"
+import { useGetFollowStatsQuery } from "../features/social/followApi"
 const MENU_ITEMS = [
   { to: "/garage", label: "Garage" },
   { to: "/routes", label: "Percorsi" },
@@ -22,35 +19,12 @@ const MENU_ITEMS = [
 
 function ProfilePage() {
   const { data: profile, isLoading, isError } = useGetCurrentUserQuery()
-  const [updatePicture, { isLoading: isUploading }] =
-    useUpdateProfilePictureMutation()
-
   const { data: myInvites } = useGetMyInvitesQuery()
   const { data: stats } = useGetFollowStatsQuery(profile?.username, {
     skip: !profile?.username,
   })
 
   const [showEdit, setShowEdit] = useState(false)
-  const [errorMsg, setErrorMsg] = useState("")
-
-  const handlePictureChange = async (e) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    if (!file.type.startsWith("image/")) {
-      setErrorMsg("Il file selezionato non è un'immagine.")
-      return
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      setErrorMsg("L'immagine non può superare i 5 MB.")
-      return
-    }
-    setErrorMsg("")
-    try {
-      await updatePicture(file).unwrap()
-    } catch (err) {
-      setErrorMsg(err.data?.message || "Errore durante il caricamento.")
-    }
-  }
 
   if (isLoading) {
     return (
@@ -73,20 +47,11 @@ function ProfilePage() {
       <div className="px-20">
         <div className="profile-page__header-row">
           <div className="profile-page__avatar-wrap">
-            <img
+            <Avatar
               src={profile.profilePicture}
               alt={profile.username}
               className="profile-page__avatar"
             />
-            {isUploading && (
-              <div className="profile-page__avatar-overlay">
-                <Spinner
-                  size="sm"
-                  animation="border"
-                  style={{ color: "#FF7A2F" }}
-                />
-              </div>
-            )}
           </div>
 
           <div className="profile-page__info">
@@ -112,24 +77,14 @@ function ProfilePage() {
               </Link>
             </div>
 
-            <label className="btn-secondary profile-page__change-photo-btn">
+            <Link
+              to="/profile/avatar"
+              className="btn-secondary profile-page__change-photo-btn"
+            >
               CAMBIA FOTO
-              <input
-                type="file"
-                accept="image/*"
-                hidden
-                disabled={isUploading}
-                onChange={handlePictureChange}
-              />
-            </label>
+            </Link>
           </div>
         </div>
-
-        {errorMsg && (
-          <div className="error-text" style={{ marginBottom: 14 }}>
-            {errorMsg}
-          </div>
-        )}
 
         {profile.description && (
           <p className="profile-page__description">{profile.description}</p>
@@ -176,6 +131,7 @@ function ProfilePage() {
         >
           MODIFICA PROFILO
         </button>
+
         <div className="profile-page__desktop-columns">
           <div className="profile-page__account-column">
             <div className="field-label profile-page__account-label">
@@ -199,6 +155,7 @@ function ProfilePage() {
                 </div>
               </Link>
             </div>
+
             {profile?.role === "ADMIN" && (
               <Link
                 to="/admin/users"
