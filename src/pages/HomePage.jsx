@@ -14,6 +14,7 @@ import { MAP_STYLE_URL } from "../utils/mapStyle"
 import { COLORS } from "../styles/theme" // solo per i marcatori MapLibre, DOM creati fuori da React — stessa eccezione di EventDetailPage
 import { EVENT_TYPE_LABELS } from "../utils/constants"
 import "../pages/CSS/HomePage.css"
+import Avatar from "../components/Avatar"
 
 const RADIUS_KM = 40
 const INITIAL_CENTER = [12.4964, 41.9028]
@@ -155,7 +156,7 @@ function HomePage() {
                 CIAO, {(me?.name || me?.username || "").toUpperCase()}
               </div>
               <div className="page-title home-page__greeting-title">
-                QJ RIDERS
+                FlowRides
               </div>
             </div>
           </div>
@@ -164,7 +165,7 @@ function HomePage() {
               <NotificationBell />
             </div>
             <Link to="/profile" className="mobile-only">
-              <img
+              <Avatar
                 src={me?.profilePicture}
                 alt=""
                 className="home-page__avatar"
