@@ -21,7 +21,9 @@ function FeedPage() {
     isLoading,
     isFetching,
     isError,
-  } = useGetFeedQuery(feedArgs)
+  } = useGetFeedQuery(feedArgs, {
+    refetchOnMountOrArgChange: true,
+  })
 
   const handleTabChange = (newType) => {
     setType(newType)
