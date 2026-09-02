@@ -34,6 +34,7 @@ import AdminRoute from "../pages/AdminRoute"
 import AdminLayout from "../pages/AdminLayout"
 import AdminUsersPage from "../pages/AdminUsersPage"
 import AdminCatalogPage from "../pages/AdminCatalogPage"
+import AvatarPickerPage from "../pages/AvatarPickerPage"
 
 function AppRoutes() {
   return (
@@ -74,6 +75,7 @@ function AppRoutes() {
             path="/events/:tripId/days/new"
             element={<AddEventDayPage />}
           />
+          <Route path="/profile/avatar" element={<AvatarPickerPage />} />
         </Route>
       </Route>
       <Route path="/login" element={<LoginPage />} />
