@@ -12,6 +12,7 @@ import {
 } from "../utils/notifications"
 import { formatRelativeTime } from "../utils/dateFormat"
 import "../pages/CSS/NotificationsPage.css"
+import Avatar from "../components/Avatar"
 
 function NotificationsPage() {
   const [page, setPage] = useState(0)
@@ -78,7 +79,7 @@ function NotificationsPage() {
                 onClick={() => handleClick(n)}
               >
                 {n.actorProfilePicture ? (
-                  <img
+                  <Avatar
                     src={n.actorProfilePicture}
                     alt=""
                     className="notification-row__avatar"
