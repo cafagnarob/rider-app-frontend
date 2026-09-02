@@ -21,6 +21,7 @@
 }
 
 .admin-user-row__username {
+  color: white;
   font-family: var(--font-heading);
   font-weight: 700;
   font-size: 16px;
