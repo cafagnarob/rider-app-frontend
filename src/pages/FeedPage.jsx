@@ -22,7 +22,7 @@ function FeedPage() {
     isFetching,
     isError,
   } = useGetFeedQuery(feedArgs, {
-    refetchOnMountOrArgChange: true,
+    refetchOnMountOrArgChange: 30,
   })
 
   const handleTabChange = (newType) => {
