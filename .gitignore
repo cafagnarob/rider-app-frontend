@@ -27,3 +27,4 @@ dist-ssr
 # ENV# 
 .env.
 .env.*
+!.env.production
