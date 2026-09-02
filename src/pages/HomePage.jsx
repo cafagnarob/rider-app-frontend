@@ -28,6 +28,7 @@ function HomePage() {
 
   const { data: allEventsPage, isLoading: isLoadingMap } = useSearchEventsQuery(
     { page: 0, size: 50 },
+    { refetchOnMountOrArgChange: true },
   )
 
   // "Uscite in zona": filtrata per vicinanza se la posizione è disponibile, altrimenti stessi dati della mappa
@@ -39,21 +40,27 @@ function HomePage() {
       page: 0,
       size: 20,
     },
-    { skip: !position },
+    { skip: !position, refetchOnMountOrArgChange: true },
   )
 
   const mapEvents = allEventsPage?.content || []
   const nearbyEvents = position ? nearbyQuery.data?.content || [] : mapEvents
 
-  const { data: participating } = useGetParticipatingEventsQuery({
-    page: 0,
-    size: 1,
-  })
-  const { data: explore } = useGetFeedQuery({
-    type: "EXPLORE",
-    page: 0,
-    size: 8,
-  })
+  const { data: participating } = useGetParticipatingEventsQuery(
+    {
+      page: 0,
+      size: 1,
+    },
+    { refetchOnMountOrArgChange: true },
+  )
+  const { data: explore } = useGetFeedQuery(
+    {
+      type: "EXPLORE",
+      page: 0,
+      size: 8,
+    },
+    { refetchOnMountOrArgChange: true },
+  )
 
   const nextEvent = participating?.content?.[0] || nearbyEvents[0] || null
   const communityPhotos = useMemo(
