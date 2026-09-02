@@ -54,7 +54,7 @@ function RegisterPage() {
 
       <div className="auth-page__body">
         <div>
-          <div className="auth-page__brand-title">QJ RIDERS</div>
+          <div className="auth-page__brand-title">FlowRides</div>
           <div className="auth-page__brand-subtitle">CREA IL TUO PROFILO</div>
         </div>
 
