@@ -30,15 +30,13 @@ function LoginPage() {
 
   return (
     <div className="auth-page">
-      <div className="auth-page__hero">
-        <span className="auth-page__hero-caption">
-          FOTO · MOTO IN CURVA, PASSO ALPINO
-        </span>
+      <div className="auth-page__hero auth-page__hero--photo">
+        <span className="auth-page__hero-caption"></span>
       </div>
 
       <div className="auth-page__body">
         <div>
-          <div className="auth-page__brand-title">QJ RIDERS</div>
+          <div className="auth-page__brand-title">FlowRides</div>
           <div className="auth-page__brand-subtitle">BENTORNATO IN SELLA</div>
         </div>
 
