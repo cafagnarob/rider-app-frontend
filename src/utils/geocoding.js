@@ -1,12 +1,15 @@
 const BASE = "https://api.maptiler.com/geocoding"
 
-export async function searchPlaces(query, { limit = 5, country = "it" } = {}) {
+export async function searchPlaces(
+  query,
+  { limit = 5, proximity = "12.4964,41.9028" } = {},
+) {
   if (!query || query.trim().length < 3) return []
 
   const url =
     `${BASE}/${encodeURIComponent(query.trim())}.json` +
     `?key=${import.meta.env.VITE_MAPTILER_KEY}` +
-    `&limit=${limit}&country=${country}&language=it`
+    `&limit=${limit}&language=it&proximity=${proximity}`
 
   const response = await fetch(url)
   if (!response.ok) throw new Error("Errore nella ricerca")
