@@ -14,6 +14,7 @@ import { useGetCurrentUserQuery } from "../features/users/usersApi"
 import PostAutoCarousel from "../features/social/components/PostAutoCarousel"
 import { formatRelativeTime } from "../utils/dateFormat"
 import "../pages/CSS/PostDetailPage.css"
+import Avatar from "../components/Avatar"
 
 function PostDetailPage() {
   const { postId } = useParams()
@@ -112,7 +113,7 @@ function PostDetailPage() {
       <div className="post-detail-page__section">
         <div className="post-detail-page__author-row">
           <Link to={`/profile/${post.authorUsername}`}>
-            <img
+            <Avatar
               src={post.authorProfilePicture}
               alt={post.authorUsername}
               className="post-detail-page__avatar"
@@ -228,7 +229,7 @@ function PostDetailPage() {
               me?.username === comment.authorUsername || isAuthor
             return (
               <div key={comment.id} className="comment-row">
-                <img
+                <Avatar
                   src={comment.authorProfilePicture}
                   alt={comment.authorUsername}
                   className="comment-row__avatar"
