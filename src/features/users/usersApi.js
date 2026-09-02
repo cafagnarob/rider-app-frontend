@@ -42,6 +42,15 @@ export const usersApi = apiSlice.injectEndpoints({
       invalidatesTags: ["User"],
     }),
 
+    selectAvatar: builder.mutation({
+      query: (avatarUrl) => ({
+        url: "/users/me/avatar",
+        method: "PATCH",
+        body: { avatarUrl },
+      }),
+      invalidatesTags: ["User"],
+    }),
+
     addProfileLink: builder.mutation({
       query: (body) => ({
         url: "/users/me/links",
@@ -121,4 +130,5 @@ export const {
   useDeactivateAccountMutation,
   useGetPublicProfileQuery,
   useSearchUsersQuery,
+  useSelectAvatarMutation,
 } = usersApi
