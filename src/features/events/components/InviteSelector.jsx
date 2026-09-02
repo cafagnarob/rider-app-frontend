@@ -4,6 +4,7 @@ import {
   useGetFollowingQuery,
 } from "../../social/followApi"
 import { useGetCurrentUserQuery } from "../../users/usersApi"
+import Avatar from "../../../components/Avatar"
 
 function InviteSelector({ selected, onChange }) {
   const { data: me } = useGetCurrentUserQuery()
@@ -62,7 +63,7 @@ function InviteSelector({ selected, onChange }) {
               className={`selectable-contact-row ${isSelected ? "selectable-contact-row--selected" : ""}`}
               onClick={() => toggle(contact.username)}
             >
-              <img
+              <Avatar
                 src={contact.profilePicture}
                 alt={contact.username}
                 className="contact-row__avatar"
