@@ -819,7 +819,7 @@
 }
 
 .auth-page__hero--photo {
-  background-image: url("public/auth_page.png");
+  background-image: url("/auth_page.png");
   background-size: cover;
   background-position: center;
 }
