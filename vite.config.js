@@ -13,6 +13,10 @@ export default defineConfig({
       devOptions: { enabled: true },
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico"],
+      workbox: {
+        skipWaiting: true,
+        clientsClaim: true,
+      },
       manifest: {
         id: "/",
         name: "Rider App",
