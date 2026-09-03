@@ -183,7 +183,7 @@ function RouteRow({ data, full }) {
           <path
             d={path}
             fill="none"
-            stroke="#fff"
+            stroke="#ff7b00"
             strokeWidth="4"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -215,7 +215,7 @@ function RouteStack({ data }) {
           <path
             d={path}
             fill="none"
-            stroke="#fff"
+            stroke="#ff7b00"
             strokeWidth="4"
             strokeLinecap="round"
             strokeLinejoin="round"
