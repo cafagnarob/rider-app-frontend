@@ -15,6 +15,7 @@ import PostAutoCarousel from "../features/social/components/PostAutoCarousel"
 import { formatRelativeTime } from "../utils/dateFormat"
 import "../pages/CSS/PostDetailPage.css"
 import Avatar from "../components/Avatar"
+import PostWidgetsOverlay from "./PostWidgetsOverlay"
 
 function PostDetailPage() {
   const { postId } = useParams()
@@ -165,7 +166,13 @@ function PostDetailPage() {
 
         {post.media?.length > 0 && (
           <div className="post-detail-page__media">
-            <PostAutoCarousel media={post.media} onDoubleClick={handleLike} />
+            <PostAutoCarousel
+              media={post.media}
+              onDoubleClick={handleLike}
+              renderOverlay={(m) => (
+                <PostWidgetsOverlay widgets={post.widgets} mediaId={m.id} />
+              )}
+            />
           </div>
         )}
 

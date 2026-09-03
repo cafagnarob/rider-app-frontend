@@ -5,7 +5,7 @@ const RESUME_DELAY = 5000
 const SWIPE_THRESHOLD = 40
 const TAP_THRESHOLD = 8
 
-function PostAutoCarousel({ media, height, onDoubleClick }) {
+function PostAutoCarousel({ media, height, onDoubleClick, renderOverlay }) {
   const [index, setIndex] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
@@ -118,6 +118,7 @@ function PostAutoCarousel({ media, height, onDoubleClick }) {
             style={{ width: `${100 / count}%` }}
           >
             <img src={m.mediaUrl} alt="" draggable={false} />
+            {renderOverlay && renderOverlay(m)}
           </div>
         ))}
       </div>

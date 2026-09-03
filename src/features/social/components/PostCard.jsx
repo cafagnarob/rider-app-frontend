@@ -5,6 +5,7 @@ import { useToggleLikeMutation } from "../postsApi"
 import { formatRelativeTime } from "../../../utils/dateFormat"
 import PostMediaCarousel from "./PostMediaCarousel"
 import Avatar from "../../../components/Avatar"
+import PostWidgetsOverlay from "../../../pages/PostWidgetsOverlay"
 
 function PostCard({ post }) {
   const navigate = useNavigate()
@@ -101,7 +102,12 @@ function PostCard({ post }) {
           style={{ marginTop: 12, cursor: "pointer" }}
           onClick={handleImageClick}
         >
-          <PostMediaCarousel media={post.media} />
+          <PostMediaCarousel
+            media={post.media}
+            renderOverlay={(m) => (
+              <PostWidgetsOverlay widgets={post.widgets} mediaId={m.id} />
+            )}
+          />
         </div>
       )}
 

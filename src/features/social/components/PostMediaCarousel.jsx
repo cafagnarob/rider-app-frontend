@@ -1,6 +1,6 @@
 import { useRef, useState } from "react"
 
-function PostMediaCarousel({ media }) {
+function PostMediaCarousel({ media, renderOverlay }) {
   const containerRef = useRef(null)
   const [activeIndex, setActiveIndex] = useState(0)
 
@@ -23,6 +23,7 @@ function PostMediaCarousel({ media }) {
         {media.map((m) => (
           <div key={m.id} className="media-carousel__slide">
             <img src={m.mediaUrl} alt="" draggable={false} />
+            {renderOverlay && renderOverlay(m)}
           </div>
         ))}
       </div>

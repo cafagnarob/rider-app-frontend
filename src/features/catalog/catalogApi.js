@@ -27,7 +27,11 @@ export const catalogApi = apiSlice.injectEndpoints({
       },
       providesTags: ["Model"],
     }),
+    getModelById: builder.query({
+      query: (modelId) => `/motorcycle-models/${modelId}`,
+    }),
   }),
 })
 
-export const { useGetBrandsQuery, useGetModelsQuery } = catalogApi
+export const { useGetBrandsQuery, useGetModelsQuery, useGetModelByIdQuery } =
+  catalogApi

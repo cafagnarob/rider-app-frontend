@@ -3,9 +3,8 @@ import { Spinner } from "react-bootstrap"
 import { useGetFeedQuery } from "../features/social/postsApi"
 import NotificationBell from "../features/notification/components/NotificationBell"
 import PostCard from "../features/social/components/PostCard"
-import CreatePostModal from "../features/social/components/CreatePostModal"
 import "../pages/CSS/FeedPage.css"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { useGetCurrentUserQuery } from "../features/users/usersApi"
 import { useGetUserPostsQuery } from "../features/social/postsApi"
 import Avatar from "../components/Avatar"
@@ -19,6 +18,7 @@ const TABS = [
 function FeedPage() {
   const [type, setType] = useState("FOLLOWING")
   const [page, setPage] = useState(0)
+  const navigate = useNavigate()
 
   const { data: me } = useGetCurrentUserQuery()
 
@@ -47,8 +47,6 @@ function FeedPage() {
     setPage(0)
   }
 
-  const [showCreate, setShowCreate] = useState(false)
-
   return (
     <div className="page">
       <div className="feed-page__header">
@@ -63,7 +61,7 @@ function FeedPage() {
           <button
             type="button"
             className="btn-accent-sm"
-            onClick={() => setShowCreate(true)}
+            onClick={() => navigate("/posts/new")}
           >
             + POST
           </button>
@@ -225,8 +223,6 @@ function FeedPage() {
           )}
         </>
       )}
-
-      <CreatePostModal show={showCreate} onClose={() => setShowCreate(false)} />
     </div>
   )
 }

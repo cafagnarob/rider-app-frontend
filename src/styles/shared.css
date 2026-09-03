@@ -2035,6 +2035,7 @@
 .auto-carousel__slide {
   height: 100%;
   flex-shrink: 0;
+  position: relative;
 }
 
 .auto-carousel__slide img {
@@ -2213,6 +2214,7 @@
   scroll-snap-align: center;
   /* height: 210px; */
   aspect-ratio: 4 / 5;
+  position: relative;
 }
 
 .media-carousel__slide img {
@@ -3075,4 +3077,16 @@ img.avatar--preset {
   object-fit: contain !important;
   background: transparent !important;
   border: none !important;
+}
+
+.post-widget-overlay-item {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  z-index: 2;
+}
+
+.media-carousel__slide,
+.auto-carousel__slide {
+  position: relative;
 }

@@ -35,6 +35,8 @@ import AdminLayout from "../pages/AdminLayout"
 import AdminUsersPage from "../pages/AdminUsersPage"
 import AdminCatalogPage from "../pages/AdminCatalogPage"
 import AvatarPickerPage from "../pages/AvatarPickerPage"
+import StoryComposerPage from "../pages/StoryComposerPage"
+import ModelDetailPage from "../pages/ModelDetailPage"
 
 function AppRoutes() {
   return (
@@ -76,6 +78,11 @@ function AppRoutes() {
             element={<AddEventDayPage />}
           />
           <Route path="/profile/avatar" element={<AvatarPickerPage />} />
+          <Route path="/posts/new" element={<StoryComposerPage />} />
+          <Route
+            path="/catalog/models/:modelId"
+            element={<ModelDetailPage />}
+          />
         </Route>
       </Route>
       <Route path="/login" element={<LoginPage />} />
