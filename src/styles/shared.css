@@ -3245,11 +3245,11 @@ img.avatar--preset {
 }
 
 .post-widget__vehicle-large-img {
-  width: 100px;
-  height: 100px;
+  width: 100px !important;
+  height: 100px !important;
   min-width: 44px;
   min-height: 44px;
-  object-fit: contain;
+  object-fit: contain !important;
   flex-shrink: 0;
   display: block;
 }
