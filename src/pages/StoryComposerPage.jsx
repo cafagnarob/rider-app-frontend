@@ -153,6 +153,33 @@ function StoryComposerPage() {
     e.currentTarget.setPointerCapture(e.pointerId)
   }
 
+  const rafRef = useRef(null)
+  const pendingUpdateRef = useRef(null)
+
+  const scheduleFrame = () => {
+    if (rafRef.current) return
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null
+      const update = pendingUpdateRef.current
+      if (!update) return
+      if (update.kind === "move") {
+        setWidgets((prev) =>
+          prev.map((w) =>
+            w.id === update.widgetId
+              ? { ...w, xPercent: update.xPercent, yPercent: update.yPercent }
+              : w,
+          ),
+        )
+      } else {
+        setWidgets((prev) =>
+          prev.map((w) =>
+            w.id === update.widgetId ? { ...w, size: update.nextSize } : w,
+          ),
+        )
+      }
+    })
+  }
+
   const handleViewerPointerMove = (e) => {
     if (dragRef.current && dragRef.current.pointerId === e.pointerId) {
       if (!viewerRef.current) return
@@ -165,11 +192,13 @@ function StoryComposerPage() {
         96,
         Math.max(4, ((e.clientY - rect.top) / rect.height) * 100),
       )
-      setWidgets((prev) =>
-        prev.map((w) =>
-          w.id === dragRef.current.widgetId ? { ...w, xPercent, yPercent } : w,
-        ),
-      )
+      pendingUpdateRef.current = {
+        kind: "move",
+        widgetId: dragRef.current.widgetId,
+        xPercent,
+        yPercent,
+      }
+      scheduleFrame()
       return
     }
 
@@ -181,13 +210,17 @@ function StoryComposerPage() {
       const dx = e.clientX - anchorX
       const dy = e.clientY - anchorY
       const nextSize = resolveWidgetSize(dx, dy)
-      setWidgets((prev) =>
-        prev.map((w) => (w.id === widgetId ? { ...w, size: nextSize } : w)),
-      )
+      pendingUpdateRef.current = { kind: "resize", widgetId, nextSize }
+      scheduleFrame()
     }
   }
 
   const handleViewerPointerUp = () => {
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current)
+      rafRef.current = null
+    }
+    pendingUpdateRef.current = null
     dragRef.current = null
     resizeDragRef.current = null
   }
@@ -239,7 +272,7 @@ function StoryComposerPage() {
       streamRef.current = null
       return
     }
-
+    console.log(facingMode)
     let cancelled = false
     navigator.mediaDevices
       ?.getUserMedia({ video: { facingMode }, audio: false })
