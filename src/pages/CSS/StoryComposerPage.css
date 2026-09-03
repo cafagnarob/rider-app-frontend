@@ -449,3 +449,24 @@
   cursor: nwse-resize;
   touch-action: none;
 }
+
+.story-composer__flip-btn {
+  position: absolute;
+  top: 16px;
+  right: 78px;
+  z-index: 3;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.story-composer__video--mirrored {
+  transform: scaleX(-1);
+}

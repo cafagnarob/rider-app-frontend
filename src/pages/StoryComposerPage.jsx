@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { FaTimes, FaImages } from "react-icons/fa"
+import { FaTimes, FaImages, FaSyncAlt } from "react-icons/fa"
 import { useCreatePostMutation } from "../features/social/postsApi"
 import "../pages/CSS/StoryComposerPage.css"
 import {
@@ -79,6 +79,8 @@ function StoryComposerPage() {
   const [selectedWidgetId, setSelectedWidgetId] = useState(null)
   const dragRef = useRef(null)
   const viewerRef = useRef(null)
+
+  const [facingMode, setFacingMode] = useState("environment")
 
   const resizeDragRef = useRef(null)
 
@@ -240,7 +242,7 @@ function StoryComposerPage() {
 
     let cancelled = false
     navigator.mediaDevices
-      ?.getUserMedia({ video: { facingMode: "environment" }, audio: false })
+      ?.getUserMedia({ video: { facingMode }, audio: false })
       .then((stream) => {
         if (cancelled) {
           stream.getTracks().forEach((t) => t.stop())
@@ -259,7 +261,7 @@ function StoryComposerPage() {
       streamRef.current?.getTracks().forEach((t) => t.stop())
       streamRef.current = null
     }
-  }, [inCameraMode])
+  }, [inCameraMode, facingMode])
 
   const addSlide = (slide) => {
     const newIndex = slides.length
@@ -273,7 +275,12 @@ function StoryComposerPage() {
     const canvas = document.createElement("canvas")
     canvas.width = video.videoWidth
     canvas.height = video.videoHeight
-    canvas.getContext("2d").drawImage(video, 0, 0)
+    const ctx = canvas.getContext("2d")
+    if (facingMode === "user") {
+      ctx.translate(canvas.width, 0)
+      ctx.scale(-1, 1)
+    }
+    ctx.drawImage(video, 0, 0)
     canvas.toBlob(
       (blob) => {
         const file = new File([blob], "scatto.jpg", { type: "image/jpeg" })
@@ -395,7 +402,7 @@ function StoryComposerPage() {
           {inCameraMode && !cameraError && (
             <video
               ref={videoRef}
-              className="story-composer__video"
+              className={`story-composer__video ${facingMode === "user" ? "story-composer__video--mirrored" : ""}`}
               autoPlay
               playsInline
               muted
@@ -574,7 +581,7 @@ function StoryComposerPage() {
                       ref={nativeCaptureInputRef}
                       type="file"
                       accept="image/*"
-                      capture="environment"
+                      capture={facingMode === "user" ? "user" : "environment"}
                       hidden
                       onChange={handleNativeCapture}
                     />
@@ -634,6 +641,18 @@ function StoryComposerPage() {
           )}
         </div>
       </div>
+
+      {inCameraMode && !cameraError && (
+        <button
+          type="button"
+          className="story-composer__flip-btn"
+          onClick={() =>
+            setFacingMode((m) => (m === "environment" ? "user" : "environment"))
+          }
+        >
+          <FaSyncAlt size={16} />
+        </button>
+      )}
 
       {activeTagPicker && (
         <div
