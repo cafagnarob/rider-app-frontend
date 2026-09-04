@@ -15,7 +15,7 @@ import PostAutoCarousel from "../features/social/components/PostAutoCarousel"
 import { formatRelativeTime } from "../utils/dateFormat"
 import "../pages/CSS/PostDetailPage.css"
 import Avatar from "../components/Avatar"
-import PostWidgetsOverlay from "./PostWidgetsOverlay"
+import PostWidgetsOverlay from "../features/social/components/PostWidgetsOverlay"
 
 function PostDetailPage() {
   const { postId } = useParams()

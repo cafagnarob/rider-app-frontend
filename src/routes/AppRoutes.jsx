@@ -49,7 +49,6 @@ function AppRoutes() {
           <Route path="/garage" element={<GaragePage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/profile/:username" element={<PublicProfilePage />} />
-          <Route path="/feed" element={<FeedPage />} />
           <Route path="/posts/:postId" element={<PostDetailPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route
@@ -78,13 +77,15 @@ function AppRoutes() {
             element={<AddEventDayPage />}
           />
           <Route path="/profile/avatar" element={<AvatarPickerPage />} />
-          <Route path="/posts/new" element={<StoryComposerPage />} />
+
           <Route
             path="/catalog/models/:modelId"
             element={<ModelDetailPage />}
           />
         </Route>
       </Route>
+      <Route path="/posts/new" element={<StoryComposerPage />} />
+      <Route path="/feed" element={<FeedPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />

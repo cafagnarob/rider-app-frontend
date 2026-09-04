@@ -1,19 +1,8 @@
-.feed-page__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 20px;
-}
-
-.feed-page__header-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.feed-page__tabs {
-  padding: 18px 20px 0;
-  padding-bottom: 18px;
+.feed-page__mine-tab-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
 .feed-page__empty-text {
@@ -24,53 +13,224 @@
   padding: 60px 20px;
 }
 
-.feed-page__list {
-  margin-top: 4px;
+.reel-feed {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: #000;
+  overflow: hidden;
 }
 
-/* DESK */
+.reel-feed__top-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.6) 0%,
+    rgba(0, 0, 0, 0) 100%
+  );
+}
+
+.reel-feed__close-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.reel-feed__tabs {
+  flex: 1;
+  overflow-x: auto;
+}
+
+.reel-feed__create-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  border: none;
+  color: var(--color-on-accent);
+  font-size: 20px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.reel-feed__scroll {
+  height: 100%;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+}
+
+.reel-feed__post {
+  position: relative;
+  height: 100vh;
+  scroll-snap-align: start;
+}
+
+.reel-feed__media {
+  position: absolute;
+  inset: 0;
+}
+
+.reel-feed__media .auto-carousel {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  border-radius: 0;
+  border: none;
+}
+
+.reel-overlay__bottom {
+  position: absolute;
+  left: 0;
+  right: 76px;
+  bottom: 0;
+  z-index: 5;
+  padding: 20px 16px 28px;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.7) 20%,
+    rgba(0, 0, 0, 0) 100%
+  );
+}
+
+.reel-overlay__author-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.reel-overlay__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+.reel-overlay__username {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 14px;
+  color: #fff;
+  cursor: pointer;
+}
+
+.reel-overlay__caption {
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.4;
+  color: #fff;
+  margin: 0 0 10px;
+}
+
+.reel-overlay__badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.reel-overlay__actions {
+  position: absolute;
+  right: 12px;
+  bottom: 30px;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+}
+
+.reel-overlay__action-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.reel-feed__loading {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reel-feed__grid-wrap {
+  height: 100%;
+  overflow-y: auto;
+  padding: 76px 3px 20px;
+}
+
+.reel-feed__grid-header-row {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.reel-feed__grid-header-spacer {
+  flex: 1;
+}
+
+.reel-feed__avatar-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  border: 1.5px solid #000;
+}
+
+/* DESK: stessa cornice a telefono già usata da StoryComposerPage, per coerenza tra le due viste immersive */
 @media (min-width: 1024px) {
-  .feed-page__header {
-    width: calc(100% - 48px);
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0;
-  }
-
-  .feed-page__header .page-title {
-    font-size: 34px !important;
-  }
-
-  .feed-page__header-actions {
-    gap: 12px;
-  }
-
-  .feed-page__tabs {
-    width: calc(100% - 48px);
-    max-width: 1400px;
-    margin: 0 auto;
-
-    padding: 24px 0;
-  }
-
-  .feed-page__list {
-    width: min(100% - 48px, 600px);
-
-    margin: 0 auto;
-
+  .reel-feed {
+    background: #050505;
     display: flex;
-    flex-direction: column;
-    gap: 18px;
+    align-items: center;
+    justify-content: center;
   }
 
-  .feed-page__empty-text {
-    padding: 100px 20px;
-  }
-
-  .feed-page__list + .pagination-row {
-    width: min(100% - 48px, 720px);
-
-    margin: 30px auto 0;
-    padding-bottom: 60px;
+  .reel-feed__scroll,
+  .reel-feed__grid-wrap {
+    width: min(420px, 90vw);
+    height: min(860px, 90vh);
+    border-radius: 36px;
+    border: 8px solid #1a1a1a;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.65);
   }
 }
