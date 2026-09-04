@@ -78,6 +78,7 @@ function EventCreatePage() {
     meetingPointLabel: draft?.meetingPointLabel || "",
     startDateTime: draft?.startDateTime || "",
     endDateTime: draft?.endDateTime || "",
+    bufferMinutes: draft?.bufferMinutes ?? 0,
     maxParticipants: draft?.maxParticipants ?? 10,
     visibility: draft?.visibility || "PUBLIC",
     autoApprove: draft?.autoApprove || false,
@@ -133,13 +134,14 @@ function EventCreatePage() {
 
   const selectedRoute = routesPage?.content?.find((r) => r.id === form.routeId)
 
-  const minEndDateTime =
+  const estimatedEndDateTime =
     selectedRoute && form.startDateTime
       ? addSecondsToLocalDateTime(
           form.startDateTime,
-          selectedRoute.durationSeconds,
+          selectedRoute.durationSeconds +
+            (Number(form.bufferMinutes) || 0) * 60,
         )
-      : form.startDateTime || nowLocal
+      : null
 
   const handleTypeChange = (value) => {
     setForm((prev) => {
@@ -216,23 +218,16 @@ function EventCreatePage() {
       setErrorMsg("Un raduno richiede un percorso oppure un punto di ritrovo.")
       return
     }
-    if (selectedRoute && form.startDateTime) {
-      const minEnd = new Date(
-        addSecondsToLocalDateTime(
-          form.startDateTime,
-          selectedRoute.durationSeconds,
-        ),
-      )
-      if (new Date(form.endDateTime) < minEnd) {
-        const minutes = Math.ceil(selectedRoute.durationSeconds / 60)
+    if (form.type === "RADUNO") {
+      if (
+        !form.endDateTime ||
+        new Date(form.endDateTime) <= new Date(form.startDateTime)
+      ) {
         setErrorMsg(
-          `La fine deve essere almeno ${minutes} minuti dopo l'inizio, la durata stimata del percorso.`,
+          "La data di fine deve essere successiva a quella di inizio.",
         )
         return
       }
-    } else if (new Date(form.endDateTime) <= new Date(form.startDateTime)) {
-      setErrorMsg("La data di fine deve essere successiva a quella di inizio.")
-      return
     }
     if (form.visibility === "PRIVATE_CODE" && !form.accessCode.trim()) {
       setErrorMsg("Inserisci un codice di accesso per un evento con codice.")
@@ -248,7 +243,9 @@ function EventCreatePage() {
         meetingPointLat: !form.routeId ? form.meetingPointLat : null,
         meetingPointLng: !form.routeId ? form.meetingPointLng : null,
         startDateTime: form.startDateTime + ":00",
-        endDateTime: form.endDateTime + ":00",
+        endDateTime: form.type === "RADUNO" ? form.endDateTime + ":00" : null,
+        bufferMinutes:
+          form.type === "STANDARD" ? Number(form.bufferMinutes) || 0 : null,
         maxParticipants:
           form.visibility === "INVITE_ONLY"
             ? 999
@@ -483,24 +480,57 @@ function EventCreatePage() {
               required
             />
           </div>
-          <div className="field-col">
-            <div className="field-label form-group__label">FINE</div>
-            <input
-              type="datetime-local"
-              className="input"
-              min={minEndDateTime}
-              value={form.endDateTime}
-              onChange={set("endDateTime")}
-              required
-            />
-            {selectedRoute && (
+
+          {form.type === "RADUNO" && (
+            <div className="field-col">
+              <div className="field-label form-group__label">FINE</div>
+              <input
+                type="datetime-local"
+                className="input"
+                value={form.endDateTime}
+                onChange={set("endDateTime")}
+                required
+              />
+            </div>
+          )}
+        </div>
+
+        {form.type === "STANDARD" && (
+          <div>
+            <div className="field-label form-group__label">FINE STIMATA</div>
+            {estimatedEndDateTime ? (
+              <div className="empty-state" style={{ padding: "14px 16px" }}>
+                {new Date(estimatedEndDateTime).toLocaleString("it-IT", {
+                  day: "numeric",
+                  month: "short",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+                <div className="duration-hint" style={{ marginTop: 4 }}>
+                  Calcolata da partenza + durata del percorso
+                  {Number(form.bufferMinutes) > 0 &&
+                    ` + ${form.bufferMinutes} min extra`}
+                </div>
+              </div>
+            ) : (
               <div className="duration-hint">
-                Durata stimata: {Math.ceil(selectedRoute.durationSeconds / 60)}{" "}
-                min
+                Seleziona un percorso per calcolare la fine stimata
               </div>
             )}
+            <div style={{ marginTop: 10 }}>
+              <div className="field-label form-group__label">
+                AGGIUNGI TEMPO (MINUTI, OPZIONALE)
+              </div>
+              <input
+                type="number"
+                className="input"
+                min={0}
+                value={form.bufferMinutes}
+                onChange={set("bufferMinutes")}
+              />
+            </div>
           </div>
-        </div>
+        )}
 
         {form.visibility !== "INVITE_ONLY" && (
           <div>

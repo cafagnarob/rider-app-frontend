@@ -46,6 +46,7 @@ const emptyDayForm = {
   meetingPointLabel: "",
   startDateTime: "",
   endDateTime: "",
+  bufferMinutes: 0,
 }
 
 function AddEventDayPage() {
@@ -169,13 +170,18 @@ function AddEventDayPage() {
       setErrorMsg("Una sosta richiede un percorso oppure un punto di ritrovo.")
       return
     }
-    if (
-      !dayForm.startDateTime ||
-      !dayForm.endDateTime ||
-      new Date(dayForm.endDateTime) <= new Date(dayForm.startDateTime)
-    ) {
-      setErrorMsg("La fine deve essere successiva all'inizio.")
+    if (!dayForm.startDateTime) {
+      setErrorMsg("Specifica la data di inizio del giorno.")
       return
+    }
+    if (dayForm.type === "RADUNO") {
+      if (
+        !dayForm.endDateTime ||
+        new Date(dayForm.endDateTime) <= new Date(dayForm.startDateTime)
+      ) {
+        setErrorMsg("La fine deve essere successiva all'inizio.")
+        return
+      }
     }
 
     try {
@@ -188,7 +194,12 @@ function AddEventDayPage() {
         meetingPointLat: !dayForm.routeId ? dayForm.meetingPointLat : null,
         meetingPointLng: !dayForm.routeId ? dayForm.meetingPointLng : null,
         startDateTime: dayForm.startDateTime + ":00",
-        endDateTime: dayForm.endDateTime + ":00",
+        endDateTime:
+          dayForm.type === "RADUNO" ? dayForm.endDateTime + ":00" : null,
+        bufferMinutes:
+          dayForm.type === "STANDARD"
+            ? Number(dayForm.bufferMinutes) || 0
+            : null,
       }).unwrap()
 
       setDayForm(emptyDayForm)
@@ -416,23 +427,41 @@ function AddEventDayPage() {
                 required
               />
             </div>
-            <div className="date-group">
-              <div className="field-label form-group__label">FINE</div>
+
+            {dayForm.type === "RADUNO" && (
+              <div className="date-group">
+                <div className="field-label form-group__label">FINE</div>
+                <input
+                  type="datetime-local"
+                  className="input"
+                  value={dayForm.endDateTime}
+                  onChange={set("endDateTime")}
+                  required
+                />
+              </div>
+            )}
+          </div>
+
+          {dayForm.type === "STANDARD" && (
+            <div>
+              <div className="field-label form-group__label">
+                AGGIUNGI TEMPO (MINUTI, OPZIONALE)
+              </div>
               <input
-                type="datetime-local"
+                type="number"
                 className="input"
-                value={dayForm.endDateTime}
-                onChange={set("endDateTime")}
-                required
+                min={0}
+                value={dayForm.bufferMinutes}
+                onChange={set("bufferMinutes")}
               />
               {selectedRoute && (
                 <div className="duration-hint">
-                  Durata stimata:{" "}
+                  Durata percorso:{" "}
                   {Math.ceil(selectedRoute.durationSeconds / 60)} min
                 </div>
               )}
             </div>
-          </div>
+          )}
 
           {errorMsg && <div className="error-text">{errorMsg}</div>}
 

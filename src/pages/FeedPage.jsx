@@ -11,7 +11,6 @@ import { useGetCurrentUserQuery } from "../features/users/usersApi"
 import { useGetUnreadCountQuery } from "../features/notification/notificationsApi"
 import PostAutoCarousel from "../features/social/components/PostAutoCarousel"
 import PostWidgetsOverlay from "../features/social/components/PostWidgetsOverlay"
-import NotificationBell from "../features/notification/components/NotificationBell"
 import Avatar from "../components/Avatar"
 import "../pages/CSS/FeedPage.css"
 
