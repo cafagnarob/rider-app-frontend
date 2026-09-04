@@ -5,7 +5,7 @@ import { useToggleLikeMutation } from "../postsApi"
 import { formatRelativeTime } from "../../../utils/dateFormat"
 import PostMediaCarousel from "./PostMediaCarousel"
 import Avatar from "../../../components/Avatar"
-import PostWidgetsOverlay from "../../../pages/PostWidgetsOverlay"
+import PostWidgetsOverlay from "../../social/components/PostWidgetsOverlay"
 
 function PostCard({ post }) {
   const navigate = useNavigate()

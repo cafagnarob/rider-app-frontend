@@ -494,6 +494,7 @@
 /* --- tab a pillola orizzontali (Feed, EventsList, Search...) --- */
 .tab-pills {
   display: flex;
+  align-items: center;
   gap: 8px;
 }
 
@@ -2019,12 +2020,13 @@
 
 /* --- carosello autoplay: cornice statica, gli stili di scorrimento restano inline (calcolati a runtime) --- */
 .auto-carousel {
-  height: 100%;
   position: relative;
   overflow: hidden;
   border-radius: 18px;
   border: 1px solid var(--color-border-soft);
   touch-action: pan-y;
+  width: 100%;
+  aspect-ratio: 4 / 5;
 }
 
 .auto-carousel__track {
@@ -2035,7 +2037,7 @@
 .auto-carousel__slide {
   height: 100%;
   flex-shrink: 0;
-  position: relative;
+  container-type: inline-size;
 }
 
 .auto-carousel__slide img {
@@ -2203,6 +2205,8 @@
   border-radius: 16px;
   border: 1px solid var(--color-border-soft);
   scrollbar-width: none;
+  aspect-ratio: 4 / 5;
+  height: auto;
 }
 
 .media-carousel__scroll::-webkit-scrollbar {
@@ -2212,9 +2216,8 @@
 .media-carousel__slide {
   flex: 0 0 100%;
   scroll-snap-align: center;
-  /* height: 210px; */
-  aspect-ratio: 4 / 5;
-  position: relative;
+  height: 100%;
+  container-type: inline-size;
 }
 
 .media-carousel__slide img {
@@ -3063,6 +3066,8 @@
   align-items: center;
   justify-content: center;
   margin-left: auto;
+  margin-right: 4px;
+  margin-top: 4px;
 }
 
 .feed-page__mine-tab-avatar {
@@ -3103,23 +3108,31 @@ img.avatar--preset {
 }
 
 .post-widget--mini {
-  width: 84px;
+  width: 21cqw;
+  min-width: 60px;
+  max-width: 100px;
   aspect-ratio: 1 / 1;
   padding: 8px;
 }
 
 .post-widget--wide {
-  width: 220px;
+  width: 56cqw;
+  min-width: 160px;
+  max-width: 260px;
   aspect-ratio: 2.4 / 1;
 }
 
 .post-widget--tall {
-  width: 110px;
+  width: 28cqw;
+  min-width: 80px;
+  max-width: 140px;
   aspect-ratio: 0.7 / 1;
 }
 
 .post-widget--large {
-  width: 260px;
+  width: 67cqw;
+  min-width: 200px;
+  max-width: 300px;
   aspect-ratio: 1.1 / 1;
   padding: 16px;
 }
@@ -3301,4 +3314,5 @@ img.avatar--preset {
 .media-carousel__slide,
 .auto-carousel__slide {
   position: relative;
+  container-type: inline-size;
 }

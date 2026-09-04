@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom"
-import PostWidgetLoader from "./PostWidgetLoader"
+import PostWidgetLoader from "../../../pages/PostWidgetLoader"
 
 function PostWidgetsOverlay({ widgets, mediaId }) {
   const navigate = useNavigate()
