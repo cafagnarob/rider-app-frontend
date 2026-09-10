@@ -79,6 +79,13 @@
   scroll-snap-type: y mandatory;
 }
 
+.reel-feed__loading-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
 .reel-feed__post {
   position: relative;
   height: 100vh;
