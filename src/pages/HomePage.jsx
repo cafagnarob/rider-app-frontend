@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Map as MapLibreMap, Marker, FullscreenControl } from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
 import { useNavigate, Link } from "react-router-dom"
@@ -23,63 +23,97 @@ const INITIAL_ZOOM = 5
 function HomePage() {
   const navigate = useNavigate()
   const { position } = useGeolocation()
-
   const { data: me } = useGetCurrentUserQuery()
 
-  const { data: allEventsPage, isLoading: isLoadingMap } = useSearchEventsQuery(
-    { page: 0, size: 50 },
-    { refetchOnMountOrArgChange: true },
-  )
-
-  // "Uscite in zona": filtrata per vicinanza se la posizione è disponibile, altrimenti stessi dati della mappa
-  const nearbyQuery = useSearchEventsQuery(
-    {
-      lat: position?.latitude,
-      lng: position?.longitude,
-      radiusKm: RADIUS_KM,
-      page: 0,
-      size: 20,
-    },
-    { skip: !position, refetchOnMountOrArgChange: true },
-  )
-
-  const mapEvents = allEventsPage?.content || []
-  const nearbyEvents = position ? nearbyQuery.data?.content || [] : mapEvents
-
-  const { data: participating } = useGetParticipatingEventsQuery(
-    {
-      page: 0,
-      size: 1,
-    },
-    { refetchOnMountOrArgChange: true },
-  )
-  const { data: explore } = useGetFeedQuery(
-    {
-      type: "EXPLORE",
-      page: 0,
-      size: 8,
-    },
-    { refetchOnMountOrArgChange: true },
-  )
-
-  const nextEvent = participating?.content?.[0] || nearbyEvents[0] || null
+  // --- tutto lo stato, prima di qualunque query che lo usa ---
+  const [nearbyPage, setNearbyPage] = useState(0)
+  const [nearbyAccumulated, setNearbyAccumulated] = useState([])
+  const [explorePage, setExplorePage] = useState(0)
+  const [communityAccumulated, setCommunityAccumulated] = useState([])
+  const [activeSection, setActiveSection] = useState(null)
   const [selectedEvent, setSelectedEvent] = useState(null)
-  const displayedEvent = selectedEvent || nextEvent
-  const communityPhotos = useMemo(
-    () =>
-      explore?.content?.filter((p) => p.media?.length > 0).slice(0, 6) || [],
-    [explore],
-  )
+  const [mapReady, setMapReady] = useState(false)
 
   const containerRef = useRef(null)
   const mapRef = useRef(null)
   const markersRef = useRef([])
   const hasFlownRef = useRef(false)
-  const [mapReady, setMapReady] = useState(false)
+
+  // --- query, ora possono usare tranquillamente nearbyPage/explorePage ---
+  const { data: allEventsPage, isLoading: isLoadingMap } = useSearchEventsQuery(
+    { page: 0, size: 50 },
+    { refetchOnMountOrArgChange: true },
+  )
+
+  const nearbyQuery = useSearchEventsQuery(
+    {
+      lat: position?.latitude,
+      lng: position?.longitude,
+      radiusKm: RADIUS_KM,
+      page: nearbyPage,
+      size: 20,
+    },
+    { skip: !position, refetchOnMountOrArgChange: true },
+  )
+
+  const { data: participating } = useGetParticipatingEventsQuery(
+    { page: 0, size: 1 },
+    { refetchOnMountOrArgChange: true },
+  )
+
+  const { data: explore, isFetching: isFetchingExplore } = useGetFeedQuery(
+    { type: "EXPLORE", page: explorePage, size: 8 },
+    { refetchOnMountOrArgChange: true },
+  )
+
+  // --- valori derivati ---
+  const mapEvents = allEventsPage?.content || []
+  const nearbyEvents = position ? nearbyAccumulated : mapEvents
+  const communityPhotos = communityAccumulated
+  const nextEvent = participating?.content?.[0] || nearbyEvents[0] || null
+  const displayedEvent = selectedEvent || nextEvent
+
+  const toggleSection = (key) => {
+    setActiveSection((prev) => (prev === key ? null : key))
+  }
+
+  const handleNearbyScroll = (e) => {
+    if (!position || nearbyQuery.isFetching || nearbyQuery.data?.last) return
+    const el = e.target
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 40) {
+      setNearbyPage((p) => p + 1)
+    }
+  }
+
+  const handleCommunityScroll = (e) => {
+    if (isFetchingExplore || explore?.last) return
+    const el = e.target
+    if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 60) {
+      setExplorePage((p) => p + 1)
+    }
+  }
+
+  const [prevNearbyData, setPrevNearbyData] = useState(null)
+  if (nearbyQuery.data && nearbyQuery.data !== prevNearbyData) {
+    setPrevNearbyData(nearbyQuery.data)
+    setNearbyAccumulated((prev) =>
+      nearbyPage === 0
+        ? nearbyQuery.data.content
+        : [...prev, ...nearbyQuery.data.content],
+    )
+  }
+
+  const [prevExploreData, setPrevExploreData] = useState(null)
+  if (explore && explore !== prevExploreData) {
+    setPrevExploreData(explore)
+    const withMedia = explore.content.filter((p) => p.media?.length > 0)
+    setCommunityAccumulated((prev) =>
+      explorePage === 0 ? withMedia : [...prev, ...withMedia],
+    )
+  }
 
   useEffect(() => {
     if (!containerRef.current) return
-
     const map = new MapLibreMap({
       container: containerRef.current,
       style: MAP_STYLE_URL,
@@ -87,15 +121,12 @@ function HomePage() {
       zoom: INITIAL_ZOOM,
     })
     mapRef.current = map
-
     map.addControl(new FullscreenControl(), "top-right")
-
     const handleLoad = () => {
       map.resize()
       setMapReady(true)
     }
     map.on("load", handleLoad)
-
     return () => {
       map.off("load", handleLoad)
       map.remove()
@@ -107,7 +138,6 @@ function HomePage() {
   useEffect(() => {
     const map = mapRef.current
     if (!map || !mapReady || !position || hasFlownRef.current) return
-
     hasFlownRef.current = true
     map.flyTo({
       center: [position.longitude, position.latitude],
@@ -121,39 +151,29 @@ function HomePage() {
   useEffect(() => {
     const map = mapRef.current
     if (!map) return
-
     markersRef.current.forEach((m) => m.remove())
     markersRef.current = []
     mapEvents
       .filter((ev) => ev.meetingPointLat != null && ev.meetingPointLng != null)
       .forEach((ev) => {
         const isNext = displayedEvent && ev.id === displayedEvent.id
-
         const el = document.createElement("div")
         el.style.cssText = `
           width: ${isNext ? 34 : 26}px; height: ${isNext ? 34 : 26}px;
-          border-radius: 50%;
-          background: ${COLORS.accent};
-          border: 2px solid ${COLORS.bg};
-          cursor: pointer;
+          border-radius: 50%; background: ${COLORS.accent}; border: 2px solid ${COLORS.bg}; cursor: pointer;
         `
         if (isNext) {
           const pulse = document.createElement("span")
-          pulse.style.cssText = `
-            position: absolute; inset: -6px; border-radius: 50%;
-            background: ${COLORS.accent}; animation: qjpulse 2.6s ease-out infinite;
-          `
+          pulse.style.cssText = `position: absolute; inset: -6px; border-radius: 50%; background: ${COLORS.accent}; animation: qjpulse 2.6s ease-out infinite;`
           el.appendChild(pulse)
         }
-
         const marker = new Marker({ element: el })
           .setLngLat([ev.meetingPointLng, ev.meetingPointLat])
           .addTo(map)
-
         el.addEventListener("click", () => setSelectedEvent(ev))
         markersRef.current.push(marker)
       })
-  }, [mapEvents, nextEvent, selectedEvent, navigate])
+  }, [mapEvents, displayedEvent])
 
   return (
     <div className="page" style={{ paddingBottom: 0 }}>
@@ -245,73 +265,102 @@ function HomePage() {
           {communityPhotos.length > 0 && (
             <div className="home-page__community-section">
               <div className="section-header home-page__community-header">
-                <div className="section-title">DALLA COMMUNITY</div>
+                <button
+                  type="button"
+                  className="section-title home-page__section-toggle"
+                  onClick={() => toggleSection("community")}
+                >
+                  DALLA COMMUNITY
+                </button>
                 <Link to="/feed" className="text-btn text-btn--accent">
                   FEED
                 </Link>
               </div>
-              <div className="home-page__community-scroll">
-                {communityPhotos.slice(0, 4).map((post) => (
-                  <Link
-                    key={post.id}
-                    to={`/posts/${post.id}`}
-                    className="home-page__community-item"
-                  >
-                    <img src={post.media[0].mediaUrl} alt="" />
-                  </Link>
-                ))}
-              </div>
+
+              {activeSection === "community" && (
+                <div
+                  className="home-page__community-scroll"
+                  onScroll={handleCommunityScroll}
+                >
+                  {communityPhotos.map((post) => (
+                    <Link
+                      key={post.id}
+                      to={`/posts/${post.id}`}
+                      className="home-page__community-item"
+                    >
+                      <img src={post.media[0].mediaUrl} alt="" />
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
           <div className="home-page__nearby-section">
             <div className="section-header">
-              <div className="section-title">USCITE IN ZONA</div>
+              <button
+                type="button"
+                className="section-title home-page__section-toggle"
+                onClick={() => toggleSection("nearby")}
+              >
+                USCITE IN ZONA
+              </button>
               <Link to="/events" className="text-btn text-btn--accent">
                 TUTTE
               </Link>
             </div>
 
-            {nearbyEvents.length === 0 && !isLoadingMap && (
-              <div className="empty-state">
-                Nessun evento nelle vicinanze al momento.
+            {activeSection === "nearby" && (
+              <div
+                className="home-page__nearby-list"
+                onScroll={handleNearbyScroll}
+              >
+                {nearbyEvents.length === 0 && !isLoadingMap && (
+                  <div className="empty-state">
+                    Nessun evento nelle vicinanze al momento.
+                  </div>
+                )}
+                {nearbyEvents.map((ev) => (
+                  <div
+                    key={ev.id}
+                    className="home-event-row"
+                    onClick={() => navigate(`/events/${ev.id}`)}
+                  >
+                    <div className="event-row__date-box">
+                      <span className="event-row__date-day">
+                        {new Date(ev.startDateTime)
+                          .getDate()
+                          .toString()
+                          .padStart(2, "0")}
+                      </span>
+                      <span className="event-row__date-month">
+                        {new Date(ev.startDateTime)
+                          .toLocaleDateString("it-IT", { month: "short" })
+                          .toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="home-event-row__info">
+                      <div className="home-event-row__title">{ev.title}</div>
+                      <div className="home-event-row__meta">
+                        {ev.type !== "STANDARD" && (
+                          <span style={{ color: "var(--color-accent)" }}>
+                            {EVENT_TYPE_LABELS[ev.type]} ·{" "}
+                          </span>
+                        )}
+                        {ev.organizerUsername} · {ev.currentParticipants}/
+                        {ev.maxParticipants}
+                      </div>
+                    </div>
+                    <span className="home-event-row__chevron">{">"}</span>
+                  </div>
+                ))}
+                {nearbyQuery.isFetching && nearbyPage > 0 && (
+                  <div className="home-page__scroll-loading">
+                    CARICAMENTO...
+                  </div>
+                )}
               </div>
             )}
-
-            {nearbyEvents.slice(0, 5).map((ev) => (
-              <div
-                key={ev.id}
-                className="home-event-row"
-                onClick={() => navigate(`/events/${ev.id}`)}
-              >
-                <div className="event-row__date-box">
-                  <span className="event-row__date-day">
-                    {new Date(ev.startDateTime)
-                      .getDate()
-                      .toString()
-                      .padStart(2, "0")}
-                  </span>
-                  <span className="event-row__date-month">
-                    {new Date(ev.startDateTime)
-                      .toLocaleDateString("it-IT", { month: "short" })
-                      .toUpperCase()}
-                  </span>
-                </div>
-                <div className="home-event-row__info">
-                  <div className="home-event-row__title">{ev.title}</div>
-                  <div className="home-event-row__meta">
-                    {ev.type !== "STANDARD" && (
-                      <span style={{ color: "var(--color-accent)" }}>
-                        {EVENT_TYPE_LABELS[ev.type]} ·{" "}
-                      </span>
-                    )}
-                    {ev.organizerUsername} · {ev.currentParticipants}/
-                    {ev.maxParticipants}
-                  </div>
-                </div>
-                <span className="home-event-row__chevron">{">"}</span>
-              </div>
-            ))}
           </div>
         </div>
       </div>
