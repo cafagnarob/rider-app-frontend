@@ -147,6 +147,9 @@ function MineAvatarTab({
 function FeedPage() {
   const [type, setType] = useState("FOLLOWING")
   const [page, setPage] = useState(0)
+  const [feedAccumulated, setFeedAccumulated] = useState([])
+  const [prevFeedData, setPrevFeedData] = useState(null)
+  const [isSwitchingTab, setIsSwitchingTab] = useState(false)
   const navigate = useNavigate()
 
   const { data: me } = useGetCurrentUserQuery()
@@ -163,15 +166,39 @@ function FeedPage() {
   const {
     data: feed,
     isLoading,
+    isFetching,
     isError,
   } = useGetFeedQuery(
     { type, page },
     { skip: type === "MINE", refetchOnMountOrArgChange: true },
   )
 
+  if (feed && feed !== prevFeedData) {
+    setPrevFeedData(feed)
+    setFeedAccumulated((prev) =>
+      page === 0 ? feed.content : [...prev, ...feed.content],
+    )
+    if (page === 0) setIsSwitchingTab(false)
+  }
+
+  const handleFeedScroll = (e) => {
+    if (isFetching || feed?.last) return
+    const el = e.target
+    if (
+      el.scrollTop + el.clientHeight >=
+      el.scrollHeight - window.innerHeight * 0.5
+    ) {
+      setPage((p) => p + 1)
+    }
+  }
+
   const handleTabChange = (newType) => {
+    if (newType === type) return
     setType(newType)
     setPage(0)
+    setFeedAccumulated([])
+    setPrevFeedData(null)
+    setIsSwitchingTab(true)
   }
 
   return (
@@ -267,7 +294,7 @@ function FeedPage() {
             </div>
           )}
         </div>
-      ) : isLoading ? (
+      ) : isLoading || isSwitchingTab ? (
         <div className="reel-feed__loading">
           <Spinner animation="border" style={{ color: "#FF7A2F" }} />
         </div>
@@ -286,10 +313,15 @@ function FeedPage() {
           </span>
         </div>
       ) : (
-        <div className="reel-feed__scroll">
-          {feed?.content.map((post) => (
+        <div className="reel-feed__scroll" onScroll={handleFeedScroll}>
+          {feedAccumulated.map((post) => (
             <ReelPost key={post.id} post={post} />
           ))}
+          {isFetching && page > 0 && (
+            <div className="reel-feed__post reel-feed__loading-more">
+              <Spinner animation="border" style={{ color: "#FF7A2F" }} />
+            </div>
+          )}
         </div>
       )}
     </div>
