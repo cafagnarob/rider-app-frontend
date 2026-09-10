@@ -478,21 +478,3 @@
   gap: 8px;
   margin-bottom: 8px;
 }
-
-.story-composer__ride-picker-row .story-composer__picker-row {
-  flex: 1;
-  margin-bottom: 0;
-}
-
-.story-composer__ride-photo-toggle {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-family: var(--font-mono);
-  font-size: 9px;
-  color: rgba(255, 255, 255, 0.6);
-  white-space: nowrap;
-  padding: 0 4px;
-  cursor: pointer;
-  flex-shrink: 0;
-}

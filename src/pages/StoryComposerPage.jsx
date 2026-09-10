@@ -79,7 +79,6 @@ function StoryComposerPage() {
   const [selectedWidgetId, setSelectedWidgetId] = useState(null)
   const dragRef = useRef(null)
   const viewerRef = useRef(null)
-  const [routePhotoRideId, setRoutePhotoRideId] = useState(null)
 
   const [facingMode, setFacingMode] = useState("environment")
 
@@ -253,9 +252,9 @@ function StoryComposerPage() {
         data: {
           text: caption.trim() || null,
           eventId: null,
-          rideId: routePhotoRideId,
+          rideId: null,
           vehicleId: null,
-          includeRoutePhoto: routePhotoRideId != null,
+          includeRoutePhoto: false,
           widgets: widgetsPayload,
         },
         files,
@@ -706,26 +705,15 @@ function StoryComposerPage() {
 
             {activeTagPicker === "RIDE" &&
               ridesPage?.content.map((r) => (
-                <div key={r.id} className="story-composer__ride-picker-row">
-                  <button
-                    type="button"
-                    className="story-composer__picker-row"
-                    onClick={() => addWidget("RIDE", r)}
-                  >
-                    {r.title || "Giro senza titolo"} ·{" "}
-                    {r.distanceKm?.toFixed(1)} km
-                  </button>
-                  <label className="story-composer__ride-photo-toggle">
-                    <input
-                      type="checkbox"
-                      checked={routePhotoRideId === r.id}
-                      onChange={(e) =>
-                        setRoutePhotoRideId(e.target.checked ? r.id : null)
-                      }
-                    />
-                    FOTO TRACCIATO
-                  </label>
-                </div>
+                <button
+                  key={r.id}
+                  type="button"
+                  className="story-composer__picker-row"
+                  onClick={() => addWidget("RIDE", r)}
+                >
+                  {r.title || "Giro senza titolo"} · {r.distanceKm?.toFixed(1)}{" "}
+                  km
+                </button>
               ))}
 
             {activeTagPicker === "ROUTE" &&
