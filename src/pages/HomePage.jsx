@@ -63,6 +63,8 @@ function HomePage() {
   )
 
   const nextEvent = participating?.content?.[0] || nearbyEvents[0] || null
+  const [selectedEvent, setSelectedEvent] = useState(null)
+  const displayedEvent = selectedEvent || nextEvent
   const communityPhotos = useMemo(
     () =>
       explore?.content?.filter((p) => p.media?.length > 0).slice(0, 6) || [],
@@ -125,7 +127,7 @@ function HomePage() {
     mapEvents
       .filter((ev) => ev.meetingPointLat != null && ev.meetingPointLng != null)
       .forEach((ev) => {
-        const isNext = nextEvent && ev.id === nextEvent.id
+        const isNext = displayedEvent && ev.id === displayedEvent.id
 
         const el = document.createElement("div")
         el.style.cssText = `
@@ -148,10 +150,10 @@ function HomePage() {
           .setLngLat([ev.meetingPointLng, ev.meetingPointLat])
           .addTo(map)
 
-        el.addEventListener("click", () => navigate(`/events/${ev.id}`))
+        el.addEventListener("click", () => setSelectedEvent(ev))
         markersRef.current.push(marker)
       })
-  }, [mapEvents, nextEvent, navigate])
+  }, [mapEvents, nextEvent, selectedEvent, navigate])
 
   return (
     <div className="page" style={{ paddingBottom: 0 }}>
@@ -199,39 +201,39 @@ function HomePage() {
               {isLoadingMap ? "CARICAMENTO..." : `${mapEvents.length} EVENTI`}
             </div>
 
-            {nextEvent && (
+            {displayedEvent && (
               <div className="home-page__next-event">
                 <div className="home-page__next-event-date">
                   <span className="home-page__next-event-day">
-                    {new Date(nextEvent.startDateTime)
+                    {new Date(displayedEvent.startDateTime)
                       .getDate()
                       .toString()
                       .padStart(2, "0")}
                   </span>
                   <span className="home-page__next-event-month">
-                    {new Date(nextEvent.startDateTime)
+                    {new Date(displayedEvent.startDateTime)
                       .toLocaleDateString("it-IT", { month: "short" })
                       .toUpperCase()}
                   </span>
                 </div>
                 <div className="home-page__next-event-info">
                   <div className="home-page__next-event-title">
-                    {nextEvent.title}
+                    {displayedEvent.title}
                   </div>
                   <div className="home-page__next-event-meta">
-                    {new Date(nextEvent.startDateTime).toLocaleTimeString(
+                    {new Date(displayedEvent.startDateTime).toLocaleTimeString(
                       "it-IT",
                       { hour: "2-digit", minute: "2-digit" },
                     )}
                     {" · "}
-                    {nextEvent.currentParticipants}/{nextEvent.maxParticipants}{" "}
-                    ISCRITTI
+                    {displayedEvent.currentParticipants}/
+                    {displayedEvent.maxParticipants} ISCRITTI
                   </div>
                 </div>
                 <button
                   type="button"
                   className="home-page__next-event-btn"
-                  onClick={() => navigate(`/events/${nextEvent.id}`)}
+                  onClick={() => navigate(`/events/${displayedEvent.id}`)}
                 >
                   APRI
                 </button>
