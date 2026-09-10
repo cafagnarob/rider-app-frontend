@@ -304,7 +304,11 @@ function FeedPage() {
             Impossibile caricare il feed.
           </span>
         </div>
-      ) : feed?.content.length === 0 ? (
+      ) : !feed ? (
+        <div className="reel-feed__loading">
+          <Spinner animation="border" style={{ color: "#FF7A2F" }} />
+        </div>
+      ) : feed.content.length === 0 ? (
         <div className="reel-feed__loading">
           <span className="feed-page__empty-text">
             {type === "FOLLOWING"
