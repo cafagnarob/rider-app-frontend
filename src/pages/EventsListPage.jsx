@@ -208,17 +208,14 @@ function EventsListPage() {
                     <span className="badge-sm">
                       {event.currentParticipants}/{event.maxParticipants}
                     </span>
-                    {event.myParticipationStatus && (
-                      <span
-                        className={
-                          event.myParticipationStatus === "ACCEPTED"
-                            ? "badge-sm--status-accepted"
-                            : "badge-sm--status-pending"
-                        }
-                      >
-                        {event.myParticipationStatus === "ACCEPTED"
-                          ? "CONFERMATO"
-                          : "IN ATTESA"}
+                    {event.myParticipationStatus === "ACCEPTED" && (
+                      <span className="badge-sm--status-accepted">
+                        CONFERMATO
+                      </span>
+                    )}
+                    {event.myParticipationStatus === "PENDING" && (
+                      <span className="badge-sm--status-pending">
+                        IN ATTESA
                       </span>
                     )}
                   </div>

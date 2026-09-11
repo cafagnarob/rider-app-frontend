@@ -57,6 +57,17 @@ export const participationApi = apiSlice.injectEndpoints({
         "Event",
       ],
     }),
+    removeParticipant: builder.mutation({
+      query: ({ eventId, participationId }) => ({
+        url: `/events/${eventId}/participations/${participationId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, { eventId }) => [
+        { type: "Participation", id: eventId },
+        { type: "Event", id: eventId },
+        "Event",
+      ],
+    }),
   }),
 })
 
@@ -67,4 +78,5 @@ export const {
   useGetAcceptedParticipantsQuery,
   useApproveParticipationMutation,
   useRejectParticipationMutation,
+  useRemoveParticipantMutation,
 } = participationApi

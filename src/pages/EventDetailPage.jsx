@@ -723,17 +723,30 @@ function EventDetailPage() {
                 </div>
               )}
 
-              {(event.myParticipationStatus === "REJECTED" ||
-                event.myParticipationStatus === "CANCELLED") && (
+              {event.myParticipationStatus === "REJECTED" && (
                 <span className="participation-card__status--neutral">
-                  {event.myParticipationStatus === "REJECTED"
-                    ? "RICHIESTA RIFIUTATA"
-                    : "PARTECIPAZIONE ANNULLATA"}
+                  RICHIESTA RIFIUTATA
                 </span>
               )}
 
-              {event.myParticipationStatus === null && (
+              {event.myParticipationStatus === "REMOVED" && (
+                <span className="participation-card__status--neutral">
+                  SEI STATO RIMOSSO DALL'ORGANIZZATORE
+                </span>
+              )}
+
+              {(event.myParticipationStatus === null ||
+                event.myParticipationStatus === "CANCELLED") && (
                 <>
+                  {event.myParticipationStatus === "CANCELLED" && (
+                    <p
+                      className="participation-card__info-text"
+                      style={{ marginBottom: 12 }}
+                    >
+                      Hai annullato la tua partecipazione. Puoi richiedere di
+                      nuovo di partecipare.
+                    </p>
+                  )}
                   {event.visibility === "INVITE_ONLY" ? (
                     event.myInviteId ? (
                       <div>

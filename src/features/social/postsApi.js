@@ -86,10 +86,15 @@ export const postsApi = apiSlice.injectEndpoints({
         url: `/posts/${postId}/comments/${commentId}`,
         method: "DELETE",
       }),
-      invalidatesTags: (result, error, { postId }) => [
+      invalidatesTags: (
+        result,
+        error,
+        { postId, parentCommentId, commentId },
+      ) => [
         { type: "Comment", id: postId },
         { type: "Post", id: postId },
         "Post",
+        { type: "Reply", id: parentCommentId || commentId },
       ],
     }),
     createPost: builder.mutation({
@@ -119,6 +124,40 @@ export const postsApi = apiSlice.injectEndpoints({
         `/posts/vehicle/${vehicleId}?page=${page}&size=${size}`,
       providesTags: ["Post"],
     }),
+    toggleCommentLike: builder.mutation({
+      query: ({ postId, commentId }) => ({
+        url: `/posts/${postId}/comments/${commentId}/like`,
+        method: "POST",
+      }),
+      invalidatesTags: (
+        result,
+        error,
+        { postId, parentCommentId, commentId },
+      ) => [
+        { type: "Comment", id: postId },
+        { type: "Reply", id: parentCommentId || commentId },
+      ],
+    }),
+
+    addReply: builder.mutation({
+      query: ({ postId, commentId, text }) => ({
+        url: `/posts/${postId}/comments/${commentId}/replies`,
+        method: "POST",
+        body: { text },
+      }),
+      invalidatesTags: (result, error, { postId, commentId }) => [
+        { type: "Comment", id: postId },
+        { type: "Reply", id: commentId },
+      ],
+    }),
+
+    getReplies: builder.query({
+      query: ({ postId, commentId }) =>
+        `/posts/${postId}/comments/${commentId}/replies`,
+      providesTags: (result, error, { commentId }) => [
+        { type: "Reply", id: commentId },
+      ],
+    }),
   }),
 })
 
@@ -133,4 +172,7 @@ export const {
   useCreatePostMutation,
   useGetPostsByVehicleQuery,
   useGetUserPostsQuery,
+  useToggleCommentLikeMutation,
+  useAddReplyMutation,
+  useGetRepliesQuery,
 } = postsApi

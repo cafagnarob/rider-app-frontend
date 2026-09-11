@@ -105,7 +105,11 @@ function PostCard({ post }) {
           <PostMediaCarousel
             media={post.media}
             renderOverlay={(m) => (
-              <PostWidgetsOverlay widgets={post.widgets} mediaId={m.id} />
+              <PostWidgetsOverlay
+                widgets={post.widgets}
+                mediaId={m.id}
+                postAuthorUsername={post.authorUsername}
+              />
             )}
           />
         </div>

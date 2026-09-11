@@ -37,6 +37,9 @@ export const ridesApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Ride"],
     }),
+    getRideSummary: builder.query({
+      query: (rideId) => `/rides/${rideId}/summary`,
+    }),
   }),
 })
 
@@ -46,4 +49,5 @@ export const {
   useStartRideMutation,
   useFinishRideMutation,
   useDeleteRideMutation,
+  useGetRideSummaryQuery,
 } = ridesApi

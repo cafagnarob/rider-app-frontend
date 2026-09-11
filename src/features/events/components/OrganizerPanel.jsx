@@ -3,6 +3,7 @@ import {
   useGetAcceptedParticipantsQuery,
   useApproveParticipationMutation,
   useRejectParticipationMutation,
+  useRemoveParticipantMutation,
 } from "../participationApi"
 import { useGetEventInvitesQuery } from "../invitesApi"
 import {
@@ -12,12 +13,14 @@ import {
 } from "../eventsApi"
 import InvitePeoplePicker from "./InvitePeoplePicker"
 import Avatar from "../../../components/Avatar"
+import { FaTimes } from "react-icons/fa"
 
 function OrganizerPanel({ eventId, visibility }) {
   const { data: pending } = useGetPendingParticipantsQuery(eventId)
   const { data: accepted } = useGetAcceptedParticipantsQuery(eventId)
   const [approve] = useApproveParticipationMutation()
   const [reject] = useRejectParticipationMutation()
+  const [removeParticipant] = useRemoveParticipantMutation()
 
   const { data: invites } = useGetEventInvitesQuery(eventId, {
     skip: visibility !== "INVITE_ONLY",
@@ -136,6 +139,17 @@ function OrganizerPanel({ eventId, visibility }) {
           {accepted?.map((p) => (
             <span key={p.id} className="confirmed-pill">
               {p.username}
+              <button
+                type="button"
+                className="confirmed-pill__remove"
+                onClick={() => {
+                  if (window.confirm(`Rimuovere ${p.username} dall'evento?`)) {
+                    removeParticipant({ eventId, participationId: p.id })
+                  }
+                }}
+              >
+                <FaTimes size={9} />
+              </button>
             </span>
           ))}
         </div>

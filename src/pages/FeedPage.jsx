@@ -1,111 +1,17 @@
 import { useState } from "react"
 import { useNavigate, Link } from "react-router-dom"
 import { Spinner } from "react-bootstrap"
-import { FaTimes, FaHeart, FaRegHeart, FaRegComment } from "react-icons/fa"
+import { FaTimes } from "react-icons/fa"
 import {
   useGetFeedQuery,
   useGetUserPostsQuery,
-  useToggleLikeMutation,
 } from "../features/social/postsApi"
 import { useGetCurrentUserQuery } from "../features/users/usersApi"
 import { useGetUnreadCountQuery } from "../features/notification/notificationsApi"
-import PostAutoCarousel from "../features/social/components/PostAutoCarousel"
-import PostWidgetsOverlay from "../features/social/components/PostWidgetsOverlay"
+
 import Avatar from "../components/Avatar"
 import "../pages/CSS/FeedPage.css"
-
-function ReelPost({ post }) {
-  const navigate = useNavigate()
-  const [toggleLike] = useToggleLikeMutation()
-
-  const handleLike = () =>
-    toggleLike({ postId: post.id, liked: post.likedByCurrentUser })
-
-  return (
-    <div className="reel-feed__post">
-      <div className="reel-feed__media">
-        <PostAutoCarousel
-          media={post.media}
-          onDoubleClick={handleLike}
-          renderOverlay={(m) => (
-            <PostWidgetsOverlay widgets={post.widgets} mediaId={m.id} />
-          )}
-        />
-      </div>
-
-      <div className="reel-overlay__bottom">
-        <div className="reel-overlay__author-row">
-          <Avatar
-            src={post.authorProfilePicture}
-            alt=""
-            className="reel-overlay__avatar"
-            onClick={() => navigate(`/profile/${post.authorUsername}`)}
-          />
-          <span
-            className="reel-overlay__username"
-            onClick={() => navigate(`/profile/${post.authorUsername}`)}
-          >
-            {post.authorUsername}
-          </span>
-        </div>
-        {post.text && <p className="reel-overlay__caption">{post.text}</p>}
-        <div className="reel-overlay__badges">
-          {post.event && (
-            <button
-              type="button"
-              className="post-ref-badge post-ref-badge--event"
-              onClick={() => navigate(`/events/${post.event.id}`)}
-            >
-              {post.event.title}
-            </button>
-          )}
-          {post.ride && (
-            <button
-              type="button"
-              className="post-ref-badge post-ref-badge--ride"
-              onClick={() => navigate(`/rides/${post.ride.id}`)}
-            >
-              {post.ride.title || "GIRO"} · {post.ride.distanceKm?.toFixed(1)}{" "}
-              KM
-            </button>
-          )}
-          {post.routeId && (
-            <button
-              type="button"
-              className="post-ref-badge post-ref-badge--ride"
-              onClick={() => navigate(`/routes/${post.routeId}`)}
-            >
-              {post.routeName || "PERCORSO"}
-            </button>
-          )}
-        </div>
-      </div>
-
-      <div className="reel-overlay__actions">
-        <button
-          type="button"
-          className="reel-overlay__action-btn"
-          onClick={handleLike}
-        >
-          {post.likedByCurrentUser ? (
-            <FaHeart size={26} />
-          ) : (
-            <FaRegHeart size={26} />
-          )}
-          <span>{post.likeCount}</span>
-        </button>
-        <button
-          type="button"
-          className="reel-overlay__action-btn"
-          onClick={() => navigate(`/posts/${post.id}`)}
-        >
-          <FaRegComment size={26} />
-          <span>{post.commentCount}</span>
-        </button>
-      </div>
-    </div>
-  )
-}
+import ReelPost from "../features/social/components/ReelPost"
 
 function MineAvatarTab({
   me,
@@ -319,7 +225,13 @@ function FeedPage() {
       ) : (
         <div className="reel-feed__scroll" onScroll={handleFeedScroll}>
           {feedAccumulated.map((post) => (
-            <ReelPost key={post.id} post={post} />
+            <ReelPost
+              key={post.id}
+              post={post}
+              onDeleted={(id) =>
+                setFeedAccumulated((prev) => prev.filter((p) => p.id !== id))
+              }
+            />
           ))}
           {isFetching && page > 0 && (
             <div className="reel-feed__post reel-feed__loading-more">
