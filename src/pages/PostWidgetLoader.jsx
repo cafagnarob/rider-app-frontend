@@ -1,11 +1,11 @@
-import { useGetRideByIdQuery } from "../../src/features/rides/ridesApi"
+import { useGetRideSummaryQuery } from "../../src/features/rides/ridesApi"
 import { useGetRouteByIdQuery } from "../../src/features/routesMap/routesApi"
 import { useGetEventByIdQuery } from "../../src/features/events/eventsApi"
 import { useGetModelByIdQuery } from "../../src/features/catalog/catalogApi"
 import PostWidgetPreview from "../../src/features/social/components/PostWidgetPreview"
 
 function PostWidgetLoader({ type, referenceId, size }) {
-  const { data: rideData } = useGetRideByIdQuery(referenceId, {
+  const { data: rideData } = useGetRideSummaryQuery(referenceId, {
     skip: type !== "RIDE",
   })
   const { data: routeData } = useGetRouteByIdQuery(referenceId, {
