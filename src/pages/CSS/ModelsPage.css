@@ -73,7 +73,10 @@
 }
 
 .model-card__image {
-  aspect-ratio: 16/10;
+  margin-top: 20px;
+  opacity: 30%;
+  margin-inline: auto;
+  width: 60%;
   background: var(--color-card-alt);
 }
 
