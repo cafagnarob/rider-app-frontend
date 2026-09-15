@@ -1,15 +1,14 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Spinner } from "react-bootstrap"
 import { useParams, useNavigate, Link } from "react-router-dom"
 import {
   Map as MapLibreMap,
   Marker,
-  Popup,
   LngLatBounds,
   FullscreenControl,
 } from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
-import { FaArrowLeft } from "react-icons/fa"
+import { FaArrowLeft, FaTimes } from "react-icons/fa"
 import {
   useGetEventByIdQuery,
   useChangeEventStatusMutation,
@@ -33,12 +32,26 @@ import {
 } from "../features/events/invitesApi"
 import Avatar from "../components/Avatar"
 
+function haversineKm([lng1, lat1], [lng2, lat2]) {
+  const R = 6371
+  const dLat = ((lat2 - lat1) * Math.PI) / 180
+  const dLng = ((lng2 - lng1) * Math.PI) / 180
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLng / 2) ** 2
+  return R * 2 * Math.asin(Math.sqrt(a))
+}
+
 function EventDetailPage() {
   const { eventId } = useParams()
   const navigate = useNavigate()
   const { data: event, isLoading, isError } = useGetEventByIdQuery(eventId)
 
   const { data: participants } = useGetAcceptedParticipantsQuery(eventId)
+
+  const [selectedWaypointId, setSelectedWaypointId] = useState(null)
 
   const [requestAccessCode, { isLoading: isRequestingCode }] =
     useRequestAccessCodeMutation()
@@ -171,15 +184,7 @@ function EventDetailPage() {
             wp.longitude,
             wp.latitude,
           ])
-          if (wp.label && wp.label.trim()) {
-            marker.setPopup(
-              new Popup({
-                offset: 14,
-                closeButton: false,
-                className: "qj-popup",
-              }).setText(wp.label),
-            )
-          }
+          el.addEventListener("click", () => setSelectedWaypointId(wp.id))
           marker.addTo(map)
         })
 
@@ -254,6 +259,49 @@ function EventDetailPage() {
       console.error(err)
     }
   }
+
+  const hasRoute = !!event?.route?.encodedPolyline
+
+  const waypointStats = useMemo(() => {
+    if (!hasRoute || !event?.route?.waypoints) return {}
+
+    const coords = decodePolyline(event.route.encodedPolyline)
+    if (coords.length === 0) return {}
+
+    const cumulative = [0]
+    for (let i = 1; i < coords.length; i++) {
+      cumulative.push(cumulative[i - 1] + haversineKm(coords[i - 1], coords[i]))
+    }
+    const totalKm = cumulative[cumulative.length - 1]
+
+    const waypoints = event.route.waypoints
+    const distFromStart = waypoints.map((wp) => {
+      let bestIdx = 0
+      let bestDist = Infinity
+      coords.forEach((c, idx) => {
+        const d = haversineKm(c, [wp.longitude, wp.latitude])
+        if (d < bestDist) {
+          bestDist = d
+          bestIdx = idx
+        }
+      })
+      return cumulative[bestIdx]
+    })
+
+    const stats = {}
+    waypoints.forEach((wp, i) => {
+      stats[wp.id] = {
+        fromStartKm: distFromStart[i],
+        toEndKm: totalKm - distFromStart[i],
+        fromPrevKm: i > 0 ? distFromStart[i] - distFromStart[i - 1] : null,
+        toNextKm:
+          i < waypoints.length - 1
+            ? distFromStart[i + 1] - distFromStart[i]
+            : null,
+      }
+    })
+    return stats
+  }, [event, hasRoute])
 
   if (isLoading) {
     return (
@@ -434,15 +482,10 @@ function EventDetailPage() {
         >
           <FaArrowLeft />
         </button>
-
-        {event.organizer && event.status === "ACTIVE" && (
-          <button
-            type="button"
-            className="event-detail-page__cancel-btn"
-            onClick={() => setConfirmType("cancelEvent")}
-          >
-            ANNULLA EVENTO
-          </button>
+        {hasRoute && (
+          <div className="event-detail-page__waypoint-hint">
+            Tocca un punto sulla mappa per i dettagli
+          </div>
         )}
       </div>
 
@@ -488,6 +531,13 @@ function EventDetailPage() {
         </div>
 
         <div className="event-detail-page__title">{event.title}</div>
+
+        <Link
+          to={`/profile/${event.organizerUsername}`}
+          className="event-detail-page__organizer-link"
+        >
+          Organizzato da {event.organizerUsername}
+        </Link>
 
         <div className="event-detail-page__meta">
           {isTrip
@@ -836,6 +886,31 @@ function EventDetailPage() {
         {!isChild && event.organizer && (
           <OrganizerPanel eventId={eventId} visibility={event.visibility} />
         )}
+
+        {event.organizer && event.status === "ACTIVE" && (
+          <div className="event-detail-page__organizer-actions">
+            <Link
+              to={
+                isChild
+                  ? `/events/${event.parentEventId}/days/${event.id}/edit`
+                  : `/events/${eventId}/edit`
+              }
+              className="btn-secondary btn-link-edit-events"
+              style={{ width: "100%" }}
+            >
+              {isChild ? "MODIFICA GIORNO" : "MODIFICA EVENTO"}
+            </Link>
+            {!isChild && (
+              <button
+                type="button"
+                className="btn-danger-block"
+                onClick={() => setConfirmType("cancelEvent")}
+              >
+                ANNULLA EVENTO
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {confirmType && (
@@ -875,6 +950,87 @@ function EventDetailPage() {
           </div>
         </div>
       )}
+
+      {selectedWaypointId &&
+        hasRoute &&
+        (() => {
+          const wp = event.route.waypoints.find(
+            (w) => w.id === selectedWaypointId,
+          )
+          const stats = waypointStats[selectedWaypointId]
+          if (!wp) return null
+          return (
+            <div
+              className="sheet-overlay"
+              onClick={() => setSelectedWaypointId(null)}
+            >
+              <div className="sheet-panel" onClick={(e) => e.stopPropagation()}>
+                <div className="sheet-header">
+                  <button
+                    type="button"
+                    className="btn-icon"
+                    onClick={() => setSelectedWaypointId(null)}
+                  >
+                    <FaTimes />
+                  </button>
+                  <div className="sheet-header__title">
+                    {wp.label || "TAPPA"}
+                  </div>
+                  <div style={{ width: 40 }} />
+                </div>
+                <div className="sheet-body">
+                  {wp.imageUrl && (
+                    <img
+                      src={wp.imageUrl}
+                      alt=""
+                      className="waypoint-detail-sheet__image"
+                    />
+                  )}
+                  <div
+                    className="stat-grid stat-grid--cols-2"
+                    style={{ marginTop: 16 }}
+                  >
+                    <div className="stat-cell">
+                      <span className="stat-label">DA PARTENZA</span>
+                      <span className="stat-value">
+                        {stats?.fromStartKm.toFixed(1).replace(".", ",")} KM
+                      </span>
+                    </div>
+                    <div className="stat-cell">
+                      <span className="stat-label">ALL'ARRIVO</span>
+                      <span className="stat-value">
+                        {stats?.toEndKm.toFixed(1).replace(".", ",")} KM
+                      </span>
+                    </div>
+                    <div className="stat-cell">
+                      <span className="stat-label">DA TAPPA PRECEDENTE</span>
+                      <span className="stat-value">
+                        {stats?.fromPrevKm != null
+                          ? stats.fromPrevKm.toFixed(1).replace(".", ",")
+                          : "0,0"}{" "}
+                        KM
+                      </span>
+                    </div>
+                    <div className="stat-cell">
+                      <span className="stat-label">ALLA TAPPA SUCCESSIVA</span>
+                      <span className="stat-value">
+                        {stats?.toNextKm != null
+                          ? stats.toNextKm.toFixed(1).replace(".", ",")
+                          : "0,0"}{" "}
+                        KM
+                      </span>
+                    </div>
+                  </div>
+                  {wp.stopMinutes > 0 && (
+                    <div className="empty-state" style={{ marginTop: 14 }}>
+                      Sosta di {wp.stopMinutes} minuti
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )
+        })()}
     </div>
   )
 }

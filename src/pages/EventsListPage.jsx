@@ -6,6 +6,7 @@ import {
   useSearchEventsQuery,
   useGetOrganizedEventsQuery,
   useGetParticipatingEventsQuery,
+  useGetHistoryEventsQuery,
 } from "../features/events/eventsApi"
 import NotificationBell from "../features/notification/components/NotificationBell"
 import { VISIBILITY_LABELS, EVENT_TYPE_LABELS } from "../utils/constants"
@@ -15,6 +16,7 @@ const TABS = [
   { key: "search", label: "SCOPRI" },
   { key: "organized", label: "ORGANIZZATI" },
   { key: "participating", label: "PARTECIPO" },
+  { key: "history", label: "STORICO" },
 ]
 
 function EventsListPage() {
@@ -23,6 +25,7 @@ function EventsListPage() {
   const [title, setTitle] = useState("")
   const navigate = useNavigate()
   const location = useLocation()
+  const [history, setHistory] = useState(false)
 
   const [titleInput, setTitleInput] = useState("")
   const timerRef = useRef(null)
@@ -58,12 +61,16 @@ function EventsListPage() {
     { skip: tab !== "search" },
   )
   const organizedQuery = useGetOrganizedEventsQuery(
-    { page },
+    { history, page },
     { skip: tab !== "organized" },
   )
   const participatingQuery = useGetParticipatingEventsQuery(
-    { page },
+    { history, page },
     { skip: tab !== "participating" },
+  )
+  const historyQuery = useGetHistoryEventsQuery(
+    { page },
+    { skip: tab !== "history" },
   )
 
   const { data, isLoading, isFetching, isError } =
@@ -71,11 +78,14 @@ function EventsListPage() {
       ? searchQuery
       : tab === "organized"
         ? organizedQuery
-        : participatingQuery
+        : tab === "participating"
+          ? participatingQuery
+          : historyQuery
 
   const handleTab = (key) => {
     setTab(key)
     setPage(0)
+    setHistory(false)
   }
 
   return (

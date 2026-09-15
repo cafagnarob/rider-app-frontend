@@ -25,13 +25,13 @@ export const eventsApi = apiSlice.injectEndpoints({
       providesTags: ["Event"],
     }),
     getOrganizedEvents: builder.query({
-      query: ({ page = 0, size = 20 } = {}) =>
-        `/events/organized?page=${page}&size=${size}`,
+      query: ({ history = false, page = 0, size = 20 } = {}) =>
+        `/events/organized?history=${history}&page=${page}&size=${size}`,
       providesTags: ["Event"],
     }),
     getParticipatingEvents: builder.query({
-      query: ({ page = 0, size = 20 } = {}) =>
-        `/events/participating?page=${page}&size=${size}`,
+      query: ({ history = false, page = 0, size = 20 } = {}) =>
+        `/events/participating?history=${history}&page=${page}&size=${size}`,
       providesTags: ["Event"],
     }),
     getEventById: builder.query({
@@ -39,6 +39,11 @@ export const eventsApi = apiSlice.injectEndpoints({
       providesTags: (result, error, eventId) => [
         { type: "Event", id: eventId },
       ],
+    }),
+    getHistoryEvents: builder.query({
+      query: ({ page = 0, size = 20 } = {}) =>
+        `/events/history?page=${page}&size=${size}`,
+      providesTags: ["Event"],
     }),
     createEvent: builder.mutation({
       query: (body) => ({
@@ -49,10 +54,10 @@ export const eventsApi = apiSlice.injectEndpoints({
       invalidatesTags: ["Event"],
     }),
     updateEvent: builder.mutation({
-      query: ({ eventId, ...body }) => ({
+      query: ({ eventId, data }) => ({
         url: `/events/${eventId}`,
         method: "PATCH",
-        body,
+        body: data,
       }),
       invalidatesTags: (result, error, { eventId }) => [
         { type: "Event", id: eventId },
@@ -130,10 +135,23 @@ export const eventsApi = apiSlice.injectEndpoints({
         { type: "AccessRequest", id: eventId },
       ],
     }),
+    updateEventDay: builder.mutation({
+      query: ({ tripId, dayId, data }) => ({
+        url: `/events/${tripId}/days/${dayId}`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: (result, error, { tripId, dayId }) => [
+        { type: "Event", id: tripId },
+        { type: "Event", id: dayId },
+        "Event",
+      ],
+    }),
   }),
 })
 
 export const {
+  useUpdateEventDayMutation,
   useSearchEventsQuery,
   useGetOrganizedEventsQuery,
   useGetParticipatingEventsQuery,
@@ -148,4 +166,5 @@ export const {
   useGetAccessCodeRequestsQuery,
   useApproveAccessCodeRequestMutation,
   useRejectAccessCodeRequestMutation,
+  useGetHistoryEventsQuery,
 } = eventsApi

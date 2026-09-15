@@ -52,6 +52,13 @@
   gap: 8px;
 }
 
+.page-title-title-new-route {
+  font-family: var(--font-heading);
+  font-weight: bold;
+  font-size: 28px;
+  line-height: 1;
+}
+
 @media (min-width: 1024px) {
   .routes-list-page__header {
     padding: 0 32px 24px;

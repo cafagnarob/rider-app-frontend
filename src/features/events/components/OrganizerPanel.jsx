@@ -14,6 +14,7 @@ import {
 import InvitePeoplePicker from "./InvitePeoplePicker"
 import Avatar from "../../../components/Avatar"
 import { FaTimes } from "react-icons/fa"
+import { Link } from "react-router-dom"
 
 function OrganizerPanel({ eventId, visibility }) {
   const { data: pending } = useGetPendingParticipantsQuery(eventId)
@@ -138,11 +139,17 @@ function OrganizerPanel({ eventId, visibility }) {
         <div className="confirmed-pills">
           {accepted?.map((p) => (
             <span key={p.id} className="confirmed-pill">
-              {p.username}
+              <Link
+                to={`/profile/${p.username}`}
+                className="confirmed-pill__name"
+              >
+                {p.username}
+              </Link>
               <button
                 type="button"
                 className="confirmed-pill__remove"
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation()
                   if (window.confirm(`Rimuovere ${p.username} dall'evento?`)) {
                     removeParticipant({ eventId, participationId: p.id })
                   }

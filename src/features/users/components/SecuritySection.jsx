@@ -67,8 +67,7 @@ function SecuritySection({ profile }) {
         oldPassword: pwForm.oldPassword,
         newPassword: pwForm.newPassword,
       }).unwrap()
-      setFeedback({ type: "success", text: "Password aggiornata." })
-      closeForm()
+      forceReLoginWithMessage("Password aggiornata, accedi di nuovo.")
     } catch (err) {
       setFeedback({
         type: "danger",
@@ -82,8 +81,7 @@ function SecuritySection({ profile }) {
     setFeedback(null)
     try {
       await updateUsername(userForm).unwrap()
-      setFeedback({ type: "success", text: "Username aggiornato." })
-      closeForm()
+      forceReLoginWithMessage("Username aggiornato, accedi di nuovo.")
     } catch (err) {
       setFeedback({
         type: "danger",
@@ -97,8 +95,7 @@ function SecuritySection({ profile }) {
     setFeedback(null)
     try {
       await updateEmail(mailForm).unwrap()
-      setFeedback({ type: "success", text: "Email aggiornata." })
-      closeForm()
+      forceReLoginWithMessage("Email aggiornata, accedi di nuovo.")
     } catch (err) {
       setFeedback({
         type: "danger",
@@ -122,6 +119,12 @@ function SecuritySection({ profile }) {
   }
 
   const handleLogout = () => {
+    dispatch(logout())
+    navigate("/login")
+  }
+
+  const forceReLoginWithMessage = (message) => {
+    sessionStorage.setItem("loginInfoMessage", message)
     dispatch(logout())
     navigate("/login")
   }

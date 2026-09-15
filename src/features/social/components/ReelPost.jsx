@@ -11,13 +11,7 @@ import {
 import { useState } from "react"
 import PostAutoCarousel from "./PostAutoCarousel"
 import PostWidgetsOverlay from "./PostWidgetsOverlay"
-import {
-  FaHeart,
-  FaRegComment,
-  FaRegHeart,
-  FaTimes,
-  FaTrash,
-} from "react-icons/fa"
+import { FaHeart, FaRegComment, FaRegHeart, FaTrash } from "react-icons/fa"
 import Avatar from "../../../components/Avatar"
 
 import CommentThread from "./CommentThread"
@@ -187,7 +181,7 @@ function ReelPost({ post, onDeleted }) {
         <button
           type="button"
           className="reel-overlay__action-btn"
-          onClick={() => setShowComments(true)}
+          onClick={() => setShowComments((v) => !v)}
         >
           <FaRegComment size={26} />
           <span>{post.commentCount}</span>
@@ -201,16 +195,6 @@ function ReelPost({ post, onDeleted }) {
             onClick={() => setShowComments(false)}
           />
           <div className="reel-comments__panel">
-            <div className="reel-comments__top-bar">
-              <button
-                type="button"
-                className="reel-comments__close-btn"
-                onClick={() => setShowComments(false)}
-              >
-                <FaTimes size={14} />
-              </button>
-            </div>
-
             <div className="reel-comments__list">
               <div className="reel-comments__caption-entry">
                 <div className="reel-overlay__author-row">

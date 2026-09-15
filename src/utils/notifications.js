@@ -8,6 +8,7 @@ import {
   FaCheckCircle,
   FaTimesCircle,
   FaBell,
+  FaEdit,
 } from "react-icons/fa"
 
 export const NOTIFICATION_ICONS = {
@@ -16,6 +17,7 @@ export const NOTIFICATION_ICONS = {
   COMMENT: { Icon: FaComment, color: "#6c757d" },
   MESSAGE: { Icon: FaEnvelope, color: "#6c757d" },
   EVENT_INVITE: { Icon: FaCalendarPlus, color: "#FFBE5D" },
+  EVENT_UPDATED: { Icon: FaEdit, color: "#FFBE5D" },
   PARTICIPATION_REQUEST: { Icon: FaUserClock, color: "#FFBE5D" },
   PARTICIPATION_ACCEPTED: { Icon: FaCheckCircle, color: "#198754" },
   PARTICIPATION_REJECTED: { Icon: FaTimesCircle, color: "#dc3545" },

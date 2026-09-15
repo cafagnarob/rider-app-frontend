@@ -14,12 +14,48 @@ export const routesApi = apiSlice.injectEndpoints({
       ],
     }),
     createRoute: builder.mutation({
-      query: (body) => ({
-        url: "/routes",
-        method: "POST",
-        body,
-      }),
+      query: ({ data, images }) => {
+        const formData = new FormData()
+        formData.append(
+          "data",
+          new Blob([JSON.stringify(data)], { type: "application/json" }),
+        )
+        ;(images || []).forEach((file) => formData.append("images", file))
+
+        console.log("BODY:", formData)
+        console.log("IS FORMDATA:", formData instanceof FormData)
+
+        return { url: "/routes", method: "POST", body: formData }
+      },
       invalidatesTags: ["Route"],
+    }),
+    updateRoute: builder.mutation({
+      query: ({ routeId, data, images }) => {
+        const formData = new FormData()
+        formData.append(
+          "data",
+          new Blob([JSON.stringify(data)], { type: "application/json" }),
+        )
+        ;(images || []).forEach((file) => formData.append("images", file))
+        return { url: `/routes/${routeId}`, method: "PATCH", body: formData }
+      },
+      invalidatesTags: (result, error, { routeId }) => [
+        { type: "Route", id: routeId },
+      ],
+    }),
+    updateWaypointImage: builder.mutation({
+      query: ({ routeId, waypointId, image }) => {
+        const formData = new FormData()
+        formData.append("image", image)
+        return {
+          url: `/routes/${routeId}/waypoints/${waypointId}/image`,
+          method: "PATCH",
+          body: formData,
+        }
+      },
+      invalidatesTags: (result, error, { routeId }) => [
+        { type: "Route", id: routeId },
+      ],
     }),
     deleteRoute: builder.mutation({
       query: (routeId) => ({
@@ -65,4 +101,6 @@ export const {
   useImportRouteMutation,
   usePreviewRouteMutation,
   useGetUserRoutesQuery,
+  useUpdateWaypointImageMutation,
+  useUpdateRouteMutation,
 } = routesApi
