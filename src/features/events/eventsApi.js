@@ -147,6 +147,21 @@ export const eventsApi = apiSlice.injectEndpoints({
         "Event",
       ],
     }),
+    updateEventCoverPhoto: builder.mutation({
+      query: ({ eventId, image }) => {
+        const formData = new FormData()
+        formData.append("image", image)
+        return {
+          url: `/events/${eventId}/cover-photo`,
+          method: "PATCH",
+          body: formData,
+        }
+      },
+      invalidatesTags: (result, error, { eventId }) => [
+        { type: "Event", id: eventId },
+        "Event",
+      ],
+    }),
   }),
 })
 
@@ -167,4 +182,5 @@ export const {
   useApproveAccessCodeRequestMutation,
   useRejectAccessCodeRequestMutation,
   useGetHistoryEventsQuery,
+  useUpdateEventCoverPhotoMutation,
 } = eventsApi

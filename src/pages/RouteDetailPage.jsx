@@ -22,7 +22,7 @@ import {
 import { decodePolyline } from "../utils/polyline"
 import { downloadGpx } from "../utils/gpx"
 import { MAP_STYLE_URL } from "../utils/mapStyle"
-import { COLORS } from "../styles/theme"
+import { COLORS, FONTS } from "../styles/theme"
 import "../pages/CSS/RouteDetailPage.css"
 
 function haversineKm([lng1, lat1], [lng2, lat2]) {
@@ -126,14 +126,17 @@ function RouteDetailPage() {
         const isEndpoint = isStart || isEnd
 
         const el = document.createElement("div")
-        el.style.cssText = `width: ${isEndpoint ? 18 : 10}px; height: ${isEndpoint ? 18 : 10}px;`
+        el.style.cssText = `width: ${isEndpoint ? 26 : 20}px; height: ${isEndpoint ? 26 : 20}px;`
 
         const dot = document.createElement("div")
         dot.style.cssText = `
-          width: 100%; height: 100%; border-radius: 50%; position: relative;
-          background: ${isStart ? "#4ADE80" : isEnd ? COLORS.danger : COLORS.accent};
-          border: 2px solid ${COLORS.bg};
-        `
+  width: 100%; height: 100%; border-radius: 50%; position: relative;
+  background: ${isStart ? "#4ADE80" : isEnd ? COLORS.danger : COLORS.accent};
+  color: #08080A; font-family: ${FONTS.mono}; font-weight: 700; font-size: ${isEndpoint ? 11 : 9}px;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid ${COLORS.bg};
+`
+        dot.textContent = String(index + 1)
         el.appendChild(dot)
 
         const marker = new Marker({ element: el }).setLngLat([

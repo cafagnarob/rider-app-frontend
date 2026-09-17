@@ -11,6 +11,7 @@ import {
 import NotificationBell from "../features/notification/components/NotificationBell"
 import { VISIBILITY_LABELS, EVENT_TYPE_LABELS } from "../utils/constants"
 import "../pages/CSS/EventsListPage.css"
+import { useGeolocation } from "../utils/useGeolocation"
 
 const TABS = [
   { key: "search", label: "SCOPRI" },
@@ -18,6 +19,21 @@ const TABS = [
   { key: "participating", label: "PARTECIPO" },
   { key: "history", label: "STORICO" },
 ]
+
+function haversineKm([lng1, lat1], [lng2, lat2]) {
+  const R = 6371
+
+  const dLat = ((lat2 - lat1) * Math.PI) / 180
+  const dLng = ((lng2 - lng1) * Math.PI) / 180
+
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLng / 2) ** 2
+
+  return R * 2 * Math.asin(Math.sqrt(a))
+}
 
 function EventsListPage() {
   const [tab, setTab] = useState("search")
@@ -29,6 +45,7 @@ function EventsListPage() {
 
   const [titleInput, setTitleInput] = useState("")
   const timerRef = useRef(null)
+  const { position } = useGeolocation()
 
   const [geoFilter, setGeoFilter] = useState(
     location.state?.nearLat
@@ -42,8 +59,11 @@ function EventsListPage() {
 
   const handleSearchChange = (e) => {
     const value = e.target.value
+
     setTitleInput(value)
+
     clearTimeout(timerRef.current)
+
     timerRef.current = setTimeout(() => {
       setTitle(value)
       setPage(0)
@@ -58,19 +78,38 @@ function EventsListPage() {
       lng: geoFilter?.lng,
       radiusKm: geoFilter ? 40 : undefined,
     },
-    { skip: tab !== "search" },
+    {
+      skip: tab !== "search",
+    },
   )
+
   const organizedQuery = useGetOrganizedEventsQuery(
-    { history, page },
-    { skip: tab !== "organized" },
+    {
+      history,
+      page,
+    },
+    {
+      skip: tab !== "organized",
+    },
   )
+
   const participatingQuery = useGetParticipatingEventsQuery(
-    { history, page },
-    { skip: tab !== "participating" },
+    {
+      history,
+      page,
+    },
+    {
+      skip: tab !== "participating",
+    },
   )
+
   const historyQuery = useGetHistoryEventsQuery(
-    { page },
-    { skip: tab !== "history" },
+    {
+      page,
+    },
+    {
+      skip: tab !== "history",
+    },
   )
 
   const { data, isLoading, isFetching, isError } =
@@ -94,10 +133,12 @@ function EventsListPage() {
         <div className="page-title" style={{ fontSize: 28 }}>
           EVENTI
         </div>
+
         <div className="events-list-page__header-actions">
           <div className="mobile-only">
             <NotificationBell />
           </div>
+
           <Link to="/events/new" className="btn-accent-sm">
             + CREA
           </Link>
@@ -107,6 +148,7 @@ function EventsListPage() {
       <div className="tab-pills events-list-page__tabs">
         {TABS.map((t) => {
           const active = tab === t.key
+
           return (
             <button
               key={t.key}
@@ -130,6 +172,20 @@ function EventsListPage() {
             onChange={handleSearchChange}
           />
         </div>
+      )}
+
+      {(tab === "organized" || tab === "participating") && (
+        <label className="checkbox-label" style={{ margin: "0 20px 14px" }}>
+          <input
+            type="checkbox"
+            checked={history}
+            onChange={(e) => {
+              setHistory(e.target.checked)
+              setPage(0)
+            }}
+          />
+          Mostra storico
+        </label>
       )}
 
       {geoFilter && (
@@ -170,6 +226,17 @@ function EventsListPage() {
         >
           {data.content.map((event) => {
             const start = new Date(event.startDateTime)
+
+            const distanceKm =
+              position &&
+              event.meetingPointLat != null &&
+              event.meetingPointLng != null
+                ? haversineKm(
+                    [position.longitude, position.latitude],
+                    [event.meetingPointLng, event.meetingPointLat],
+                  )
+                : null
+
             return (
               <div
                 key={event.id}
@@ -180,9 +247,12 @@ function EventsListPage() {
                   <span className="event-row__date-day">
                     {start.getDate().toString().padStart(2, "0")}
                   </span>
+
                   <span className="event-row__date-month">
                     {start
-                      .toLocaleDateString("it-IT", { month: "short" })
+                      .toLocaleDateString("it-IT", {
+                        month: "short",
+                      })
                       .toUpperCase()}
                   </span>
                 </div>
@@ -192,7 +262,9 @@ function EventsListPage() {
                     {event.locked && (
                       <FaLock className="event-row__lock-icon" />
                     )}
+
                     <span className="event-row__title">{event.title}</span>
+
                     {event.organizer && (
                       <span className="badge-sm--own">TUO</span>
                     )}
@@ -212,17 +284,21 @@ function EventsListPage() {
                         {EVENT_TYPE_LABELS[event.type]}
                       </span>
                     )}
+
                     <span className="badge-sm">
                       {VISIBILITY_LABELS[event.visibility]}
                     </span>
+
                     <span className="badge-sm">
                       {event.currentParticipants}/{event.maxParticipants}
                     </span>
+
                     {event.myParticipationStatus === "ACCEPTED" && (
                       <span className="badge-sm--status-accepted">
                         CONFERMATO
                       </span>
                     )}
+
                     {event.myParticipationStatus === "PENDING" && (
                       <span className="badge-sm--status-pending">
                         IN ATTESA
@@ -230,6 +306,30 @@ function EventsListPage() {
                     )}
                   </div>
                 </div>
+
+                {distanceKm != null && (
+                  <div className="event-row__distance-box">
+                    <span className="event-row__date-day">
+                      {Math.round(distanceKm)}
+                    </span>
+
+                    <span className="event-row__date-month">KM DA TE</span>
+                  </div>
+                )}
+
+                {distanceKm == null && position && event.locked && (
+                  <div className="event-row__distance-box event-row__date-box--locked">
+                    <span
+                      className="event-row__date-month"
+                      style={{
+                        fontSize: 7.5,
+                        lineHeight: 1.25,
+                      }}
+                    >
+                      RICHIEDI IL CODICE
+                    </span>
+                  </div>
+                )}
               </div>
             )
           })}
@@ -251,9 +351,11 @@ function EventsListPage() {
           >
             PRECEDENTE
           </button>
+
           <span className="pagination-row__label">
             {data.number + 1} / {data.totalPages}
           </span>
+
           <button
             type="button"
             className="btn-secondary"

@@ -8,6 +8,8 @@ import {
   FaArrowLeft,
   FaArrowUp,
   FaCamera,
+  FaChevronDown,
+  FaChevronUp,
   FaSearch,
   FaTrash,
 } from "react-icons/fa"
@@ -72,6 +74,7 @@ function RouteEditorPage() {
 
   const { position, error } = useGeolocation()
   const [timedOut, setTimedOut] = useState(false)
+  const [waypointsExpanded, setWaypointsExpanded] = useState(false)
 
   const { data: existingRoute, isLoading: isLoadingRoute } =
     useGetRouteByIdQuery(routeId, {
@@ -791,167 +794,6 @@ function RouteEditorPage() {
           )}
         </div>
 
-        <div>
-          <div className="field-label form-group__label">
-            PUNTI ({waypoints.length})
-          </div>
-
-          {waypoints.length === 0 ? (
-            <p
-              className="no-results-text"
-              style={{
-                padding: 0,
-                textAlign: "left",
-              }}
-            >
-              Nessun punto. Tocca la mappa per iniziare.
-            </p>
-          ) : (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 8,
-              }}
-            >
-              {waypoints.map((wp, index) => {
-                const isStart = index === 0
-                const isLast = index === waypoints.length - 1
-
-                return (
-                  <div key={wp.id} className="card waypoint-edit-row">
-                    <span
-                      className={`waypoint-edit-row__number ${
-                        isStart
-                          ? "waypoint-row__number--start"
-                          : isLast
-                            ? "waypoint-row__number--end"
-                            : "waypoint-row__number"
-                      }`}
-                    >
-                      {index + 1}
-                    </span>
-
-                    <label className="waypoint-edit-row__photo-btn">
-                      {wp.imagePreviewUrl || wp.existingImageUrl ? (
-                        <img
-                          src={wp.imagePreviewUrl || wp.existingImageUrl}
-                          alt=""
-                          className="waypoint-edit-row__photo-preview"
-                        />
-                      ) : (
-                        <FaCamera size={12} />
-                      )}
-
-                      <input
-                        type="file"
-                        accept="image/*"
-                        hidden
-                        onChange={(e) =>
-                          setWaypointImage(wp.id, e.target.files?.[0] || null)
-                        }
-                      />
-                    </label>
-
-                    <input
-                      type="text"
-                      className="waypoint-edit-row__input"
-                      placeholder={
-                        isStart
-                          ? "Es. Ritrovo"
-                          : isLast
-                            ? "Es. Arrivo"
-                            : "Es. Sosta caffè"
-                      }
-                      value={wp.label}
-                      onChange={(e) => setLabel(wp.id, e.target.value)}
-                    />
-
-                    <input
-                      type="number"
-                      className="waypoint-edit-row__stop-input"
-                      min={0}
-                      placeholder="0"
-                      value={wp.stopMinutes ?? ""}
-                      onChange={(e) => setStopMinutes(wp.id, e.target.value)}
-                      title="Minuti di sosta"
-                    />
-
-                    <button
-                      type="button"
-                      className="icon-btn-plain icon-btn-plain--muted"
-                      disabled={index === 0}
-                      onClick={() => move(index, -1)}
-                    >
-                      <FaArrowUp size={11} />
-                    </button>
-
-                    <button
-                      type="button"
-                      className="icon-btn-plain icon-btn-plain--muted"
-                      disabled={isLast}
-                      onClick={() => move(index, 1)}
-                    >
-                      <FaArrowDown size={11} />
-                    </button>
-
-                    <button
-                      type="button"
-                      className="icon-btn-plain icon-btn-plain--danger"
-                      onClick={() => remove(wp.id)}
-                    >
-                      <FaTrash size={11} />
-                    </button>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </div>
-
-        <div className="checkbox-stack">
-          {[
-            {
-              key: "avoidHighways",
-              label: "Evita autostrade",
-            },
-            {
-              key: "avoidTolls",
-              label: "Evita pedaggi",
-            },
-            {
-              key: "avoidFerries",
-              label: "Evita traghetti",
-            },
-          ].map((opt) => (
-            <label
-              key={opt.key}
-              className="auth-page__remember-label"
-              style={{
-                textTransform: "none",
-                letterSpacing: "normal",
-                fontFamily: "var(--font-body)",
-                fontSize: 13,
-              }}
-            >
-              <input
-                type="checkbox"
-                checked={options[opt.key]}
-                onChange={(e) =>
-                  setOptions((prev) => ({
-                    ...prev,
-                    [opt.key]: e.target.checked,
-                  }))
-                }
-              />
-
-              {opt.label}
-            </label>
-          ))}
-        </div>
-
-        {errorMsg && <div className="error-text">{errorMsg}</div>}
-
         {routeInfo && waypoints.length >= 2 && (
           <div className="inline-stats-row">
             <div>
@@ -971,6 +813,162 @@ function RouteEditorPage() {
             </div>
           </div>
         )}
+
+        <div>
+          <div className="field-label form-group__label">
+            PREFERENZE PERCORSO
+          </div>
+          <div className="options-row">
+            {[
+              { key: "avoidHighways", label: "NO AUTOSTRADE" },
+              { key: "avoidTolls", label: "NO PEDAGGI" },
+              { key: "avoidFerries", label: "NO TRAGHETTI" },
+            ].map((opt) => {
+              const active = options[opt.key]
+              return (
+                <button
+                  key={opt.key}
+                  type="button"
+                  className={`option-toggle ${active ? "option-toggle--active" : ""}`}
+                  onClick={() =>
+                    setOptions({ ...options, [opt.key]: !options[opt.key] })
+                  }
+                >
+                  {opt.label}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        <div>
+          <div className="field-label form-group__label">
+            PUNTI ({waypoints.length})
+          </div>
+          {waypoints.length === 0 ? (
+            <p
+              className="no-results-text"
+              style={{ padding: 0, textAlign: "left" }}
+            >
+              Nessun punto. Tocca la mappa per iniziare.
+            </p>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {waypoints.map((wp, index) => {
+                const isStart = index === 0
+                const isLast = index === waypoints.length - 1
+                const isMiddle = !isStart && !isLast
+                const middleCount = waypoints.length - 2
+
+                if (isMiddle && !waypointsExpanded) {
+                  if (index !== 1) return null
+                  return (
+                    <button
+                      key="waypoints-summary"
+                      type="button"
+                      className="card waypoint-edit-row waypoint-edit-row--summary"
+                      onClick={() => setWaypointsExpanded(true)}
+                    >
+                      <span>
+                        {middleCount}{" "}
+                        {middleCount === 1
+                          ? "TAPPA INTERMEDIA"
+                          : "TAPPE INTERMEDIE"}
+                      </span>
+                      <FaChevronDown size={11} />
+                    </button>
+                  )
+                }
+
+                return (
+                  <div key={wp.id} className="card waypoint-edit-row">
+                    <span
+                      className={`waypoint-edit-row__number ${isStart ? "waypoint-row__number--start" : isLast ? "waypoint-row__number--end" : "waypoint-row__number"}`}
+                    >
+                      {index + 1}
+                    </span>
+                    <label className="waypoint-edit-row__photo-btn">
+                      {wp.imagePreviewUrl || wp.existingImageUrl ? (
+                        <img
+                          src={wp.imagePreviewUrl || wp.existingImageUrl}
+                          alt=""
+                          className="waypoint-edit-row__photo-preview"
+                        />
+                      ) : (
+                        <FaCamera size={12} />
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        hidden
+                        onChange={(e) =>
+                          setWaypointImage(wp.id, e.target.files?.[0] || null)
+                        }
+                      />
+                    </label>
+                    <input
+                      type="text"
+                      className="waypoint-edit-row__input"
+                      placeholder={
+                        isStart
+                          ? "Es. Ritrovo"
+                          : isLast
+                            ? "Es. Arrivo"
+                            : "Es. Sosta caffè"
+                      }
+                      value={wp.label}
+                      onChange={(e) => setLabel(wp.id, e.target.value)}
+                    />
+                    <input
+                      type="number"
+                      className="waypoint-edit-row__stop-input"
+                      min={0}
+                      placeholder="0"
+                      value={wp.stopMinutes ?? ""}
+                      onChange={(e) => setStopMinutes(wp.id, e.target.value)}
+                      title="Minuti di sosta"
+                    />
+                    <button
+                      type="button"
+                      className="icon-btn-plain icon-btn-plain--muted"
+                      disabled={index === 0}
+                      onClick={() => move(index, -1)}
+                    >
+                      <FaArrowUp size={11} />
+                    </button>
+                    <button
+                      type="button"
+                      className="icon-btn-plain icon-btn-plain--muted"
+                      disabled={isLast}
+                      onClick={() => move(index, 1)}
+                    >
+                      <FaArrowDown size={11} />
+                    </button>
+                    <button
+                      type="button"
+                      className="icon-btn-plain icon-btn-plain--danger"
+                      onClick={() => remove(wp.id)}
+                    >
+                      <FaTrash size={11} />
+                    </button>
+                  </div>
+                )
+              })}
+
+              {waypointsExpanded && waypoints.length > 2 && (
+                <button
+                  type="button"
+                  className="waypoint-edit-row__collapse-btn"
+                  onClick={() => setWaypointsExpanded(false)}
+                >
+                  <FaChevronUp size={11} /> COMPRIMI TAPPE INTERMEDIE
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+
+        {errorMsg && <div className="error-text">{errorMsg}</div>}
 
         {savedRoute && (
           <div

@@ -8,11 +8,12 @@ import {
   FullscreenControl,
 } from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
-import { FaArrowLeft, FaTimes } from "react-icons/fa"
+import { FaArrowLeft, FaCamera, FaTimes } from "react-icons/fa"
 import {
   useGetEventByIdQuery,
   useChangeEventStatusMutation,
   useRequestAccessCodeMutation,
+  useUpdateEventCoverPhotoMutation,
 } from "../features/events/eventsApi"
 import {
   useJoinEventMutation,
@@ -67,6 +68,29 @@ function EventDetailPage() {
 
   const containerRef = useRef(null)
   const mapRef = useRef(null)
+
+  const [activeView, setActiveView] = useState("map")
+
+  const [showFullscreenCover, setShowFullscreenCover] = useState(false)
+
+  useEffect(() => {
+    if (activeView === "map") {
+      mapRef.current?.resize()
+    }
+  }, [activeView])
+
+  const [updateCoverPhoto, { isLoading: isUploadingCover }] =
+    useUpdateEventCoverPhotoMutation()
+
+  const handleCoverPhotoChange = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    try {
+      await updateCoverPhoto({ eventId, image: file }).unwrap()
+    } catch (err) {
+      console.error(err)
+    }
+  }
 
   const [acceptInvite, { isLoading: isAcceptingInvite }] =
     useAcceptInviteMutation()
@@ -467,12 +491,59 @@ function EventDetailPage() {
   return (
     <div className="page pb-100">
       <div className="event-detail-page__map-wrapper">
-        {showMap ? (
-          <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
-        ) : (
-          <div className="event-detail-page__map-placeholder">
-            <span className="screen-label">VIAGGIO MULTIGIORNO</span>
-          </div>
+        <div
+          style={{
+            display: activeView === "map" ? "block" : "none",
+            width: "100%",
+            height: "100%",
+          }}
+        >
+          {showMap ? (
+            <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
+          ) : (
+            <div className="event-detail-page__map-placeholder">
+              <span className="screen-label">VIAGGIO MULTIGIORNO</span>
+            </div>
+          )}
+        </div>
+
+        <div
+          style={{
+            display: activeView === "cover" ? "block" : "none",
+            width: "100%",
+            height: "100%",
+            cursor: event.coverPhotoUrl ? "pointer" : "default",
+          }}
+          onClick={() => event.coverPhotoUrl && setShowFullscreenCover(true)}
+        >
+          {event.coverPhotoUrl ? (
+            <img
+              src={event.coverPhotoUrl}
+              alt=""
+              className="event-detail-page__cover-img"
+            />
+          ) : (
+            <div className="event-detail-page__cover-empty">
+              <span className="screen-label">NESSUNA FOTO DI COPERTINA</span>
+            </div>
+          )}
+        </div>
+
+        {event.organizer && activeView === "cover" && (
+          <label className="event-detail-page__cover-edit-btn">
+            {isUploadingCover ? (
+              <Spinner size="sm" animation="border" />
+            ) : (
+              <FaCamera size={13} />
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={handleCoverPhotoChange}
+              disabled={isUploadingCover}
+            />
+          </label>
         )}
 
         <button
@@ -482,7 +553,27 @@ function EventDetailPage() {
         >
           <FaArrowLeft />
         </button>
-        {hasRoute && (
+
+        {(event.coverPhotoUrl || event.organizer) && (
+          <div className="event-detail-page__view-tabs">
+            <button
+              type="button"
+              className={`event-detail-page__view-tab ${activeView === "map" ? "event-detail-page__view-tab--active" : ""}`}
+              onClick={() => setActiveView("map")}
+            >
+              MAPPA
+            </button>
+            <button
+              type="button"
+              className={`event-detail-page__view-tab ${activeView === "cover" ? "event-detail-page__view-tab--active" : ""}`}
+              onClick={() => setActiveView("cover")}
+            >
+              FOTO
+            </button>
+          </div>
+        )}
+
+        {activeView === "map" && hasRoute && (
           <div className="event-detail-page__waypoint-hint">
             Tocca un punto sulla mappa per i dettagli
           </div>
@@ -1031,6 +1122,23 @@ function EventDetailPage() {
             </div>
           )
         })()}
+
+      {showFullscreenCover && event.coverPhotoUrl && (
+        <div className="event-cover-fullscreen">
+          <button
+            type="button"
+            className="btn-icon event-cover-fullscreen__back-btn"
+            onClick={() => setShowFullscreenCover(false)}
+          >
+            <FaArrowLeft />
+          </button>
+          <img
+            src={event.coverPhotoUrl}
+            alt=""
+            className="event-cover-fullscreen__img"
+          />
+        </div>
+      )}
     </div>
   )
 }

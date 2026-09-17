@@ -89,6 +89,10 @@ export const routesApi = apiSlice.injectEndpoints({
       query: ({ username, page = 0, size = 20 }) =>
         `/routes/user/${username}?page=${page}&size=${size}`,
     }),
+    getImportableRoutesForMap: builder.query({
+      query: () => "/routes/importable",
+      providesTags: ["Route"],
+    }),
   }),
 })
 
@@ -103,4 +107,5 @@ export const {
   useGetUserRoutesQuery,
   useUpdateWaypointImageMutation,
   useUpdateRouteMutation,
+  useGetImportableRoutesForMapQuery,
 } = routesApi
