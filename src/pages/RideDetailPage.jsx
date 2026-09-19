@@ -19,6 +19,8 @@ function RideDetailPage() {
   const [deleteRide, { isLoading: isDeleting }] = useDeleteRideMutation()
   const [confirm, setConfirm] = useState(false)
 
+  const [hoveredPoint, setHoveredPoint] = useState(null)
+
   const handleDelete = async () => {
     try {
       await deleteRide(rideId).unwrap()
@@ -74,11 +76,11 @@ function RideDetailPage() {
 
       <div className="ride-detail-page__hero">
         <div className="ride-detail-page__map-frame">
-          <RideMap points={ride.points} />
+          <RideMap points={ride.points} highlightedPoint={hoveredPoint} />
         </div>
 
         <div className="card ride-detail-page__chart-card">
-          <RideCharts points={ride.points} />
+          <RideCharts points={ride.points} highlightedPoint={setHoveredPoint} />
         </div>
       </div>
 
