@@ -124,6 +124,7 @@ function RideCharts({ points, onHoverPoint }) {
   const formatKmAxis = (km) => km.toFixed(1)
 
   const handleChartMouseMove = (state) => {
+    console.log("hover:", state?.activeTooltipIndex)
     if (state?.activeTooltipIndex != null) {
       onHoverPoint?.(points[state.activeTooltipIndex])
     }
