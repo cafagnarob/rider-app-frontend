@@ -4,12 +4,11 @@ import { Map, Marker, FullscreenControl, LngLatBounds } from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
 import { Spinner } from "react-bootstrap"
 import {
-  FaArrowDown,
   FaArrowLeft,
-  FaArrowUp,
   FaCamera,
   FaChevronDown,
   FaChevronUp,
+  FaGripVertical,
   FaSearch,
   FaTrash,
 } from "react-icons/fa"
@@ -25,6 +24,104 @@ import { MAP_STYLE_URL } from "../utils/mapStyle"
 import { COLORS, FONTS } from "../styles/theme"
 import "../pages/CSS/RouteEditorPage.css"
 import { useGeolocation } from "../utils/useGeolocation"
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core"
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  arrayMove,
+  useSortable,
+} from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
+
+function SortableWaypointRow({
+  wp,
+  index,
+  isStart,
+  isLast,
+  setLabel,
+  setStopMinutes,
+  setWaypointImage,
+  remove,
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: wp.id })
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+  }
+
+  return (
+    <div ref={setNodeRef} style={style} className="card waypoint-edit-row">
+      <span
+        {...attributes}
+        {...listeners}
+        className="waypoint-edit-row__drag-handle"
+      >
+        <FaGripVertical size={12} />
+      </span>
+      <span
+        className={`waypoint-edit-row__number ${isStart ? "waypoint-row__number--start" : isLast ? "waypoint-row__number--end" : "waypoint-row__number"}`}
+      >
+        {index + 1}
+      </span>
+      <label className="waypoint-edit-row__photo-btn">
+        {wp.imagePreviewUrl || wp.existingImageUrl ? (
+          <img
+            src={wp.imagePreviewUrl || wp.existingImageUrl}
+            alt=""
+            className="waypoint-edit-row__photo-preview"
+          />
+        ) : (
+          <FaCamera size={12} />
+        )}
+        <input
+          type="file"
+          accept="image/*"
+          hidden
+          onChange={(e) => setWaypointImage(wp.id, e.target.files?.[0] || null)}
+        />
+      </label>
+      <input
+        type="text"
+        className="waypoint-edit-row__input"
+        placeholder={
+          isStart ? "Es. Ritrovo" : isLast ? "Es. Arrivo" : "Es. Sosta caffè"
+        }
+        value={wp.label}
+        onChange={(e) => setLabel(wp.id, e.target.value)}
+      />
+      <input
+        type="number"
+        className="waypoint-edit-row__stop-input"
+        min={0}
+        placeholder="0"
+        value={wp.stopMinutes ?? ""}
+        onChange={(e) => setStopMinutes(wp.id, e.target.value)}
+        title="Minuti di sosta"
+      />
+      <button
+        type="button"
+        className="icon-btn-plain icon-btn-plain--danger"
+        onClick={() => remove(wp.id)}
+      >
+        <FaTrash size={11} />
+      </button>
+    </div>
+  )
+}
 
 const START_CENTER = [12.4964, 41.9028]
 
@@ -383,6 +480,11 @@ function RouteEditorPage() {
     waypoints.forEach((wp, index) => {
       const isStart = index === 0
       const isEnd = index === waypoints.length - 1 && waypoints.length > 1
+      const first = waypoints[0]
+      const isLoopClosingPoint =
+        isEnd &&
+        wp.latitude === first.latitude &&
+        wp.longitude === first.longitude
 
       const el = document.createElement("div")
 
@@ -390,15 +492,21 @@ function RouteEditorPage() {
 
       const dot = document.createElement("div")
 
+      const dotBackground = isLoopClosingPoint
+        ? `conic-gradient(${COLORS.danger} 0deg 180deg, #4ADE80 180deg 360deg)`
+        : isStart
+          ? "#4ADE80"
+          : isEnd
+            ? COLORS.danger
+            : COLORS.accent
+
       dot.style.cssText = `
-        width: 100%;
-        height: 100%;
-        border-radius: 50%;
-        position: relative;
-        background: ${
-          isStart ? "#4ADE80" : isEnd ? COLORS.danger : COLORS.accent
-        };
-        color: #08080A;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  position: relative;
+  background: ${dotBackground};
+  color: #08080A;
         font-family: ${FONTS.mono};
         font-weight: 700;
         font-size: 11px;
@@ -529,21 +637,6 @@ function RouteEditorPage() {
     setResults([])
   }
 
-  const move = (index, direction) => {
-    setWaypoints((prev) => {
-      const next = [...prev]
-      const target = index + direction
-
-      if (target < 0 || target >= next.length) {
-        return prev
-      }
-
-      ;[next[index], next[target]] = [next[target], next[index]]
-
-      return next
-    })
-  }
-
   const remove = (id) => {
     setWaypoints((prev) => {
       const target = prev.find((p) => p.id === id)
@@ -569,6 +662,51 @@ function RouteEditorPage() {
     )
   }
 
+  const isLooped = waypoints.some((w) => w.isReturnToStart)
+
+  const handleToggleLoop = () => {
+    if (isLooped) {
+      setWaypoints((prev) =>
+        prev.map((w) =>
+          w.isReturnToStart ? { ...w, isReturnToStart: false } : w,
+        ),
+      )
+      return
+    }
+    if (waypoints.length < 2) return
+
+    const first = waypoints[0]
+    const last = waypoints[waypoints.length - 1]
+
+    if (
+      last.latitude === first.latitude &&
+      last.longitude === first.longitude
+    ) {
+      setWaypoints((prev) =>
+        prev.map((w, idx) =>
+          idx === prev.length - 1 ? { ...w, isReturnToStart: true } : w,
+        ),
+      )
+      return
+    }
+
+    setWaypoints((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        latitude: first.latitude,
+        longitude: first.longitude,
+        label: first.label ? `${first.label} (ritorno)` : "",
+        stopMinutes: null,
+        imageFile: null,
+        imagePreviewUrl: null,
+        existingImageUrl: null,
+        isExisting: false,
+        isReturnToStart: true,
+      },
+    ])
+  }
+
   const setStopMinutes = (id, value) => {
     setWaypoints((prev) =>
       prev.map((p) =>
@@ -580,6 +718,20 @@ function RouteEditorPage() {
           : p,
       ),
     )
+  }
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+  )
+
+  const handleDragEnd = (event) => {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    setWaypoints((prev) => {
+      const oldIndex = prev.findIndex((w) => w.id === active.id)
+      const newIndex = prev.findIndex((w) => w.id === over.id)
+      return arrayMove(prev, oldIndex, newIndex)
+    })
   }
 
   const handleSave = async (e) => {
@@ -703,6 +855,26 @@ function RouteEditorPage() {
     })
   }
 
+  if (waypoints.length >= 2) {
+    const first = waypoints[0]
+    const returnIndex = waypoints.findIndex((w) => w.isReturnToStart)
+    if (returnIndex !== -1) {
+      const returnPoint = waypoints[returnIndex]
+      if (
+        returnPoint.latitude !== first.latitude ||
+        returnPoint.longitude !== first.longitude
+      ) {
+        setWaypoints((prev) =>
+          prev.map((w) =>
+            w.isReturnToStart
+              ? { ...w, latitude: first.latitude, longitude: first.longitude }
+              : w,
+          ),
+        )
+      }
+    }
+  }
+
   return isLoadingRoute ? (
     <div className="centered-spinner">
       <Spinner animation="border" style={{ color: "#FF7A2F" }} />
@@ -794,26 +966,6 @@ function RouteEditorPage() {
           )}
         </div>
 
-        {routeInfo && waypoints.length >= 2 && (
-          <div className="inline-stats-row">
-            <div>
-              <span className="inline-stats-row__value">
-                {routeInfo.distanceKm.toFixed(1).replace(".", ",")}
-              </span>
-
-              <span className="inline-stats-row__unit">KM</span>
-            </div>
-
-            <div>
-              <span className="inline-stats-row__value">
-                {Math.round(routeInfo.durationMin)}
-              </span>
-
-              <span className="inline-stats-row__unit">MIN</span>
-            </div>
-          </div>
-        )}
-
         <div>
           <div className="field-label form-group__label">
             PREFERENZE PERCORSO
@@ -841,10 +993,41 @@ function RouteEditorPage() {
           </div>
         </div>
 
+        {routeInfo && waypoints.length >= 2 && (
+          <div className="inline-stats-row">
+            <div>
+              <span className="inline-stats-row__value">
+                {routeInfo.distanceKm.toFixed(1).replace(".", ",")}
+              </span>
+
+              <span className="inline-stats-row__unit">KM</span>
+            </div>
+
+            <div>
+              <span className="inline-stats-row__value">
+                {Math.round(routeInfo.durationMin)}
+              </span>
+
+              <span className="inline-stats-row__unit">MIN</span>
+            </div>
+          </div>
+        )}
+
         <div>
+          <div className="options-row" style={{ marginBottom: 14 }}>
+            <button
+              type="button"
+              className={`option-toggle ${isLooped ? "option-toggle--active" : ""}`}
+              disabled={waypoints.length < 2}
+              onClick={handleToggleLoop}
+            >
+              LOOP
+            </button>
+          </div>
           <div className="field-label form-group__label">
             PUNTI ({waypoints.length})
           </div>
+
           {waypoints.length === 0 ? (
             <p
               className="no-results-text"
@@ -852,110 +1035,75 @@ function RouteEditorPage() {
             >
               Nessun punto. Tocca la mappa per iniziare.
             </p>
-          ) : (
+          ) : !waypointsExpanded && waypoints.length > 2 ? (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {waypoints.map((wp, index) => {
-                const isStart = index === 0
-                const isLast = index === waypoints.length - 1
-                const isMiddle = !isStart && !isLast
-                const middleCount = waypoints.length - 2
-
-                if (isMiddle && !waypointsExpanded) {
-                  if (index !== 1) return null
-                  return (
-                    <button
-                      key="waypoints-summary"
-                      type="button"
-                      className="card waypoint-edit-row waypoint-edit-row--summary"
-                      onClick={() => setWaypointsExpanded(true)}
-                    >
-                      <span>
-                        {middleCount}{" "}
-                        {middleCount === 1
-                          ? "TAPPA INTERMEDIA"
-                          : "TAPPE INTERMEDIE"}
-                      </span>
-                      <FaChevronDown size={11} />
-                    </button>
-                  )
-                }
-
-                return (
-                  <div key={wp.id} className="card waypoint-edit-row">
-                    <span
-                      className={`waypoint-edit-row__number ${isStart ? "waypoint-row__number--start" : isLast ? "waypoint-row__number--end" : "waypoint-row__number"}`}
-                    >
-                      {index + 1}
-                    </span>
-                    <label className="waypoint-edit-row__photo-btn">
-                      {wp.imagePreviewUrl || wp.existingImageUrl ? (
-                        <img
-                          src={wp.imagePreviewUrl || wp.existingImageUrl}
-                          alt=""
-                          className="waypoint-edit-row__photo-preview"
-                        />
-                      ) : (
-                        <FaCamera size={12} />
-                      )}
-                      <input
-                        type="file"
-                        accept="image/*"
-                        hidden
-                        onChange={(e) =>
-                          setWaypointImage(wp.id, e.target.files?.[0] || null)
-                        }
+              <div className="card waypoint-edit-row">
+                <span className="waypoint-edit-row__number waypoint-row__number--start">
+                  1
+                </span>
+                <div
+                  className="waypoint-edit-row__input"
+                  style={{ display: "flex", alignItems: "center" }}
+                >
+                  {waypoints[0].label || "Partenza"}
+                </div>
+              </div>
+              <button
+                type="button"
+                className="card waypoint-edit-row waypoint-edit-row--summary"
+                onClick={() => setWaypointsExpanded(true)}
+              >
+                <span>
+                  {waypoints.length - 2}{" "}
+                  {waypoints.length - 2 === 1
+                    ? "TAPPA INTERMEDIA"
+                    : "TAPPE INTERMEDIE"}
+                </span>
+                <FaChevronDown size={11} />
+              </button>
+              <div className="card waypoint-edit-row">
+                <span className="waypoint-edit-row__number waypoint-row__number--end">
+                  {waypoints.length}
+                </span>
+                <div
+                  className="waypoint-edit-row__input"
+                  style={{ display: "flex", alignItems: "center" }}
+                >
+                  {waypoints[waypoints.length - 1].label || "Arrivo"}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={waypoints.map((w) => w.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div
+                    style={{ display: "flex", flexDirection: "column", gap: 8 }}
+                  >
+                    {waypoints.map((wp, index) => (
+                      <SortableWaypointRow
+                        key={wp.id}
+                        wp={wp}
+                        index={index}
+                        isStart={index === 0}
+                        isLast={index === waypoints.length - 1}
+                        setLabel={setLabel}
+                        setStopMinutes={setStopMinutes}
+                        setWaypointImage={setWaypointImage}
+                        remove={remove}
                       />
-                    </label>
-                    <input
-                      type="text"
-                      className="waypoint-edit-row__input"
-                      placeholder={
-                        isStart
-                          ? "Es. Ritrovo"
-                          : isLast
-                            ? "Es. Arrivo"
-                            : "Es. Sosta caffè"
-                      }
-                      value={wp.label}
-                      onChange={(e) => setLabel(wp.id, e.target.value)}
-                    />
-                    <input
-                      type="number"
-                      className="waypoint-edit-row__stop-input"
-                      min={0}
-                      placeholder="0"
-                      value={wp.stopMinutes ?? ""}
-                      onChange={(e) => setStopMinutes(wp.id, e.target.value)}
-                      title="Minuti di sosta"
-                    />
-                    <button
-                      type="button"
-                      className="icon-btn-plain icon-btn-plain--muted"
-                      disabled={index === 0}
-                      onClick={() => move(index, -1)}
-                    >
-                      <FaArrowUp size={11} />
-                    </button>
-                    <button
-                      type="button"
-                      className="icon-btn-plain icon-btn-plain--muted"
-                      disabled={isLast}
-                      onClick={() => move(index, 1)}
-                    >
-                      <FaArrowDown size={11} />
-                    </button>
-                    <button
-                      type="button"
-                      className="icon-btn-plain icon-btn-plain--danger"
-                      onClick={() => remove(wp.id)}
-                    >
-                      <FaTrash size={11} />
-                    </button>
+                    ))}
                   </div>
-                )
-              })}
-
-              {waypointsExpanded && waypoints.length > 2 && (
+                </SortableContext>
+              </DndContext>
+              {waypoints.length > 2 && (
                 <button
                   type="button"
                   className="waypoint-edit-row__collapse-btn"
@@ -964,7 +1112,7 @@ function RouteEditorPage() {
                   <FaChevronUp size={11} /> COMPRIMI TAPPE INTERMEDIE
                 </button>
               )}
-            </div>
+            </>
           )}
         </div>
 
