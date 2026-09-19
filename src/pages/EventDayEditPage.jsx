@@ -110,6 +110,18 @@ function EventDayEditPage() {
     )
   }
 
+  const dayDate = form.startDateTime.slice(0, 10)
+
+  const setStartTime = (e) => {
+    const time = e.target.value
+    setForm((prev) => ({ ...prev, startDateTime: `${dayDate}T${time}` }))
+  }
+
+  const setEndTime = (e) => {
+    const time = e.target.value
+    setForm((prev) => ({ ...prev, endDateTime: `${dayDate}T${time}` }))
+  }
+
   const selectedRoute = routesPage?.content?.find((r) => r.id === form.routeId)
 
   const estimatedEndDateTime =
@@ -271,26 +283,43 @@ function EventDayEditPage() {
           )}
         </div>
 
+        <div>
+          <div className="field-label form-group__label">DATA</div>
+          <div className="add-day-page__first-day-date">
+            {new Date(`${dayDate}T00:00:00`)
+              .toLocaleDateString("it-IT", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+              })
+              .toUpperCase()}
+          </div>
+          <div className="helper-text">
+            La data non è modificabile da qui — cambiala dalla modifica del
+            viaggio.
+          </div>
+        </div>
+
         <div className="field-row">
           <div className="field-col">
-            <div className="field-label form-group__label">INIZIO</div>
+            <div className="field-label form-group__label">ORARIO INIZIO</div>
             <input
-              type="datetime-local"
+              type="time"
               className="input"
-              value={form.startDateTime}
-              onChange={set("startDateTime")}
+              value={form.startDateTime.slice(11, 16)}
+              onChange={setStartTime}
               required
             />
           </div>
 
           {day.type === "RADUNO" && (
             <div className="field-col">
-              <div className="field-label form-group__label">FINE</div>
+              <div className="field-label form-group__label">ORARIO FINE</div>
               <input
-                type="datetime-local"
+                type="time"
                 className="input"
-                value={form.endDateTime}
-                onChange={set("endDateTime")}
+                value={form.endDateTime.slice(11, 16)}
+                onChange={setEndTime}
                 required
               />
             </div>

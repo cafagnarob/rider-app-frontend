@@ -21,7 +21,8 @@
     "react-redux": "^9.3.0",
     "react-router-dom": "^7.18.2",
     "recharts": "^3.10.1",
-    "styled-components": "^6.5.1"
+    "styled-components": "^6.5.1",
+    "supercluster": "^9.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",

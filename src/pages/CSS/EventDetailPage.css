@@ -45,7 +45,8 @@
 
 .event-detail-page__status-row {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: start;
   margin-bottom: 10px;
 }
 
@@ -56,7 +57,7 @@
 }
 
 .event-detail-page__type-badge {
-  margin-left: auto;
+  /* margin-left: auto; */
 }
 
 .event-detail-page__title {

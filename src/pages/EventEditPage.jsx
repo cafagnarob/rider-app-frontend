@@ -168,6 +168,8 @@ function EventEditPage() {
       } else {
         payload.bufferMinutes = Number(form.bufferMinutes) || 0
       }
+    } else {
+      payload.startDateTime = form.startDateTime + ":00"
     }
 
     if (event.visibility === "PUBLIC") {
@@ -356,6 +358,25 @@ function EventEditPage() {
               </div>
             )}
           </>
+        )}
+
+        {isTrip && (
+          <div>
+            <div className="field-label form-group__label">
+              INIZIO DEL VIAGGIO
+            </div>
+            <input
+              type="datetime-local"
+              className="input"
+              value={form.startDateTime}
+              onChange={set("startDateTime")}
+              required
+            />
+            <div className="duration-hint">
+              Cambiando questa data, tutti i giorni già aggiunti si sposteranno
+              della stessa differenza, mantenendo i loro orari.
+            </div>
+          </div>
         )}
 
         {event.visibility !== "INVITE_ONLY" && (

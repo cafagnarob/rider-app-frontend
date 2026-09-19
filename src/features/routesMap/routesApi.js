@@ -90,7 +90,12 @@ export const routesApi = apiSlice.injectEndpoints({
         `/routes/user/${username}?page=${page}&size=${size}`,
     }),
     getImportableRoutesForMap: builder.query({
-      query: () => "/routes/importable",
+      query: ({ lat, lng } = {}) => {
+        const params = new URLSearchParams()
+        if (lat != null) params.append("lat", lat)
+        if (lng != null) params.append("lng", lng)
+        return `/routes/importable?${params.toString()}`
+      },
       providesTags: ["Route"],
     }),
   }),

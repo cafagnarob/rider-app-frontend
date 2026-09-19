@@ -20,6 +20,13 @@ const TABS = [
   { key: "history", label: "STORICO" },
 ]
 
+const DISTANCE_BUCKET_LABELS = {
+  UNDER_5KM: "< 5 KM",
+  KM_5_20: "5-20 KM",
+  KM_20_50: "20-50 KM",
+  OVER_50KM: "> 50 KM",
+}
+
 function haversineKm([lng1, lat1], [lng2, lat2]) {
   const R = 6371
 
@@ -77,39 +84,35 @@ function EventsListPage() {
       lat: geoFilter?.lat,
       lng: geoFilter?.lng,
       radiusKm: geoFilter ? 40 : undefined,
+      viewerLat: position?.latitude,
+      viewerLng: position?.longitude,
     },
-    {
-      skip: tab !== "search",
-    },
+    { skip: tab !== "search" },
   )
 
   const organizedQuery = useGetOrganizedEventsQuery(
     {
       history,
       page,
+      viewerLat: position?.latitude,
+      viewerLng: position?.longitude,
     },
-    {
-      skip: tab !== "organized",
-    },
+    { skip: tab !== "organized" },
   )
 
   const participatingQuery = useGetParticipatingEventsQuery(
     {
       history,
       page,
+      viewerLat: position?.latitude,
+      viewerLng: position?.longitude,
     },
-    {
-      skip: tab !== "participating",
-    },
+    { skip: tab !== "participating" },
   )
 
   const historyQuery = useGetHistoryEventsQuery(
-    {
-      page,
-    },
-    {
-      skip: tab !== "history",
-    },
+    { page, viewerLat: position?.latitude, viewerLng: position?.longitude },
+    { skip: tab !== "history" },
   )
 
   const { data, isLoading, isFetching, isError } =
@@ -307,28 +310,46 @@ function EventsListPage() {
                   </div>
                 </div>
 
-                {distanceKm != null && (
+                {event.type === "MULTI_DAY_TRIP" &&
+                event.tripDurationDays != null ? (
                   <div className="event-row__distance-box">
                     <span className="event-row__date-day">
-                      {Math.round(distanceKm)}
+                      {event.tripDurationDays}
                     </span>
-
-                    <span className="event-row__date-month">KM DA TE</span>
-                  </div>
-                )}
-
-                {distanceKm == null && position && event.locked && (
-                  <div className="event-row__distance-box event-row__date-box--locked">
-                    <span
-                      className="event-row__date-month"
-                      style={{
-                        fontSize: 7.5,
-                        lineHeight: 1.25,
-                      }}
-                    >
-                      RICHIEDI IL CODICE
+                    <span className="event-row__date-month">
+                      {event.tripDurationDays === 1 ? "GIORNO" : "GIORNI"}
                     </span>
                   </div>
+                ) : event.locked ? (
+                  event.lockedDistanceBucket ? (
+                    <div className="event-row__distance-box event-row__date-box--locked">
+                      <span
+                        className="event-row__date-day"
+                        style={{ fontSize: 14 }}
+                      >
+                        {DISTANCE_BUCKET_LABELS[event.lockedDistanceBucket]}
+                      </span>
+                      <span className="event-row__date-month">DA TE</span>
+                    </div>
+                  ) : (
+                    <div className="event-row__distance-box event-row__date-box--locked">
+                      <span
+                        className="event-row__date-month"
+                        style={{ fontSize: 7.5, lineHeight: 1.25 }}
+                      >
+                        RICHIEDI IL CODICE
+                      </span>
+                    </div>
+                  )
+                ) : (
+                  distanceKm != null && (
+                    <div className="event-row__distance-box">
+                      <span className="event-row__date-day">
+                        {Math.round(distanceKm)}
+                      </span>
+                      <span className="event-row__date-month">KM DA TE</span>
+                    </div>
+                  )
                 )}
               </div>
             )

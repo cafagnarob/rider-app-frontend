@@ -263,6 +263,24 @@
   margin-top: 6px;
 }
 
+.add-day-page__duration-estimate {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--color-accent);
+  margin-top: 15px;
+}
+
+.trip-day-row__link-area {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  text-decoration: none;
+  color: inherit;
+}
+
 .meeting-point {
   margin-top: 12px;
   position: relative;

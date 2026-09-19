@@ -8,12 +8,21 @@ import {
   FullscreenControl,
 } from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
-import { FaArrowLeft, FaCamera, FaTimes } from "react-icons/fa"
+import {
+  FaArrowDown,
+  FaArrowLeft,
+  FaArrowUp,
+  FaCamera,
+  FaTimes,
+  FaTrash,
+} from "react-icons/fa"
 import {
   useGetEventByIdQuery,
   useChangeEventStatusMutation,
   useRequestAccessCodeMutation,
   useUpdateEventCoverPhotoMutation,
+  useDeleteEventDayMutation,
+  useReorderEventDaysMutation,
 } from "../features/events/eventsApi"
 import {
   useJoinEventMutation,
@@ -72,6 +81,11 @@ function EventDetailPage() {
   const [activeView, setActiveView] = useState("map")
 
   const [showFullscreenCover, setShowFullscreenCover] = useState(false)
+
+  const [deleteEventDay, { isLoading: isDeletingDay }] =
+    useDeleteEventDayMutation()
+  const [reorderEventDays] = useReorderEventDaysMutation()
+  const [dayToDelete, setDayToDelete] = useState(null)
 
   useEffect(() => {
     if (activeView === "map") {
@@ -279,6 +293,34 @@ function EventDetailPage() {
     try {
       await changeStatus({ eventId, status: "CANCELLED" }).unwrap()
       setConfirmType(null)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const handleDeleteDay = async () => {
+    if (!dayToDelete) return
+    try {
+      await deleteEventDay({ tripId: eventId, dayId: dayToDelete }).unwrap()
+      setDayToDelete(null)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const handleMoveDay = async (index, direction) => {
+    const target = index + direction
+    if (target < 0 || target >= event.children.length) return
+    const reordered = [...event.children]
+    ;[reordered[index], reordered[target]] = [
+      reordered[target],
+      reordered[index],
+    ]
+    try {
+      await reorderEventDays({
+        tripId: eventId,
+        dayIds: reordered.map((d) => d.id),
+      }).unwrap()
     } catch (err) {
       console.error(err)
     }
@@ -586,7 +628,7 @@ function EventDetailPage() {
             to={`/events/${event.parentEventId}`}
             className="event-detail-page__parent-link"
           >
-            ← TORNA AL VIAGGIO "{event.parentEventTitle?.toUpperCase()}"
+            ← TORNA AL VIAGGIO
           </Link>
         )}
 
@@ -774,12 +816,9 @@ function EventDetailPage() {
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {event.children.map((day, index) => {
                   const dayStart = new Date(day.startDateTime)
-                  return (
-                    <Link
-                      key={day.id}
-                      to={`/events/${day.id}`}
-                      className="card trip-day-row"
-                    >
+                  const isLast = index === event.children.length - 1
+                  const dayInfo = (
+                    <>
                       <span className="trip-day-row__number">{index + 1}</span>
                       <div className="trip-day-row__info">
                         <div className="trip-day-row__title">{day.title}</div>
@@ -792,8 +831,56 @@ function EventDetailPage() {
                           {day.type === "RADUNO" ? "SOSTA" : "TAPPA"}
                         </div>
                       </div>
-                      <span className="trip-day-row__chevron">{">"}</span>
-                    </Link>
+                    </>
+                  )
+
+                  if (!event.organizer) {
+                    return (
+                      <Link
+                        key={day.id}
+                        to={`/events/${day.id}`}
+                        className="card trip-day-row"
+                      >
+                        {dayInfo}
+                        <span className="trip-day-row__chevron">{">"}</span>
+                      </Link>
+                    )
+                  }
+
+                  return (
+                    <div key={day.id} className="card trip-day-row">
+                      <Link
+                        to={`/events/${day.id}`}
+                        className="trip-day-row__link-area"
+                      >
+                        {dayInfo}
+                      </Link>
+                      <div className="trip-day-row__actions">
+                        <button
+                          type="button"
+                          className="icon-btn-plain icon-btn-plain--muted"
+                          disabled={index === 0}
+                          onClick={() => handleMoveDay(index, -1)}
+                        >
+                          <FaArrowUp size={11} />
+                        </button>
+                        <button
+                          type="button"
+                          className="icon-btn-plain icon-btn-plain--muted"
+                          disabled={isLast}
+                          onClick={() => handleMoveDay(index, 1)}
+                        >
+                          <FaArrowDown size={11} />
+                        </button>
+                        <button
+                          type="button"
+                          className="icon-btn-plain icon-btn-plain--danger"
+                          onClick={() => setDayToDelete(day.id)}
+                        >
+                          <FaTrash size={11} />
+                        </button>
+                      </div>
+                    </div>
                   )
                 })}
               </div>
@@ -1036,6 +1123,35 @@ function EventDetailPage() {
                 disabled={isCancelling}
               >
                 CONFERMA
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {dayToDelete && (
+        <div className="modal-overlay" onClick={() => setDayToDelete(null)}>
+          <div className="card modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-title">ELIMINARE QUESTO GIORNO?</div>
+            <p className="modal-text">
+              I giorni successivi scivoleranno indietro di un giorno. I
+              partecipanti verranno informati.
+            </p>
+            <div className="modal-actions">
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => setDayToDelete(null)}
+              >
+                INDIETRO
+              </button>
+              <button
+                type="button"
+                className="btn-danger"
+                onClick={handleDeleteDay}
+                disabled={isDeletingDay}
+              >
+                {isDeletingDay ? "..." : "ELIMINA"}
               </button>
             </div>
           </div>

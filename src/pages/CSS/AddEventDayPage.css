@@ -147,6 +147,18 @@
   color: var(--color-accent);
 }
 
+.add-day-page__first-day-date {
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--color-card-alt);
+  border: 1px solid var(--color-border-soft);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--color-text-secondary);
+  margin-bottom: 8px;
+}
+
 .date-row {
   display: flex;
   gap: 12px;

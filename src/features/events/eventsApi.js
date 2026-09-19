@@ -10,6 +10,8 @@ export const eventsApi = apiSlice.injectEndpoints({
         lat,
         lng,
         radiusKm,
+        viewerLat,
+        viewerLng,
         page = 0,
         size = 20,
       } = {}) => {
@@ -20,18 +22,40 @@ export const eventsApi = apiSlice.injectEndpoints({
         if (lat != null) params.append("lat", lat)
         if (lng != null) params.append("lng", lng)
         if (radiusKm) params.append("radiusKm", radiusKm)
+        if (viewerLat != null) params.append("viewerLat", viewerLat)
+        if (viewerLng != null) params.append("viewerLng", viewerLng)
         return `/events/search?${params.toString()}`
       },
       providesTags: ["Event"],
     }),
     getOrganizedEvents: builder.query({
-      query: ({ history = false, page = 0, size = 20 } = {}) =>
-        `/events/organized?history=${history}&page=${page}&size=${size}`,
+      query: ({
+        history = false,
+        viewerLat,
+        viewerLng,
+        page = 0,
+        size = 20,
+      } = {}) => {
+        const params = new URLSearchParams({ history, page, size })
+        if (viewerLat != null) params.append("viewerLat", viewerLat)
+        if (viewerLng != null) params.append("viewerLng", viewerLng)
+        return `/events/organized?${params.toString()}`
+      },
       providesTags: ["Event"],
     }),
     getParticipatingEvents: builder.query({
-      query: ({ history = false, page = 0, size = 20 } = {}) =>
-        `/events/participating?history=${history}&page=${page}&size=${size}`,
+      query: ({
+        history = false,
+        viewerLat,
+        viewerLng,
+        page = 0,
+        size = 20,
+      } = {}) => {
+        const params = new URLSearchParams({ history, page, size })
+        if (viewerLat != null) params.append("viewerLat", viewerLat)
+        if (viewerLng != null) params.append("viewerLng", viewerLng)
+        return `/events/participating?${params.toString()}`
+      },
       providesTags: ["Event"],
     }),
     getEventById: builder.query({
@@ -41,8 +65,12 @@ export const eventsApi = apiSlice.injectEndpoints({
       ],
     }),
     getHistoryEvents: builder.query({
-      query: ({ page = 0, size = 20 } = {}) =>
-        `/events/history?page=${page}&size=${size}`,
+      query: ({ viewerLat, viewerLng, page = 0, size = 20 } = {}) => {
+        const params = new URLSearchParams({ page, size })
+        if (viewerLat != null) params.append("viewerLat", viewerLat)
+        if (viewerLng != null) params.append("viewerLng", viewerLng)
+        return `/events/history?${params.toString()}`
+      },
       providesTags: ["Event"],
     }),
     createEvent: builder.mutation({
@@ -162,6 +190,27 @@ export const eventsApi = apiSlice.injectEndpoints({
         "Event",
       ],
     }),
+    deleteEventDay: builder.mutation({
+      query: ({ tripId, dayId }) => ({
+        url: `/events/${tripId}/days/${dayId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, { tripId }) => [
+        { type: "Event", id: tripId },
+        "Event",
+      ],
+    }),
+    reorderEventDays: builder.mutation({
+      query: ({ tripId, dayIds }) => ({
+        url: `/events/${tripId}/days/reorder`,
+        method: "PATCH",
+        body: { dayIds },
+      }),
+      invalidatesTags: (result, error, { tripId }) => [
+        { type: "Event", id: tripId },
+        "Event",
+      ],
+    }),
   }),
 })
 
@@ -183,4 +232,6 @@ export const {
   useRejectAccessCodeRequestMutation,
   useGetHistoryEventsQuery,
   useUpdateEventCoverPhotoMutation,
+  useDeleteEventDayMutation,
+  useReorderEventDaysMutation,
 } = eventsApi
