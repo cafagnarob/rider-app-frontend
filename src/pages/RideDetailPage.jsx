@@ -80,7 +80,7 @@ function RideDetailPage() {
         </div>
 
         <div className="card ride-detail-page__chart-card">
-          <RideCharts points={ride.points} highlightedPoint={setHoveredPoint} />
+          <RideCharts points={ride.points} onHoverPoint={setHoveredPoint} />
         </div>
       </div>
 
