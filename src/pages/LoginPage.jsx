@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useDispatch } from "react-redux"
 import { useNavigate, useLocation, Link } from "react-router-dom"
 import { useLoginMutation } from "../features/auth/authApi"
@@ -16,6 +16,10 @@ function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
 
+  const [infoMessage, setInfoMessage] = useState(() =>
+    sessionStorage.getItem("loginInfoMessage"),
+  )
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setErrorMsg("")
@@ -28,6 +32,12 @@ function LoginPage() {
     }
   }
 
+  useEffect(() => {
+    if (infoMessage) {
+      sessionStorage.removeItem("loginInfoMessage")
+    }
+  }, [])
+
   return (
     <div className="auth-page">
       <div className="auth-page__hero auth-page__hero--photo">
@@ -39,6 +49,18 @@ function LoginPage() {
           <div className="auth-page__brand-title">FlowRides</div>
           <div className="auth-page__brand-subtitle">BENTORNATO IN SELLA</div>
         </div>
+
+        {infoMessage && (
+          <div
+            className="empty-state"
+            style={{
+              borderColor: "var(--color-accent-soft-border)",
+              color: "var(--color-accent)",
+            }}
+          >
+            {infoMessage}
+          </div>
+        )}
 
         <form className="auth-page__form" onSubmit={handleSubmit}>
           <input

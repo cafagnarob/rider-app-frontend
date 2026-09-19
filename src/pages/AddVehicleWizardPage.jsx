@@ -9,6 +9,7 @@ import {
 import { useAddVehicleMutation } from "../features/vehicles/vehiclesApi"
 import { CATEGORY_LABELS } from "../utils/constants"
 import "../pages/CSS/AddVehicleWizardPage.css"
+import CatalogSuggestionModal from "../features/catalog/components/CatalogSuggestionModal"
 
 const STEPS = ["MARCA", "MODELLO", "DETTAGLI"]
 
@@ -44,6 +45,7 @@ function AddVehicleWizardPage() {
   )
 
   const [addVehicle, { isLoading: isSaving }] = useAddVehicleMutation()
+  const [showSuggestionModal, setShowSuggestionModal] = useState(false)
 
   const filteredBrands = brands?.filter((b) =>
     b.name.toLowerCase().includes(brandSearch.toLowerCase()),
@@ -217,6 +219,16 @@ function AddVehicleWizardPage() {
         </div>
       )}
 
+      <div style={{ textAlign: "center", marginTop: 24, marginBottom: 12 }}>
+        <button
+          type="button"
+          className="text-btn text-btn--accent"
+          onClick={() => setShowSuggestionModal(true)}
+        >
+          NON TROVI LA TUA MOTO? SEGNALACELO
+        </button>
+      </div>
+
       {step === 2 && selectedModel && (
         <form onSubmit={handleSubmit} className="form-stack px-20">
           <div className="card selected-model-summary">
@@ -320,6 +332,10 @@ function AddVehicleWizardPage() {
             {isSaving ? "..." : "AGGIUNGI AL GARAGE"}
           </button>
         </form>
+      )}
+
+      {showSuggestionModal && (
+        <CatalogSuggestionModal onClose={() => setShowSuggestionModal(false)} />
       )}
     </div>
   )

@@ -37,6 +37,8 @@ import AdminCatalogPage from "../pages/AdminCatalogPage"
 import AvatarPickerPage from "../pages/AvatarPickerPage"
 import StoryComposerPage from "../pages/StoryComposerPage"
 import ModelDetailPage from "../pages/ModelDetailPage"
+import EventEditPage from "../pages/EventEditPage"
+import EventDayEditPage from "../pages/EventDayEditPage"
 
 function AppRoutes() {
   return (
@@ -68,6 +70,12 @@ function AppRoutes() {
           <Route path="/events" element={<EventsListPage />} />
           <Route path="/events/new" element={<EventCreatePage />} />
           <Route path="/events/:eventId" element={<EventDetailPage />} />
+          <Route path="/events/:eventId/edit" element={<EventEditPage />} />
+          <Route path="/routes/:routeId/edit" element={<RouteEditorPage />} />
+          <Route
+            path="/events/:tripId/days/:dayId/edit"
+            element={<EventDayEditPage />}
+          />
           <Route path="/invites" element={<MyInvitesPage />} />
           <Route path="/garage/:vehicleId" element={<VehicleDetailPage />} />
           <Route path="/search" element={<SearchPage />} />

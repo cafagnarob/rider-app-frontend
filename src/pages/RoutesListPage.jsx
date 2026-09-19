@@ -18,6 +18,7 @@ function RoutesListPage() {
   const navigate = useNavigate()
   const [searchInput, setSearchInput] = useState("")
   const timerRef = useRef(null)
+  const [deleteErrors, setDeleteErrors] = useState({})
 
   const handleSearchChange = (e) => {
     const value = e.target.value
@@ -28,10 +29,14 @@ function RoutesListPage() {
 
   const handleDelete = async (e, routeId) => {
     e.stopPropagation()
+    setDeleteErrors((prev) => ({ ...prev, [routeId]: null }))
     try {
       await deleteRoute(routeId).unwrap()
     } catch (err) {
-      console.error("Eliminazione fallita:", err.data?.message || err)
+      setDeleteErrors((prev) => ({
+        ...prev,
+        [routeId]: err.data?.message || "Impossibile eliminare il percorso.",
+      }))
     }
   }
 
@@ -166,6 +171,16 @@ function RoutesListPage() {
                   IMPORTABILE
                 </label>
               </div>
+
+              {deleteErrors[route.id] && (
+                <div
+                  className="error-text"
+                  style={{ marginTop: 10 }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {deleteErrors[route.id]}
+                </div>
+              )}
             </div>
           ))}
         </div>

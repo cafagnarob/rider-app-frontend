@@ -10,6 +10,7 @@ import {
 import { useGetMyVehiclesQuery } from "../features/vehicles/vehiclesApi"
 import { CATEGORY_LABELS, CC_RANGES } from "../utils/constants"
 import "../pages/CSS/ModelsPage.css"
+import CatalogSuggestionModal from "../features/catalog/components/CatalogSuggestionModal"
 
 const ORDER_OPTIONS = [
   { value: "name", label: "Nome" },
@@ -35,6 +36,7 @@ function ModelsPage() {
   const timerRef = useRef(null)
 
   const [ccRange, setCcRange] = useState("")
+  const [showSuggestionModal, setShowSuggestionModal] = useState(false)
 
   const [minCc, maxCc] = ccRange
     ? ccRange.split("-").map((v) => (v === "" ? undefined : Number(v)))
@@ -276,7 +278,15 @@ function ModelsPage() {
           })}
         </div>
       )}
-
+      <div style={{ textAlign: "center", marginTop: 24, marginBottom: 12 }}>
+        <button
+          type="button"
+          className="text-btn text-btn--accent"
+          onClick={() => setShowSuggestionModal(true)}
+        >
+          NON TROVI LA TUA MOTO? SEGNALACELO
+        </button>
+      </div>
       {pageData.totalPages > 1 && (
         <div className="pagination-row">
           <button
@@ -315,6 +325,9 @@ function ModelsPage() {
         model={selectedModel}
         onClose={() => setSelectedModel(null)}
       />
+      {showSuggestionModal && (
+        <CatalogSuggestionModal onClose={() => setShowSuggestionModal(false)} />
+      )}
     </div>
   )
 }

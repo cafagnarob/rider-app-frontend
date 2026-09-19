@@ -3,12 +3,14 @@ import { useGetBrandsQuery } from "../features/catalog/catalogApi"
 import { useNavigate } from "react-router-dom"
 import { useState } from "react"
 import "../pages/CSS/BrandsPage.css"
+import CatalogSuggestionModal from "../features/catalog/components/CatalogSuggestionModal"
 
 function BrandsPage() {
   const { data: brands, isLoading, isError } = useGetBrandsQuery()
   const navigate = useNavigate()
 
   const [search, setSearch] = useState("")
+  const [showSuggestionModal, setShowSuggestionModal] = useState(false)
 
   const filteredBrands = brands?.filter((b) =>
     b.name.toLowerCase().includes(search.toLowerCase()),
@@ -71,6 +73,18 @@ function BrandsPage() {
             </div>
           ))}
         </div>
+      )}
+      <div style={{ textAlign: "center", marginTop: 24, marginBottom: 12 }}>
+        <button
+          type="button"
+          className="text-btn text-btn--accent"
+          onClick={() => setShowSuggestionModal(true)}
+        >
+          NON TROVI LA TUA MOTO? SEGNALACELO
+        </button>
+      </div>
+      {showSuggestionModal && (
+        <CatalogSuggestionModal onClose={() => setShowSuggestionModal(false)} />
       )}
     </div>
   )

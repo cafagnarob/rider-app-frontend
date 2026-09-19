@@ -1,19 +1,28 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Spinner } from "react-bootstrap"
 import { useParams, useNavigate, Link } from "react-router-dom"
 import {
   Map as MapLibreMap,
   Marker,
-  Popup,
   LngLatBounds,
   FullscreenControl,
 } from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
-import { FaArrowLeft } from "react-icons/fa"
+import {
+  FaArrowDown,
+  FaArrowLeft,
+  FaArrowUp,
+  FaCamera,
+  FaTimes,
+  FaTrash,
+} from "react-icons/fa"
 import {
   useGetEventByIdQuery,
   useChangeEventStatusMutation,
   useRequestAccessCodeMutation,
+  useUpdateEventCoverPhotoMutation,
+  useDeleteEventDayMutation,
+  useReorderEventDaysMutation,
 } from "../features/events/eventsApi"
 import {
   useJoinEventMutation,
@@ -33,12 +42,26 @@ import {
 } from "../features/events/invitesApi"
 import Avatar from "../components/Avatar"
 
+function haversineKm([lng1, lat1], [lng2, lat2]) {
+  const R = 6371
+  const dLat = ((lat2 - lat1) * Math.PI) / 180
+  const dLng = ((lng2 - lng1) * Math.PI) / 180
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLng / 2) ** 2
+  return R * 2 * Math.asin(Math.sqrt(a))
+}
+
 function EventDetailPage() {
   const { eventId } = useParams()
   const navigate = useNavigate()
   const { data: event, isLoading, isError } = useGetEventByIdQuery(eventId)
 
   const { data: participants } = useGetAcceptedParticipantsQuery(eventId)
+
+  const [selectedWaypointId, setSelectedWaypointId] = useState(null)
 
   const [requestAccessCode, { isLoading: isRequestingCode }] =
     useRequestAccessCodeMutation()
@@ -54,6 +77,34 @@ function EventDetailPage() {
 
   const containerRef = useRef(null)
   const mapRef = useRef(null)
+
+  const [activeView, setActiveView] = useState("map")
+
+  const [showFullscreenCover, setShowFullscreenCover] = useState(false)
+
+  const [deleteEventDay, { isLoading: isDeletingDay }] =
+    useDeleteEventDayMutation()
+  const [reorderEventDays] = useReorderEventDaysMutation()
+  const [dayToDelete, setDayToDelete] = useState(null)
+
+  useEffect(() => {
+    if (activeView === "map") {
+      mapRef.current?.resize()
+    }
+  }, [activeView])
+
+  const [updateCoverPhoto, { isLoading: isUploadingCover }] =
+    useUpdateEventCoverPhotoMutation()
+
+  const handleCoverPhotoChange = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    try {
+      await updateCoverPhoto({ eventId, image: file }).unwrap()
+    } catch (err) {
+      console.error(err)
+    }
+  }
 
   const [acceptInvite, { isLoading: isAcceptingInvite }] =
     useAcceptInviteMutation()
@@ -171,15 +222,7 @@ function EventDetailPage() {
             wp.longitude,
             wp.latitude,
           ])
-          if (wp.label && wp.label.trim()) {
-            marker.setPopup(
-              new Popup({
-                offset: 14,
-                closeButton: false,
-                className: "qj-popup",
-              }).setText(wp.label),
-            )
-          }
+          el.addEventListener("click", () => setSelectedWaypointId(wp.id))
           marker.addTo(map)
         })
 
@@ -254,6 +297,77 @@ function EventDetailPage() {
       console.error(err)
     }
   }
+
+  const handleDeleteDay = async () => {
+    if (!dayToDelete) return
+    try {
+      await deleteEventDay({ tripId: eventId, dayId: dayToDelete }).unwrap()
+      setDayToDelete(null)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const handleMoveDay = async (index, direction) => {
+    const target = index + direction
+    if (target < 0 || target >= event.children.length) return
+    const reordered = [...event.children]
+    ;[reordered[index], reordered[target]] = [
+      reordered[target],
+      reordered[index],
+    ]
+    try {
+      await reorderEventDays({
+        tripId: eventId,
+        dayIds: reordered.map((d) => d.id),
+      }).unwrap()
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const hasRoute = !!event?.route?.encodedPolyline
+
+  const waypointStats = useMemo(() => {
+    if (!hasRoute || !event?.route?.waypoints) return {}
+
+    const coords = decodePolyline(event.route.encodedPolyline)
+    if (coords.length === 0) return {}
+
+    const cumulative = [0]
+    for (let i = 1; i < coords.length; i++) {
+      cumulative.push(cumulative[i - 1] + haversineKm(coords[i - 1], coords[i]))
+    }
+    const totalKm = cumulative[cumulative.length - 1]
+
+    const waypoints = event.route.waypoints
+    const distFromStart = waypoints.map((wp) => {
+      let bestIdx = 0
+      let bestDist = Infinity
+      coords.forEach((c, idx) => {
+        const d = haversineKm(c, [wp.longitude, wp.latitude])
+        if (d < bestDist) {
+          bestDist = d
+          bestIdx = idx
+        }
+      })
+      return cumulative[bestIdx]
+    })
+
+    const stats = {}
+    waypoints.forEach((wp, i) => {
+      stats[wp.id] = {
+        fromStartKm: distFromStart[i],
+        toEndKm: totalKm - distFromStart[i],
+        fromPrevKm: i > 0 ? distFromStart[i] - distFromStart[i - 1] : null,
+        toNextKm:
+          i < waypoints.length - 1
+            ? distFromStart[i + 1] - distFromStart[i]
+            : null,
+      }
+    })
+    return stats
+  }, [event, hasRoute])
 
   if (isLoading) {
     return (
@@ -419,12 +533,59 @@ function EventDetailPage() {
   return (
     <div className="page pb-100">
       <div className="event-detail-page__map-wrapper">
-        {showMap ? (
-          <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
-        ) : (
-          <div className="event-detail-page__map-placeholder">
-            <span className="screen-label">VIAGGIO MULTIGIORNO</span>
-          </div>
+        <div
+          style={{
+            display: activeView === "map" ? "block" : "none",
+            width: "100%",
+            height: "100%",
+          }}
+        >
+          {showMap ? (
+            <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
+          ) : (
+            <div className="event-detail-page__map-placeholder">
+              <span className="screen-label">VIAGGIO MULTIGIORNO</span>
+            </div>
+          )}
+        </div>
+
+        <div
+          style={{
+            display: activeView === "cover" ? "block" : "none",
+            width: "100%",
+            height: "100%",
+            cursor: event.coverPhotoUrl ? "pointer" : "default",
+          }}
+          onClick={() => event.coverPhotoUrl && setShowFullscreenCover(true)}
+        >
+          {event.coverPhotoUrl ? (
+            <img
+              src={event.coverPhotoUrl}
+              alt=""
+              className="event-detail-page__cover-img"
+            />
+          ) : (
+            <div className="event-detail-page__cover-empty">
+              <span className="screen-label">NESSUNA FOTO DI COPERTINA</span>
+            </div>
+          )}
+        </div>
+
+        {event.organizer && activeView === "cover" && (
+          <label className="event-detail-page__cover-edit-btn">
+            {isUploadingCover ? (
+              <Spinner size="sm" animation="border" />
+            ) : (
+              <FaCamera size={13} />
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={handleCoverPhotoChange}
+              disabled={isUploadingCover}
+            />
+          </label>
         )}
 
         <button
@@ -435,14 +596,29 @@ function EventDetailPage() {
           <FaArrowLeft />
         </button>
 
-        {event.organizer && event.status === "ACTIVE" && (
-          <button
-            type="button"
-            className="event-detail-page__cancel-btn"
-            onClick={() => setConfirmType("cancelEvent")}
-          >
-            ANNULLA EVENTO
-          </button>
+        {(event.coverPhotoUrl || event.organizer) && (
+          <div className="event-detail-page__view-tabs">
+            <button
+              type="button"
+              className={`event-detail-page__view-tab ${activeView === "map" ? "event-detail-page__view-tab--active" : ""}`}
+              onClick={() => setActiveView("map")}
+            >
+              MAPPA
+            </button>
+            <button
+              type="button"
+              className={`event-detail-page__view-tab ${activeView === "cover" ? "event-detail-page__view-tab--active" : ""}`}
+              onClick={() => setActiveView("cover")}
+            >
+              FOTO
+            </button>
+          </div>
+        )}
+
+        {activeView === "map" && hasRoute && (
+          <div className="event-detail-page__waypoint-hint">
+            Tocca un punto sulla mappa per i dettagli
+          </div>
         )}
       </div>
 
@@ -452,7 +628,7 @@ function EventDetailPage() {
             to={`/events/${event.parentEventId}`}
             className="event-detail-page__parent-link"
           >
-            ← TORNA AL VIAGGIO "{event.parentEventTitle?.toUpperCase()}"
+            ← TORNA AL VIAGGIO
           </Link>
         )}
 
@@ -488,6 +664,13 @@ function EventDetailPage() {
         </div>
 
         <div className="event-detail-page__title">{event.title}</div>
+
+        <Link
+          to={`/profile/${event.organizerUsername}`}
+          className="event-detail-page__organizer-link"
+        >
+          Organizzato da {event.organizerUsername}
+        </Link>
 
         <div className="event-detail-page__meta">
           {isTrip
@@ -633,12 +816,9 @@ function EventDetailPage() {
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {event.children.map((day, index) => {
                   const dayStart = new Date(day.startDateTime)
-                  return (
-                    <Link
-                      key={day.id}
-                      to={`/events/${day.id}`}
-                      className="card trip-day-row"
-                    >
+                  const isLast = index === event.children.length - 1
+                  const dayInfo = (
+                    <>
                       <span className="trip-day-row__number">{index + 1}</span>
                       <div className="trip-day-row__info">
                         <div className="trip-day-row__title">{day.title}</div>
@@ -651,8 +831,56 @@ function EventDetailPage() {
                           {day.type === "RADUNO" ? "SOSTA" : "TAPPA"}
                         </div>
                       </div>
-                      <span className="trip-day-row__chevron">{">"}</span>
-                    </Link>
+                    </>
+                  )
+
+                  if (!event.organizer) {
+                    return (
+                      <Link
+                        key={day.id}
+                        to={`/events/${day.id}`}
+                        className="card trip-day-row"
+                      >
+                        {dayInfo}
+                        <span className="trip-day-row__chevron">{">"}</span>
+                      </Link>
+                    )
+                  }
+
+                  return (
+                    <div key={day.id} className="card trip-day-row">
+                      <Link
+                        to={`/events/${day.id}`}
+                        className="trip-day-row__link-area"
+                      >
+                        {dayInfo}
+                      </Link>
+                      <div className="trip-day-row__actions">
+                        <button
+                          type="button"
+                          className="icon-btn-plain icon-btn-plain--muted"
+                          disabled={index === 0}
+                          onClick={() => handleMoveDay(index, -1)}
+                        >
+                          <FaArrowUp size={11} />
+                        </button>
+                        <button
+                          type="button"
+                          className="icon-btn-plain icon-btn-plain--muted"
+                          disabled={isLast}
+                          onClick={() => handleMoveDay(index, 1)}
+                        >
+                          <FaArrowDown size={11} />
+                        </button>
+                        <button
+                          type="button"
+                          className="icon-btn-plain icon-btn-plain--danger"
+                          onClick={() => setDayToDelete(day.id)}
+                        >
+                          <FaTrash size={11} />
+                        </button>
+                      </div>
+                    </div>
                   )
                 })}
               </div>
@@ -836,6 +1064,31 @@ function EventDetailPage() {
         {!isChild && event.organizer && (
           <OrganizerPanel eventId={eventId} visibility={event.visibility} />
         )}
+
+        {event.organizer && event.status === "ACTIVE" && (
+          <div className="event-detail-page__organizer-actions">
+            <Link
+              to={
+                isChild
+                  ? `/events/${event.parentEventId}/days/${event.id}/edit`
+                  : `/events/${eventId}/edit`
+              }
+              className="btn-secondary btn-link-edit-events"
+              style={{ width: "100%" }}
+            >
+              {isChild ? "MODIFICA GIORNO" : "MODIFICA EVENTO"}
+            </Link>
+            {!isChild && (
+              <button
+                type="button"
+                className="btn-danger-block"
+                onClick={() => setConfirmType("cancelEvent")}
+              >
+                ANNULLA EVENTO
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {confirmType && (
@@ -873,6 +1126,133 @@ function EventDetailPage() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {dayToDelete && (
+        <div className="modal-overlay" onClick={() => setDayToDelete(null)}>
+          <div className="card modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-title">ELIMINARE QUESTO GIORNO?</div>
+            <p className="modal-text">
+              I giorni successivi scivoleranno indietro di un giorno. I
+              partecipanti verranno informati.
+            </p>
+            <div className="modal-actions">
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => setDayToDelete(null)}
+              >
+                INDIETRO
+              </button>
+              <button
+                type="button"
+                className="btn-danger"
+                onClick={handleDeleteDay}
+                disabled={isDeletingDay}
+              >
+                {isDeletingDay ? "..." : "ELIMINA"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {selectedWaypointId &&
+        hasRoute &&
+        (() => {
+          const wp = event.route.waypoints.find(
+            (w) => w.id === selectedWaypointId,
+          )
+          const stats = waypointStats[selectedWaypointId]
+          if (!wp) return null
+          return (
+            <div
+              className="sheet-overlay"
+              onClick={() => setSelectedWaypointId(null)}
+            >
+              <div className="sheet-panel" onClick={(e) => e.stopPropagation()}>
+                <div className="sheet-header">
+                  <button
+                    type="button"
+                    className="btn-icon"
+                    onClick={() => setSelectedWaypointId(null)}
+                  >
+                    <FaTimes />
+                  </button>
+                  <div className="sheet-header__title">
+                    {wp.label || "TAPPA"}
+                  </div>
+                  <div style={{ width: 40 }} />
+                </div>
+                <div className="sheet-body">
+                  {wp.imageUrl && (
+                    <img
+                      src={wp.imageUrl}
+                      alt=""
+                      className="waypoint-detail-sheet__image"
+                    />
+                  )}
+                  <div
+                    className="stat-grid stat-grid--cols-2"
+                    style={{ marginTop: 16 }}
+                  >
+                    <div className="stat-cell">
+                      <span className="stat-label">DA PARTENZA</span>
+                      <span className="stat-value">
+                        {stats?.fromStartKm.toFixed(1).replace(".", ",")} KM
+                      </span>
+                    </div>
+                    <div className="stat-cell">
+                      <span className="stat-label">ALL'ARRIVO</span>
+                      <span className="stat-value">
+                        {stats?.toEndKm.toFixed(1).replace(".", ",")} KM
+                      </span>
+                    </div>
+                    <div className="stat-cell">
+                      <span className="stat-label">DA TAPPA PRECEDENTE</span>
+                      <span className="stat-value">
+                        {stats?.fromPrevKm != null
+                          ? stats.fromPrevKm.toFixed(1).replace(".", ",")
+                          : "0,0"}{" "}
+                        KM
+                      </span>
+                    </div>
+                    <div className="stat-cell">
+                      <span className="stat-label">ALLA TAPPA SUCCESSIVA</span>
+                      <span className="stat-value">
+                        {stats?.toNextKm != null
+                          ? stats.toNextKm.toFixed(1).replace(".", ",")
+                          : "0,0"}{" "}
+                        KM
+                      </span>
+                    </div>
+                  </div>
+                  {wp.stopMinutes > 0 && (
+                    <div className="empty-state" style={{ marginTop: 14 }}>
+                      Sosta di {wp.stopMinutes} minuti
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )
+        })()}
+
+      {showFullscreenCover && event.coverPhotoUrl && (
+        <div className="event-cover-fullscreen">
+          <button
+            type="button"
+            className="btn-icon event-cover-fullscreen__back-btn"
+            onClick={() => setShowFullscreenCover(false)}
+          >
+            <FaArrowLeft />
+          </button>
+          <img
+            src={event.coverPhotoUrl}
+            alt=""
+            className="event-cover-fullscreen__img"
+          />
         </div>
       )}
     </div>

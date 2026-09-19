@@ -33,9 +33,11 @@ function buildEndpointMarker(color, isPulsing) {
   return el
 }
 
-function RideMap({ points, height = "360px" }) {
+function RideMap({ points, height = "360px", highlightedPoint }) {
   const containerRef = useRef(null)
   const mapRef = useRef(null)
+  const highlightMarkerRef = useRef(null)
+  const mapReadyRef = useRef(false)
 
   useEffect(() => {
     if (!containerRef.current || !points || points.length === 0) return
@@ -136,6 +138,7 @@ function RideMap({ points, height = "360px" }) {
       if (initialized || !map.isStyleLoaded()) return
       initialized = true
       init()
+      mapReadyRef.current = true
     }
     map.on("styledata", tryInit)
     map.on("load", tryInit)
@@ -144,8 +147,44 @@ function RideMap({ points, height = "360px" }) {
     return () => {
       map.remove()
       mapRef.current = null
+      mapReadyRef.current = false
     }
   }, [points])
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !mapReadyRef.current) return
+
+    if (!highlightedPoint) {
+      highlightMarkerRef.current?.remove()
+      highlightMarkerRef.current = null
+      return
+    }
+
+    const lngLat = [
+      Number(highlightedPoint.longitude),
+      Number(highlightedPoint.latitude),
+    ]
+
+    if (highlightMarkerRef.current) {
+      highlightMarkerRef.current.setLngLat(lngLat)
+      return
+    }
+
+    const el = document.createElement("div")
+    el.style.cssText = "width: 18px; height: 18px;"
+    const dot = document.createElement("div")
+    dot.style.cssText = `
+    width: 100%; height: 100%; border-radius: 50%;
+    background: #fff; border: 3px solid ${COLORS.accent};
+    box-shadow: 0 0 0 2px rgba(0,0,0,.3);
+  `
+    el.appendChild(dot)
+
+    highlightMarkerRef.current = new Marker({ element: el })
+      .setLngLat(lngLat)
+      .addTo(map)
+  }, [highlightedPoint])
 
   if (!points || points.length === 0) {
     return (

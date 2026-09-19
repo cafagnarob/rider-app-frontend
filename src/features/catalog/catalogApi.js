@@ -30,8 +30,19 @@ export const catalogApi = apiSlice.injectEndpoints({
     getModelById: builder.query({
       query: (modelId) => `/motorcycle-models/${modelId}`,
     }),
+    submitCatalogSuggestion: builder.mutation({
+      query: (body) => ({
+        url: "/catalog-suggestions",
+        method: "POST",
+        body,
+      }),
+    }),
   }),
 })
 
-export const { useGetBrandsQuery, useGetModelsQuery, useGetModelByIdQuery } =
-  catalogApi
+export const {
+  useGetBrandsQuery,
+  useGetModelsQuery,
+  useGetModelByIdQuery,
+  useSubmitCatalogSuggestionMutation,
+} = catalogApi

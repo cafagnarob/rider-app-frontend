@@ -12,6 +12,18 @@ import "../pages/CSS/AddEventDayPage.css"
 
 const DAY_DRAFT_KEY = "eventDayDraft"
 
+function toDateTimeLocalValue(date) {
+  const pad = (n) => String(n).padStart(2, "0")
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`
+}
+
+function formatDurationMinutes(totalMinutes) {
+  if (totalMinutes < 60) return `${totalMinutes} min`
+  const hours = Math.floor(totalMinutes / 60)
+  const minutes = totalMinutes % 60
+  return minutes === 0 ? `${hours}h` : `${hours}h ${minutes}min`
+}
+
 const loadDayDraft = (tripId) => {
   try {
     const saved = localStorage.getItem(DAY_DRAFT_KEY)
@@ -74,6 +86,8 @@ function AddEventDayPage() {
   const [placeSearch, setPlaceSearch] = useState("")
   const [placeResults, setPlaceResults] = useState([])
   const placeTimerRef = useRef(null)
+
+  const [datePrefillApplied, setDatePrefillApplied] = useState(false)
 
   const persistDraft = (next) => {
     try {
@@ -154,9 +168,52 @@ function AddEventDayPage() {
     (r) => r.id === dayForm.routeId,
   )
 
+  const isFirstDay = trip ? trip.children.length === 0 : true
+  const expectedDate = trip
+    ? isFirstDay
+      ? trip.startDateTime.slice(0, 10)
+      : (() => {
+          const lastDay = trip.children[trip.children.length - 1]
+          const next = new Date(lastDay.startDateTime)
+          next.setDate(next.getDate() + 1)
+          return toDateTimeLocalValue(next).slice(0, 10)
+        })()
+    : null
+
+  if (trip && !datePrefillApplied && !dayForm.startDateTime) {
+    setDatePrefillApplied(true)
+
+    let suggestedTime = null
+    if (trip.children.length === 0) {
+      if (location.state?.suggestedStartDateTime) {
+        suggestedTime = location.state.suggestedStartDateTime.slice(11, 16)
+      }
+    } else {
+      const lastDay = trip.children[trip.children.length - 1]
+      if (lastDay?.startDateTime) {
+        suggestedTime = lastDay.startDateTime.slice(11, 16)
+      }
+    }
+
+    if (suggestedTime) {
+      setDayForm((prev) => {
+        const next = {
+          ...prev,
+          startDateTime: `${expectedDate}T${suggestedTime}`,
+        }
+        persistDraft(next)
+        return next
+      })
+    }
+  }
+
   const handleAddDay = async (e) => {
     e.preventDefault()
     setErrorMsg("")
+
+    const finalStartDateTime = dayForm.startDateTime
+      ? `${expectedDate}T${dayForm.startDateTime.slice(11, 16)}`
+      : null
 
     if (dayForm.type === "STANDARD" && !dayForm.routeId) {
       setErrorMsg("Una tappa in moto richiede un percorso.")
@@ -170,7 +227,7 @@ function AddEventDayPage() {
       setErrorMsg("Una sosta richiede un percorso oppure un punto di ritrovo.")
       return
     }
-    if (!dayForm.startDateTime) {
+    if (!finalStartDateTime) {
       setErrorMsg("Specifica la data di inizio del giorno.")
       return
     }
@@ -193,7 +250,7 @@ function AddEventDayPage() {
         routeId: dayForm.routeId || null,
         meetingPointLat: !dayForm.routeId ? dayForm.meetingPointLat : null,
         meetingPointLng: !dayForm.routeId ? dayForm.meetingPointLng : null,
-        startDateTime: dayForm.startDateTime + ":00",
+        startDateTime: finalStartDateTime + ":00",
         endDateTime:
           dayForm.type === "RADUNO" ? dayForm.endDateTime + ":00" : null,
         bufferMinutes:
@@ -226,6 +283,32 @@ function AddEventDayPage() {
   }
 
   const dayNumber = (trip.children?.length || 0) + 1
+
+  const currentTimeValue = dayForm.startDateTime
+    ? dayForm.startDateTime.slice(11, 16)
+    : ""
+
+  const setDayTime = (e) => {
+    const time = e.target.value
+    setDayForm((prev) => {
+      const next = { ...prev, startDateTime: `${expectedDate}T${time}` }
+      persistDraft(next)
+      return next
+    })
+  }
+
+  const setDayEndTime = (e) => {
+    const time = e.target.value
+    setDayForm((prev) => {
+      const next = { ...prev, endDateTime: `${expectedDate}T${time}` }
+      persistDraft(next)
+      return next
+    })
+  }
+
+  const currentEndTimeValue = dayForm.endDateTime
+    ? dayForm.endDateTime.slice(11, 16)
+    : ""
 
   return (
     <div className="add-day-page">
@@ -419,25 +502,51 @@ function AddEventDayPage() {
           <div className="date-row">
             <div className="date-group">
               <div className="field-label form-group__label">INIZIO</div>
+              <div className="add-day-page__first-day-date">
+                {new Date(`${expectedDate}T00:00:00`)
+                  .toLocaleDateString("it-IT", {
+                    weekday: "long",
+                    day: "numeric",
+                    month: "long",
+                  })
+                  .toUpperCase()}
+              </div>
               <input
-                type="datetime-local"
+                type="time"
                 className="input"
-                value={dayForm.startDateTime}
-                onChange={set("startDateTime")}
+                value={currentTimeValue}
+                onChange={setDayTime}
                 required
               />
+              <div className="helper-text">
+                {isFirstDay
+                  ? "Il primo giorno inizia lo stesso giorno dell'evento — puoi solo scegliere l'orario"
+                  : "La data segue automaticamente il giorno precedente — puoi solo scegliere l'orario"}
+              </div>
             </div>
 
             {dayForm.type === "RADUNO" && (
               <div className="date-group">
                 <div className="field-label form-group__label">FINE</div>
+                <div className="add-day-page__first-day-date">
+                  {new Date(`${expectedDate}T00:00:00`)
+                    .toLocaleDateString("it-IT", {
+                      weekday: "long",
+                      day: "numeric",
+                      month: "long",
+                    })
+                    .toUpperCase()}
+                </div>
                 <input
-                  type="datetime-local"
+                  type="time"
                   className="input"
-                  value={dayForm.endDateTime}
-                  onChange={set("endDateTime")}
+                  value={currentEndTimeValue}
+                  onChange={setDayEndTime}
                   required
                 />
+                <div className="helper-text">
+                  Stessa data dell'inizio — puoi solo scegliere l'orario
+                </div>
               </div>
             )}
           </div>
@@ -455,9 +564,12 @@ function AddEventDayPage() {
                 onChange={set("bufferMinutes")}
               />
               {selectedRoute && (
-                <div className="duration-hint">
-                  Durata percorso:{" "}
-                  {Math.ceil(selectedRoute.durationSeconds / 60)} min
+                <div className="add-day-page__duration-estimate">
+                  <span className="duration-hint">Durata stimata: </span>
+                  {formatDurationMinutes(
+                    Math.ceil(selectedRoute.durationSeconds / 60) +
+                      (Number(dayForm.bufferMinutes) || 0),
+                  )}
                 </div>
               )}
             </div>

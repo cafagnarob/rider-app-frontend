@@ -258,7 +258,9 @@ function EventCreatePage() {
       localStorage.removeItem(DRAFT_KEY)
 
       if (form.type === "MULTI_DAY_TRIP") {
-        navigate(`/events/${created.id}/days/new`)
+        navigate(`/events/${created.id}/days/new`, {
+          state: { suggestedStartDateTime: form.startDateTime },
+        })
         return
       }
 
