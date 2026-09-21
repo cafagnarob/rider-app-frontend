@@ -1,16 +1,23 @@
 import { FaHeart, FaRegHeart } from "react-icons/fa"
-import { useGetRepliesQuery, useToggleCommentLikeMutation } from "../postsApi"
+import {
+  useGetRepliesQuery,
+  useReportCommentMutation,
+  useToggleCommentLikeMutation,
+} from "../postsApi"
 import { formatRelativeTime } from "../../../utils/dateFormat"
 import { useState } from "react"
 import Avatar from "../../../components/Avatar"
+import ReportModal from "./ReportModal"
 
 function CommentActions({
   comment,
   postId,
   parentCommentId,
   canDelete,
+  canReport,
   onReply,
   onDelete,
+  onReport,
 }) {
   const [toggleCommentLike] = useToggleCommentLikeMutation()
   return (
@@ -45,6 +52,15 @@ function CommentActions({
           Elimina
         </button>
       )}
+      {canReport && (
+        <button
+          type="button"
+          className="comment-row__delete-link"
+          onClick={onReport}
+        >
+          Segnala
+        </button>
+      )}
     </div>
   )
 }
@@ -76,6 +92,8 @@ function CommentThread({
   onDelete,
 }) {
   const [expanded, setExpanded] = useState(false)
+  const [reportTarget, setReportTarget] = useState(null)
+  const [reportComment] = useReportCommentMutation()
   const { data: replies } = useGetRepliesQuery(
     { postId, commentId: comment.id },
     { skip: !expanded },
@@ -83,6 +101,7 @@ function CommentThread({
 
   const canDeleteTop =
     currentUsername === comment.authorUsername || isPostAuthor
+  const canReportTop = currentUsername !== comment.authorUsername
   const isReplyingHere = replyingTo?.commentId === comment.id
 
   return (
@@ -99,8 +118,10 @@ function CommentThread({
             comment={comment}
             postId={postId}
             canDelete={canDeleteTop}
+            canReport={canReportTop}
             onReply={() => onStartReply(comment.id, comment.authorUsername)}
             onDelete={() => onDelete(comment.id)}
+            onReport={() => setReportTarget(comment.id)}
           />
         </div>
       </div>
@@ -122,6 +143,7 @@ function CommentThread({
           {replies?.map((reply) => {
             const canDeleteReply =
               currentUsername === reply.authorUsername || isPostAuthor
+            const canReportReply = currentUsername !== reply.authorUsername
             return (
               <div key={reply.id} className="comment-row comment-row--reply">
                 <Avatar
@@ -136,10 +158,12 @@ function CommentThread({
                     postId={postId}
                     parentCommentId={comment.id}
                     canDelete={canDeleteReply}
+                    canReport={canReportReply}
                     onReply={() =>
                       onStartReply(comment.id, reply.authorUsername)
                     }
                     onDelete={() => onDelete(reply.id, comment.id)}
+                    onReport={() => setReportTarget(reply.id)}
                   />
                 </div>
               </div>
@@ -173,6 +197,21 @@ function CommentThread({
             INVIA
           </button>
         </form>
+      )}
+
+      {reportTarget && (
+        <ReportModal
+          title="SEGNALA COMMENTO"
+          onClose={() => setReportTarget(null)}
+          onSubmit={async ({ reason, note }) => {
+            await reportComment({
+              postId,
+              commentId: reportTarget,
+              reason,
+              note,
+            }).unwrap()
+          }}
+        />
       )}
     </div>
   )

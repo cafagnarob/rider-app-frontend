@@ -54,6 +54,27 @@ function CustomTraveler(props) {
   )
 }
 
+function findClosestByKm(chartData, targetKm) {
+  let lo = 0
+  let hi = chartData.length - 1
+
+  while (lo < hi) {
+    const mid = Math.floor((lo + hi) / 2)
+    if (chartData[mid].km < targetKm) {
+      lo = mid + 1
+    } else {
+      hi = mid
+    }
+  }
+
+  if (lo > 0) {
+    const prevDiff = Math.abs(chartData[lo - 1].km - targetKm)
+    const currDiff = Math.abs(chartData[lo].km - targetKm)
+    if (prevDiff < currDiff) return chartData[lo - 1]
+  }
+  return chartData[lo]
+}
+
 function RideCharts({ points, onHoverPoint }) {
   const [speedRange, setSpeedRange] = useState(null)
   const [altitudeRange, setAltitudeRange] = useState(null)
@@ -70,6 +91,8 @@ function RideCharts({ points, onHoverPoint }) {
         km: Number(cumulativeKm.toFixed(2)),
         speed: p.speedKmh != null ? Number(p.speedKmh.toFixed(1)) : 0,
         altitude: p.altitude != null ? Math.round(p.altitude) : null,
+        latitude: p.latitude,
+        longitude: p.longitude,
       }
     })
   }, [points])
@@ -124,9 +147,9 @@ function RideCharts({ points, onHoverPoint }) {
   const formatKmAxis = (km) => km.toFixed(1)
 
   const handleChartMouseMove = (state) => {
-    if (state?.activeTooltipIndex != null) {
-      onHoverPoint?.(points[state.activeTooltipIndex])
-    }
+    if (state?.activeLabel == null || chartData.length === 0) return
+    const closest = findClosestByKm(chartData, state.activeLabel)
+    onHoverPoint?.({ latitude: closest.latitude, longitude: closest.longitude })
   }
 
   const handleChartMouseLeave = () => {

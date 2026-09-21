@@ -5,6 +5,7 @@ import { FaInstagram } from "react-icons/fa6"
 import {
   useGetCurrentUserQuery,
   useGetPublicProfileQuery,
+  useReportUserMutation,
 } from "../features/users/usersApi"
 import {
   useGetFollowStatsQuery,
@@ -15,6 +16,7 @@ import "../pages/CSS/PublicProfilePage.css"
 import { useGetUserRoutesQuery } from "../features/routesMap/routesApi"
 import { useState } from "react"
 import Avatar from "../components/Avatar"
+import ReportModal from "../features/social/components/ReportModal"
 
 const PLATFORM_ICONS = {
   INSTAGRAM: FaInstagram,
@@ -32,6 +34,9 @@ function PublicProfilePage() {
     { username },
     { skip: tab !== "routes" },
   )
+
+  const [showReportModal, setShowReportModal] = useState(false)
+  const [reportUser] = useReportUserMutation()
 
   const { data: me } = useGetCurrentUserQuery()
   const {
@@ -92,6 +97,14 @@ function PublicProfilePage() {
               onClick={() => toggleFollow({ username, isFollowing })}
             >
               {isFollowing ? "SMETTI DI SEGUIRE" : "SEGUI"}
+            </button>
+            <button
+              type="button"
+              className="text-btn text-btn--secondary"
+              style={{ fontSize: 11, marginTop: 6, marginLeft: 10 }}
+              onClick={() => setShowReportModal(true)}
+            >
+              SEGNALA PROFILO
             </button>
           </div>
         </div>
@@ -226,6 +239,16 @@ function PublicProfilePage() {
             </div>
           )}
         </div>
+      )}
+
+      {showReportModal && (
+        <ReportModal
+          title="SEGNALA PROFILO"
+          onClose={() => setShowReportModal(false)}
+          onSubmit={async ({ reason, note }) => {
+            await reportUser({ username, reason, note }).unwrap()
+          }}
+        />
       )}
     </div>
   )

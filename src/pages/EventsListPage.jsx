@@ -177,20 +177,6 @@ function EventsListPage() {
         </div>
       )}
 
-      {(tab === "organized" || tab === "participating") && (
-        <label className="checkbox-label" style={{ margin: "0 20px 14px" }}>
-          <input
-            type="checkbox"
-            checked={history}
-            onChange={(e) => {
-              setHistory(e.target.checked)
-              setPage(0)
-            }}
-          />
-          Mostra storico
-        </label>
-      )}
-
       {geoFilter && (
         <div className="events-list-page__filter-chip-wrap">
           <span className="chip">

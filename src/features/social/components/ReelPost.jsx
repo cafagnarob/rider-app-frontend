@@ -6,21 +6,32 @@ import {
   useDeleteCommentMutation,
   useDeletePostMutation,
   useGetCommentsQuery,
+  useReportPostMutation,
   useToggleLikeMutation,
 } from "../postsApi"
 import { useState } from "react"
 import PostAutoCarousel from "./PostAutoCarousel"
 import PostWidgetsOverlay from "./PostWidgetsOverlay"
-import { FaHeart, FaRegComment, FaRegHeart, FaTrash } from "react-icons/fa"
+import {
+  FaFlag,
+  FaHeart,
+  FaRegComment,
+  FaRegHeart,
+  FaTrash,
+} from "react-icons/fa"
 import Avatar from "../../../components/Avatar"
 
 import CommentThread from "./CommentThread"
+import ReportModal from "./ReportModal"
 
 function ReelPost({ post, onDeleted }) {
   const navigate = useNavigate()
   const { data: me } = useGetCurrentUserQuery()
   const [toggleLike] = useToggleLikeMutation()
   const [deletePost, { isLoading: isDeletingPost }] = useDeletePostMutation()
+
+  const [showReportModal, setShowReportModal] = useState(false)
+  const [reportPost] = useReportPostMutation()
 
   const [showComments, setShowComments] = useState(false)
   const { data: comments } = useGetCommentsQuery(
@@ -114,6 +125,16 @@ function ReelPost({ post, onDeleted }) {
           disabled={isDeletingPost}
         >
           <FaTrash size={14} />
+        </button>
+      )}
+
+      {!isAuthor && (
+        <button
+          type="button"
+          className="reel-post__delete-btn"
+          onClick={() => setShowReportModal(true)}
+        >
+          <FaFlag size={14} />
         </button>
       )}
 
@@ -270,6 +291,16 @@ function ReelPost({ post, onDeleted }) {
             </form>
           </div>
         </>
+      )}
+
+      {showReportModal && (
+        <ReportModal
+          title="SEGNALA POST"
+          onClose={() => setShowReportModal(false)}
+          onSubmit={async ({ reason, note }) => {
+            await reportPost({ postId: post.id, reason, note }).unwrap()
+          }}
+        />
       )}
     </div>
   )

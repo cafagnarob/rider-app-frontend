@@ -86,7 +86,7 @@ function RideDetailPage() {
 
       <div className="px-20">
         <div
-          className="stat-grid stat-grid--cols-3"
+          className="stat-grid stat-grid--cols-2"
           style={{ marginBottom: 20 }}
         >
           <div className="stat-cell">
@@ -95,18 +95,6 @@ function RideDetailPage() {
               {ride.distanceKm != null
                 ? ride.distanceKm.toFixed(1).replace(".", ",")
                 : "—"}
-            </span>
-          </div>
-          <div className="stat-cell">
-            <span className="stat-label">MEDIA</span>
-            <span className="stat-value">
-              {ride.avgSpeedKmH != null ? ride.avgSpeedKmH.toFixed(0) : "—"}
-            </span>
-          </div>
-          <div className="stat-cell">
-            <span className="stat-label">MASSIMA</span>
-            <span className="stat-value">
-              {ride.maxSpeedKmH != null ? ride.maxSpeedKmH.toFixed(0) : "—"}
             </span>
           </div>
           <div className="stat-cell">

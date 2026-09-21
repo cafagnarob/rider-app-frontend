@@ -39,6 +39,11 @@ import StoryComposerPage from "../pages/StoryComposerPage"
 import ModelDetailPage from "../pages/ModelDetailPage"
 import EventEditPage from "../pages/EventEditPage"
 import EventDayEditPage from "../pages/EventDayEditPage"
+import AdminBroadcastPage from "../pages/AdminBroadcastPage"
+import AdminEventsPage from "../pages/AdminEventsPage"
+import AdminCatalogSuggestionsPage from "../pages/AdminCatalogSuggestionsPage"
+import AdminReportsPage from "../pages/AdminReportsPage"
+import AdminDashboardPage from "../pages/AdminDashboardPage"
 
 function AppRoutes() {
   return (
@@ -101,9 +106,17 @@ function AppRoutes() {
       <Route path="/register" element={<RegisterPage />} />
       <Route element={<AdminRoute />}>
         <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<Navigate to="/admin/users" replace />} />
+          <Route index element={<Navigate to="/admin/dashboard" replace />} />
+          <Route path="dashboard" element={<AdminDashboardPage />} />
           <Route path="users" element={<AdminUsersPage />} />
           <Route path="catalog" element={<AdminCatalogPage />} />
+          <Route path="events" element={<AdminEventsPage />} />
+          <Route
+            path="catalog-suggestions"
+            element={<AdminCatalogSuggestionsPage />}
+          />
+          <Route path="reports" element={<AdminReportsPage />} />
+          <Route path="broadcast" element={<AdminBroadcastPage />} />
         </Route>
       </Route>
     </Routes>

@@ -37,6 +37,7 @@ export const apiSlice = createApi({
     "Invite",
     "MyInvites",
     "AdminUser",
+    "AdminEvent",
   ],
   endpoints: () => ({}),
 })

@@ -158,6 +158,21 @@ export const postsApi = apiSlice.injectEndpoints({
         { type: "Reply", id: commentId },
       ],
     }),
+
+    reportPost: builder.mutation({
+      query: ({ postId, reason, note }) => ({
+        url: `/posts/${postId}/report`,
+        method: "POST",
+        body: { reason, note },
+      }),
+    }),
+    reportComment: builder.mutation({
+      query: ({ postId, commentId, reason, note }) => ({
+        url: `/posts/${postId}/comments/${commentId}/report`,
+        method: "POST",
+        body: { reason, note },
+      }),
+    }),
   }),
 })
 
@@ -175,4 +190,6 @@ export const {
   useToggleCommentLikeMutation,
   useAddReplyMutation,
   useGetRepliesQuery,
+  useReportPostMutation,
+  useReportCommentMutation,
 } = postsApi

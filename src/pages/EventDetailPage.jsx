@@ -9,10 +9,9 @@ import {
 } from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
 import {
-  FaArrowDown,
   FaArrowLeft,
-  FaArrowUp,
   FaCamera,
+  FaGripVertical,
   FaTimes,
   FaTrash,
 } from "react-icons/fa"
@@ -41,6 +40,20 @@ import {
   useRejectInviteMutation,
 } from "../features/events/invitesApi"
 import Avatar from "../components/Avatar"
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core"
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  arrayMove,
+  useSortable,
+} from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
 
 function haversineKm([lng1, lat1], [lng2, lat2]) {
   const R = 6371
@@ -52,6 +65,54 @@ function haversineKm([lng1, lat1], [lng2, lat2]) {
       Math.cos((lat2 * Math.PI) / 180) *
       Math.sin(dLng / 2) ** 2
   return R * 2 * Math.asin(Math.sqrt(a))
+}
+
+function SortableDayRow({ day, index, onDelete }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: day.id })
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+  }
+  const dayStart = new Date(day.startDateTime)
+
+  return (
+    <div ref={setNodeRef} style={style} className="card trip-day-row">
+      <span
+        {...attributes}
+        {...listeners}
+        className="trip-day-row__drag-handle"
+      >
+        <FaGripVertical size={12} />
+      </span>
+      <span className="trip-day-row__number">{index + 1}</span>
+      <Link to={`/events/${day.id}`} className="trip-day-row__link-area">
+        <div className="trip-day-row__title">{day.title}</div>
+        <div className="trip-day-row__meta">
+          {dayStart.toLocaleDateString("it-IT", {
+            day: "numeric",
+            month: "short",
+          })}
+          {" · "}
+          {day.type === "RADUNO" ? "SOSTA" : "TAPPA"}
+        </div>
+      </Link>
+      <button
+        type="button"
+        className="icon-btn-plain icon-btn-plain--danger"
+        onClick={() => onDelete(day.id)}
+      >
+        <FaTrash size={11} />
+      </button>
+    </div>
+  )
 }
 
 function EventDetailPage() {
@@ -308,14 +369,16 @@ function EventDetailPage() {
     }
   }
 
-  const handleMoveDay = async (index, direction) => {
-    const target = index + direction
-    if (target < 0 || target >= event.children.length) return
-    const reordered = [...event.children]
-    ;[reordered[index], reordered[target]] = [
-      reordered[target],
-      reordered[index],
-    ]
+  const dayDragSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+  )
+
+  const handleDayDragEnd = async (dragEvent) => {
+    const { active, over } = dragEvent
+    if (!over || active.id === over.id) return
+    const oldIndex = event.children.findIndex((d) => d.id === active.id)
+    const newIndex = event.children.findIndex((d) => d.id === over.id)
+    const reordered = arrayMove(event.children, oldIndex, newIndex)
     try {
       await reorderEventDays({
         tripId: eventId,
@@ -812,13 +875,16 @@ function EventDetailPage() {
               <p className="event-detail-page__no-days">
                 Nessun giorno ancora aggiunto a questo viaggio.
               </p>
-            ) : (
+            ) : !event.organizer ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {event.children.map((day, index) => {
                   const dayStart = new Date(day.startDateTime)
-                  const isLast = index === event.children.length - 1
-                  const dayInfo = (
-                    <>
+                  return (
+                    <Link
+                      key={day.id}
+                      to={`/events/${day.id}`}
+                      className="card trip-day-row"
+                    >
                       <span className="trip-day-row__number">{index + 1}</span>
                       <div className="trip-day-row__info">
                         <div className="trip-day-row__title">{day.title}</div>
@@ -831,59 +897,35 @@ function EventDetailPage() {
                           {day.type === "RADUNO" ? "SOSTA" : "TAPPA"}
                         </div>
                       </div>
-                    </>
-                  )
-
-                  if (!event.organizer) {
-                    return (
-                      <Link
-                        key={day.id}
-                        to={`/events/${day.id}`}
-                        className="card trip-day-row"
-                      >
-                        {dayInfo}
-                        <span className="trip-day-row__chevron">{">"}</span>
-                      </Link>
-                    )
-                  }
-
-                  return (
-                    <div key={day.id} className="card trip-day-row">
-                      <Link
-                        to={`/events/${day.id}`}
-                        className="trip-day-row__link-area"
-                      >
-                        {dayInfo}
-                      </Link>
-                      <div className="trip-day-row__actions">
-                        <button
-                          type="button"
-                          className="icon-btn-plain icon-btn-plain--muted"
-                          disabled={index === 0}
-                          onClick={() => handleMoveDay(index, -1)}
-                        >
-                          <FaArrowUp size={11} />
-                        </button>
-                        <button
-                          type="button"
-                          className="icon-btn-plain icon-btn-plain--muted"
-                          disabled={isLast}
-                          onClick={() => handleMoveDay(index, 1)}
-                        >
-                          <FaArrowDown size={11} />
-                        </button>
-                        <button
-                          type="button"
-                          className="icon-btn-plain icon-btn-plain--danger"
-                          onClick={() => setDayToDelete(day.id)}
-                        >
-                          <FaTrash size={11} />
-                        </button>
-                      </div>
-                    </div>
+                      <span className="trip-day-row__chevron">{">"}</span>
+                    </Link>
                   )
                 })}
               </div>
+            ) : (
+              <DndContext
+                sensors={dayDragSensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDayDragEnd}
+              >
+                <SortableContext
+                  items={event.children.map((d) => d.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div
+                    style={{ display: "flex", flexDirection: "column", gap: 8 }}
+                  >
+                    {event.children.map((day, index) => (
+                      <SortableDayRow
+                        key={day.id}
+                        day={day}
+                        index={index}
+                        onDelete={setDayToDelete}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
             )}
           </div>
         )}

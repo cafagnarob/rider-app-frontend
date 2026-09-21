@@ -113,6 +113,20 @@ export const usersApi = apiSlice.injectEndpoints({
       query: ({ query, page = 0, size = 20 }) =>
         `/users/search?query=${encodeURIComponent(query)}&page=${page}&size=${size}`,
     }),
+    deleteAccount: builder.mutation({
+      query: (currentPassword) => ({
+        url: "/users/me",
+        method: "DELETE",
+        body: { currentPassword },
+      }),
+    }),
+    reportUser: builder.mutation({
+      query: ({ username, reason, note }) => ({
+        url: `/users/${username}/report`,
+        method: "POST",
+        body: { reason, note },
+      }),
+    }),
   }),
 })
 export const {
@@ -131,4 +145,6 @@ export const {
   useGetPublicProfileQuery,
   useSearchUsersQuery,
   useSelectAvatarMutation,
+  useDeleteAccountMutation,
+  useReportUserMutation,
 } = usersApi

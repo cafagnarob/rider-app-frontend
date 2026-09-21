@@ -132,6 +132,7 @@
 }
 
 .page-title {
+  color: white;
   font-family: var(--font-heading);
   font-weight: 700;
   font-size: 28px;
@@ -504,6 +505,7 @@
 }
 
 .modal-title {
+  color: white;
   font-family: var(--font-heading);
   font-weight: 700;
   font-size: 20px;
@@ -3783,4 +3785,135 @@ img.avatar--preset {
   font-size: 9px;
   color: var(--color-text-muted);
   margin-left: 2px;
+}
+
+.trip-day-row__drag-handle {
+  color: var(--color-text-faint);
+  cursor: grab;
+  touch-action: none;
+  display: flex;
+  align-items: center;
+  padding: 0 2px;
+}
+
+.trip-day-row__drag-handle:active {
+  cursor: grabbing;
+}
+
+.select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  text-align: center;
+  text-align-last: center;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%23FF7A2F' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+  text-transform: uppercase;
+}
+
+/* --- barra superiore admin, solo mobile --- */
+.admin-mobile-topbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-card);
+}
+
+.admin-mobile-topbar__menu-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: var(--color-card-alt);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.admin-mobile-topbar__brand {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 16px;
+}
+
+/* --- riga marchio + chiusura, dentro la sidebar admin --- */
+.admin-side-nav__brand-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  padding-left: 16px;
+}
+
+.admin-side-nav__close-btn {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 4px;
+  display: none;
+}
+
+/* --- cassetto scorrevole per la sidebar admin su mobile --- */
+@media (max-width: 1023px) {
+  .admin-layout {
+    flex-direction: column;
+  }
+
+  .admin-side-nav-wrap {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 90;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+  }
+
+  .admin-side-nav-wrap--open {
+    transform: translateX(0);
+  }
+
+  .admin-side-nav {
+    width: 260px;
+    min-height: 100vh;
+  }
+
+  .admin-side-nav__close-btn {
+    display: block;
+  }
+
+  .admin-drawer-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    background: rgba(6, 6, 7, 0.72);
+  }
+
+  .admin-layout__main {
+    padding: 20px 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .admin-mobile-topbar {
+    display: none;
+  }
+}
+
+@media (max-width: 1023px) {
+  .tab-pills {
+    flex-wrap: wrap;
+  }
+
+  .stat-grid--cols-3 {
+    grid-template-columns: 1fr 1fr;
+  }
 }

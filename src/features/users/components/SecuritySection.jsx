@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom"
 import {
   useChangePasswordMutation,
   useDeactivateAccountMutation,
+  useDeleteAccountMutation,
   useUpdateEmailMutation,
   useUpdateUsernameMutation,
 } from "../usersApi"
@@ -23,6 +24,15 @@ function SecuritySection({ profile }) {
   const [activeForm, setActiveForm] = useState(null)
   const [feedback, setFeedback] = useState(null)
   const [showDeactivate, setShowDeactivate] = useState(false)
+
+  const [deleteAccount, { isLoading: isDeleting }] = useDeleteAccountMutation()
+  const [showDelete, setShowDelete] = useState(false)
+  const [deletePassword, setDeletePassword] = useState("")
+  const [deleteConfirmText, setDeleteConfirmText] = useState("")
+
+  const canConfirmDelete =
+    deleteConfirmText.trim().toUpperCase() === "ELIMINA" &&
+    deletePassword.trim().length > 0
 
   const [changePassword, { isLoading: isChangingPw }] =
     useChangePasswordMutation()
@@ -45,13 +55,6 @@ function SecuritySection({ profile }) {
     currentPassword: "",
     newEmail: "",
   })
-
-  const closeForm = () => {
-    setActiveForm(null)
-    setPwForm({ oldPassword: "", newPassword: "", confirm: "" })
-    setUserForm({ currentPassword: "", newUsername: "" })
-    setMailForm({ currentPassword: "", newEmail: "" })
-  }
 
   const toggle = (form) => setActiveForm((cur) => (cur === form ? null : form))
 
@@ -115,6 +118,21 @@ function SecuritySection({ profile }) {
         text: err.data?.message || "Errore durante la disattivazione.",
       })
       setShowDeactivate(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    try {
+      await deleteAccount(deletePassword).unwrap()
+      dispatch(logout())
+      navigate("/login")
+    } catch (err) {
+      setFeedback({
+        type: "danger",
+        text:
+          err.data?.message || "Errore durante l'eliminazione dell'account.",
+      })
+      setShowDelete(false)
     }
   }
 
@@ -360,6 +378,20 @@ function SecuritySection({ profile }) {
         >
           DISATTIVA ACCOUNT
         </button>
+
+        <p className="section-card__text" style={{ marginTop: 20 }}>
+          Eliminando l'account, i tuoi dati privati (giri, veicoli, follow)
+          verranno cancellati definitivamente; i contenuti già condivisi (post,
+          commenti, percorsi) resteranno visibili ma senza più alcun
+          collegamento alla tua identità. L'operazione non è reversibile.
+        </p>
+        <button
+          type="button"
+          className="btn-danger-sm"
+          onClick={() => setShowDelete(true)}
+        >
+          ELIMINA ACCOUNT DEFINITIVAMENTE
+        </button>
       </div>
 
       {showDeactivate && (
@@ -385,6 +417,62 @@ function SecuritySection({ profile }) {
                 onClick={handleDeactivate}
               >
                 {isDeactivating ? "..." : "DISATTIVA"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDelete && (
+        <div className="modal-overlay" onClick={() => setShowDelete(false)}>
+          <div className="card modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-title">
+              ELIMINARE DEFINITIVAMENTE L'ACCOUNT?
+            </div>
+            <p className="modal-text">
+              Questa azione è permanente e non può essere annullata da nessuno,
+              nemmeno da un amministratore.
+            </p>
+
+            <div style={{ marginBottom: 12 }}>
+              <div className="field-label" style={{ marginBottom: 6 }}>
+                PASSWORD ATTUALE
+              </div>
+              <PasswordInput
+                value={deletePassword}
+                onChange={(e) => setDeletePassword(e.target.value)}
+                style={{ height: 42 }}
+              />
+            </div>
+
+            <div style={{ marginBottom: 16 }}>
+              <div className="field-label" style={{ marginBottom: 6 }}>
+                SCRIVI "ELIMINA" PER CONFERMARE
+              </div>
+              <input
+                type="text"
+                className="input"
+                style={{ height: 42 }}
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+              />
+            </div>
+
+            <div className="modal-actions">
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => setShowDelete(false)}
+              >
+                ANNULLA
+              </button>
+              <button
+                type="button"
+                className="btn-danger"
+                disabled={!canConfirmDelete || isDeleting}
+                onClick={handleDelete}
+              >
+                {isDeleting ? "..." : "ELIMINA DEFINITIVAMENTE"}
               </button>
             </div>
           </div>
