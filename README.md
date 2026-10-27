@@ -8,7 +8,7 @@
 
 Organizza uscite, traccia i tuoi giri, disegna percorsi e condividi la strada con la tua community.
 
-[**▶ PROVA LA DEMO**](https://rider-app-frontend-ten.vercel.app/) · [Backend](https://github.com/cafagnarob/BE_capstone)
+[Frontend](https://github.com/cafagnarob/rider-app-frontend) · [Backend](https://github.com/cafagnarob/BE_capstone)
 
 ![React](https://img.shields.io/badge/React_19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
@@ -28,9 +28,28 @@ Qui c'è tutto in un posto solo. Crei l'uscita, scegli il percorso, inviti gli a
 
 È una **Progressive Web App**: si apre dal browser e si installa sul telefono come un'app vera, senza passare dagli store.
 
-> ⏳ Il backend gira su un piano gratuito di Render: la prima richiesta dopo un po' di inattività può impiegare qualche secondo. Come una moto a freddo.
+> 🔧 **In officina.** La demo pubblica è momentaneamente offline mentre l'app si prepara alla produzione. Nel frattempo puoi avviarla in locale seguendo le istruzioni qui sotto.
 
 ---
+
+<!--
+## 📱 Uno sguardo all'app
+
+<table align="center">
+  <tr>
+    <td align="center"><img src="./docs/screenshots/home.png" width="200" alt="Home" /><br/><b>Home</b></td>
+    <td align="center"><img src="./docs/screenshots/evento.png" width="200" alt="Dettaglio evento" /><br/><b>Evento</b></td>
+    <td align="center"><img src="./docs/screenshots/percorso.png" width="200" alt="Editor percorsi" /><br/><b>Percorsi</b></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="./docs/screenshots/ride.png" width="200" alt="Dettaglio ride" /><br/><b>Ride</b></td>
+    <td align="center"><img src="./docs/screenshots/feed.png" width="200" alt="Feed" /><br/><b>Feed</b></td>
+    <td align="center"><img src="./docs/screenshots/garage.png" width="200" alt="Garage" /><br/><b>Garage</b></td>
+  </tr>
+</table>
+
+---
+-->
 
 ## 🔥 Cosa puoi fare
 
@@ -72,32 +91,37 @@ Una sezione separata per gestire utenti, catalogo, eventi e segnalazioni, con da
 
 ## 🚀 Avvio in locale
 
-**Requisiti:** Node.js 18+ e npm.
+**Requisiti:** Node.js 18+, npm e il [backend](https://github.com/cafagnarob/BE_capstone) in esecuzione (le istruzioni sono nel suo README).
+
+**1. Scarica il progetto e installa le dipendenze**
 
 ```bash
 git clone https://github.com/cafagnarob/rider-app-frontend.git
 cd rider-app-frontend
 npm install
-npm run dev
 ```
 
-Poi apri [http://localhost:5173](http://localhost:5173).
+**2. Configura le variabili d'ambiente**
 
-### 🔑 Variabili d'ambiente
-
-Crea un file `.env.development` nella cartella principale:
+Copia `.env.example` in un nuovo file `.env.development` e inserisci i tuoi valori:
 
 ```env
 VITE_API_BASE_URL=http://localhost:8080
 VITE_MAPTILER_KEY=la_tua_chiave_maptiler
 ```
 
-| Variabile           | A cosa serve                                                               |
-| ------------------- | -------------------------------------------------------------------------- |
-| `VITE_API_BASE_URL` | indirizzo del backend. In produzione punta a Render                        |
-| `VITE_MAPTILER_KEY` | chiave [MapTiler](https://www.maptiler.com/) per mappe e ricerca indirizzi |
+| Variabile           | A cosa serve                                                                                         |
+| ------------------- | ---------------------------------------------------------------------------------------------------- |
+| `VITE_API_BASE_URL` | indirizzo del backend                                                                                |
+| `VITE_MAPTILER_KEY` | chiave [MapTiler](https://www.maptiler.com/) per mappe e ricerca indirizzi (il piano gratuito basta) |
 
-Per usare l'app in locale serve anche il [backend](https://github.com/cafagnarob/BE_capstone) in esecuzione: trovi le istruzioni nel suo README.
+**3. Accendi il motore**
+
+```bash
+npm run dev
+```
+
+Poi apri [http://localhost:5173](http://localhost:5173).
 
 ### 🧰 Comandi
 
@@ -121,7 +145,6 @@ Per usare l'app in locale serve anche il [backend](https://github.com/cafagnarob
 | **Grafici**          | Recharts                                                         |
 | **Drag & drop**      | dnd-kit, per riordinare tappe e giorni                           |
 | **App installabile** | vite-plugin-pwa                                                  |
-| **Deploy**           | Vercel                                                           |
 
 ### 📁 Struttura
 
