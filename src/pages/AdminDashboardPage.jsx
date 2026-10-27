@@ -2,10 +2,8 @@ import {
   Area,
   AreaChart,
   CartesianGrid,
-  Cell,
-  Legend,
-  Pie,
-  PieChart,
+  RadialBar,
+  RadialBarChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -63,54 +61,95 @@ const PIE_COLORS = {
   muted: "rgba(255,255,255,.25)",
 }
 
-function BreakdownChart({ title, segments, highlightIndex }) {
-  const tooltipStyle = {
-    backgroundColor: COLORS.card,
-    border: `1px solid ${COLORS.borderStrong}`,
-    borderRadius: 10,
-    fontFamily: FONTS.body,
-    fontSize: 12,
-  }
+function RadialGaugeCard({ title, metrics }) {
+  const chartData = metrics.map((m) => ({
+    name: m.label,
+    value: m.percent,
+    fill: m.color,
+  }))
 
   return (
-    <div className="card" style={{ padding: 16, marginBottom: 16 }}>
-      <div className="chart-section-title" style={{ marginBottom: 12 }}>
+    <div
+      className="admin-dashed-card"
+      style={{ padding: 16, marginBottom: 16 }}
+    >
+      <div className="chart-section-title" style={{ marginBottom: 16 }}>
         {title}
       </div>
-      <ResponsiveContainer width="100%" height={220}>
-        <PieChart>
-          <Pie
-            data={segments}
-            dataKey="value"
-            nameKey="name"
-            innerRadius={55}
-            outerRadius={85}
-            paddingAngle={2}
-            isAnimationActive={false}
-          >
-            {segments.map((seg, i) => (
-              <Cell
-                key={seg.name}
-                fill={seg.color}
-                opacity={
-                  highlightIndex == null || highlightIndex === i ? 1 : 0.35
-                }
+      <div style={{ position: "relative", minHeight: 220 }}>
+        <div>
+          {metrics.map((m) => (
+            <div
+              key={m.label}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                marginBottom: 14,
+              }}
+            >
+              <span
+                style={{
+                  width: 3,
+                  height: 30,
+                  borderRadius: 2,
+                  background: m.color,
+                  display: "inline-block",
+                  flexShrink: 0,
+                }}
               />
-            ))}
-          </Pie>
-          <Tooltip
-            contentStyle={tooltipStyle}
-            labelStyle={{ color: COLORS.text }}
-          />
-          <Legend
-            wrapperStyle={{
-              fontFamily: FONTS.mono,
-              fontSize: 11,
-              color: COLORS.textMuted,
-            }}
-          />
-        </PieChart>
-      </ResponsiveContainer>
+              <div>
+                <div
+                  style={{
+                    fontFamily: "var(--font-heading)",
+                    fontWeight: 700,
+                    fontSize: 17,
+                    color: COLORS.text,
+                    lineHeight: 1,
+                  }}
+                >
+                  {m.percent}%
+                </div>
+                <div
+                  style={{
+                    fontFamily: FONTS.mono,
+                    fontSize: 9.5,
+                    color: COLORS.textMuted,
+                    marginTop: 2,
+                  }}
+                >
+                  {m.label}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div
+          style={{
+            position: "absolute",
+            bottom: -20,
+            right: -20,
+            width: 220,
+            height: 220,
+          }}
+        >
+          <ResponsiveContainer width="100%" height="100%">
+            <RadialBarChart
+              innerRadius="35%"
+              outerRadius="100%"
+              data={chartData}
+              startAngle={180}
+              endAngle={50}
+            >
+              <RadialBar
+                dataKey="value"
+                background={{ fill: COLORS.borderSoft }}
+                cornerRadius={8}
+              />
+            </RadialBarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
     </div>
   )
 }
@@ -140,11 +179,8 @@ function TrendChart({ title, data, color, valueFormatter }) {
 
   return (
     <div
-      className="card"
-      style={{
-        padding: 16,
-        marginBottom: 16,
-      }}
+      className="admin-dashed-card"
+      style={{ padding: 16, marginBottom: 16 }}
     >
       <div className="chart-section-title" style={{ marginBottom: 12 }}>
         {title}
@@ -230,7 +266,7 @@ function AdminDashboardPage() {
         DASHBOARD
       </div>
 
-      <div className="stat-grid stat-grid--cols-3" style={{ marginBottom: 20 }}>
+      <div className="stat-grid stat-grid--cols-2" style={{ marginBottom: 20 }}>
         <StatBox
           label="SEGNALAZIONI CONTENUTI"
           value={data.pendingContentReports}
@@ -334,18 +370,15 @@ function AdminDashboardPage() {
           )}
 
           {communityChartKey === "activeLast7Days" && (
-            <BreakdownChart
+            <RadialGaugeCard
               title="ATTIVI NEGLI ULTIMI 7 GIORNI"
-              segments={[
+              metrics={[
                 {
-                  name: "Attivi (7gg)",
-                  value: data.activeLast7Days,
+                  label: "Attivi (7gg) sul totale attivi",
+                  percent: Math.round(
+                    (data.activeLast7Days / data.activeUsers) * 100,
+                  ),
                   color: PIE_COLORS.green,
-                },
-                {
-                  name: "Altri utenti attivi",
-                  value: data.activeUsers - data.activeLast7Days,
-                  color: PIE_COLORS.muted,
                 },
               ]}
             />
@@ -357,61 +390,35 @@ function AdminDashboardPage() {
                 className="stat-grid stat-grid--cols-3"
                 style={{ marginBottom: 20 }}
               >
-                <StatBox
-                  label="ATTIVI"
-                  value={data.activeUsers}
-                  active={communityChartKey === "activeUsers"}
-                  onClick={() =>
-                    setCommunityChartKey((k) =>
-                      k === "activeUsers" ? null : "activeUsers",
-                    )
-                  }
-                />
-                <StatBox
-                  label="DISATTIVATI"
-                  value={data.deactivatedUsers}
-                  active={communityChartKey === "deactivatedUsers"}
-                  onClick={() =>
-                    setCommunityChartKey((k) =>
-                      k === "deactivatedUsers" ? null : "deactivatedUsers",
-                    )
-                  }
-                />
-                <StatBox
-                  label="ELIMINATI"
-                  value={data.deletedUsers}
-                  active={communityChartKey === "deletedUsers"}
-                  onClick={() =>
-                    setCommunityChartKey((k) =>
-                      k === "deletedUsers" ? null : "deletedUsers",
-                    )
-                  }
-                />
+                <StatBox label="ATTIVI" value={data.activeUsers} />
+                <StatBox label="DISATTIVATI" value={data.deactivatedUsers} />
+                <StatBox label="ELIMINATI" value={data.deletedUsers} />
               </div>
-              <BreakdownChart
+              <RadialGaugeCard
                 title="STATO ACCOUNT"
-                segments={[
+                metrics={[
                   {
-                    name: "Attivi",
-                    value: data.activeUsers,
+                    label: "Attivi",
+                    percent: Math.round(
+                      (data.activeUsers / data.totalUsers) * 100,
+                    ),
                     color: PIE_COLORS.green,
                   },
                   {
-                    name: "Disattivati",
-                    value: data.deactivatedUsers,
+                    label: "Disattivati",
+                    percent: Math.round(
+                      (data.deactivatedUsers / data.totalUsers) * 100,
+                    ),
                     color: PIE_COLORS.accent,
                   },
                   {
-                    name: "Eliminati",
-                    value: data.deletedUsers,
+                    label: "Eliminati",
+                    percent: Math.round(
+                      (data.deletedUsers / data.totalUsers) * 100,
+                    ),
                     color: PIE_COLORS.danger,
                   },
                 ]}
-                highlightIndex={
-                  { activeUsers: 0, deactivatedUsers: 1, deletedUsers: 2 }[
-                    communityChartKey
-                  ]
-                }
               />
             </>
           )}
@@ -422,55 +429,31 @@ function AdminDashboardPage() {
                 className="stat-grid stat-grid--cols-2"
                 style={{ marginBottom: 20 }}
               >
-                <StatBox
-                  label="MAI ACCEDUTO"
-                  value={data.neverLoggedIn}
-                  active={communityChartKey === "neverLoggedIn"}
-                  onClick={() => setCommunityChartKey("neverLoggedIn")}
-                />
+                <StatBox label="MAI ACCEDUTO" value={data.neverLoggedIn} />
                 <StatBox
                   label="EMAIL NON VERIFICATE"
                   value={data.unverifiedEmails}
-                  active={communityChartKey === "unverifiedEmails"}
-                  onClick={() => setCommunityChartKey("unverifiedEmails")}
                 />
               </div>
-
-              {communityChartKey === "neverLoggedIn" && (
-                <BreakdownChart
-                  title="MAI EFFETTUATO IL LOGIN"
-                  segments={[
-                    {
-                      name: "Mai acceduto",
-                      value: data.neverLoggedIn,
-                      color: PIE_COLORS.danger,
-                    },
-                    {
-                      name: "Ha effettuato login",
-                      value: data.totalUsers - data.neverLoggedIn,
-                      color: PIE_COLORS.muted,
-                    },
-                  ]}
-                />
-              )}
-
-              {communityChartKey === "unverifiedEmails" && (
-                <BreakdownChart
-                  title="VERIFICA EMAIL"
-                  segments={[
-                    {
-                      name: "Verificate",
-                      value: data.totalUsers - data.unverifiedEmails,
-                      color: PIE_COLORS.green,
-                    },
-                    {
-                      name: "Non verificate",
-                      value: data.unverifiedEmails,
-                      color: PIE_COLORS.accent,
-                    },
-                  ]}
-                />
-              )}
+              <RadialGaugeCard
+                title="ONBOARDING"
+                metrics={[
+                  {
+                    label: "Mai acceduto",
+                    percent: Math.round(
+                      (data.neverLoggedIn / data.totalUsers) * 100,
+                    ),
+                    color: PIE_COLORS.danger,
+                  },
+                  {
+                    label: "Email non verificate",
+                    percent: Math.round(
+                      (data.unverifiedEmails / data.totalUsers) * 100,
+                    ),
+                    color: PIE_COLORS.accent,
+                  },
+                ]}
+              />
             </>
           )}
         </>

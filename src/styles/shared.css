@@ -3745,6 +3745,11 @@ img.avatar--preset {
   display: none;
 }
 
+.recharts-responsive-container {
+  width: 180% !important;
+  height: 180% !important;
+}
+
 .ride-chart-zoom-hint {
   font-family: var(--font-mono);
   font-size: 8.5px;
@@ -3913,7 +3918,13 @@ img.avatar--preset {
     flex-wrap: wrap;
   }
 
-  .stat-grid--cols-3 {
+  /* .stat-grid--cols-3 {
     grid-template-columns: 1fr 1fr;
-  }
+  } */
+}
+
+.admin-dashed-card {
+  border-radius: var(--radius-xl);
+  background: var(--color-card);
+  border: 1px dashed var(--color-border-strong);
 }
